@@ -23,9 +23,14 @@ export function activate(context: vscode.ExtensionContext): void {
 		child_process.exec("chmod +x " + startScriptPath);
 	}
 	
-	LOG.info("Launching {} with args {}", startScriptPath, args.join(" "));
+	LOG.info("Found debug adapter {} with args {}", startScriptPath, args.join(" "));
 	
-	context.subscriptions.push(vscode.commands.registerCommand("extension.kotlindebug.adapterexecutablepath", () => startScriptPath));
+	context.subscriptions.push(vscode.commands.registerCommand("extension.kotlindebug.adapterexecutablepath", () => {
+		return {
+			command: startScriptPath,
+			args: args
+		};
+	}));
 }
 
 // This method is called when your extension is deactivated
