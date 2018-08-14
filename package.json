@@ -1,7 +1,8 @@
 {
 	"name": "kotlindebug",
+	"displayName": "Kotlin Debugging",
 	"version": "0.0.1",
-	"description": "Debugging for Kotlin JVM",
+	"description": "Debugging for Kotlin on JVM",
 	"main": "./out/extension",
 	"files": [
 		"build/install/**"
@@ -14,7 +15,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/fwcd/KotlinDebugAdapter.git"
+		"url": "https://github.com/fwcd/KotlinDebugAdapter"
 	},
 	"keywords": [
 		"kotlin",
@@ -23,6 +24,7 @@
 	"categories": [
 		"Debuggers"
 	],
+	"icon": "Icon128.png",
 	"author": "fwcd",
 	"publisher": "fwcd",
 	"license": "MIT",
