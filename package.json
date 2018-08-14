@@ -3,10 +3,14 @@
 	"version": "0.0.1",
 	"description": "Debugging for Kotlin JVM",
 	"main": "./out/extension",
+	"files": [
+		"build/install/**"
+	],
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"postinstall": "node ./node_modules/vscode/bin/install",
-		"watch": "tsc -w"
+		"watch": "tsc -w",
+		"compile": "tsc"
 	},
 	"repository": {
 		"type": "git",
@@ -20,6 +24,7 @@
 		"Debuggers"
 	],
 	"author": "fwcd",
+	"publisher": "fwcd",
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/fwcd/KotlinDebugAdapter/issues"
@@ -37,5 +42,64 @@
 		"typescript": "^3.0.1",
 		"vsce": "^1.46.0",
 		"vscode": "^1.1.21"
+	},
+	"activationEvents": [
+		"onDebug"
+	],
+	"contributes": {
+		"breakpoints": [
+			{
+				"language": "kotlin"
+			}
+		],
+		"debuggers": [
+			{
+				"type": "kotlin",
+				"label": "Kotlin",
+				"adapterExecutableCommand": "extension.kotlindebug.adapterexecutablepath",
+				"configurationAttributes": {
+					"launch": {
+						"required": [
+							"jarPath",
+							"mainClass"
+						],
+						"properties": {
+							"jarPath": {
+								"type": "string",
+								"description": "Absolute path to your Kotlin JAR",
+								"default": "${workspaceFolder}/YOUR_JAR_FILE.jar"
+							},
+							"mainClass": {
+								"type": "string",
+								"description": "The full name of your main class (usually your filename in PascalCase postfixed with Kt)",
+								"default": "YourMainClassKt"
+							}
+						}
+					}
+				},
+				"initialConfigurations": [
+					{
+						"type": "kotlin",
+						"request": "launch",
+						"name": "Kotlin Launch",
+						"jarPath": "${workspaceFolder}/YOUR_JAR_FILE.jar",
+						"mainClass": "YourMainClassKt"
+					}
+				],
+				"configurationSnippets": [
+					{
+						"label": "Kotlin: Launch JAR",
+						"description": "A new Kotlin JAR launch configuration",
+						"body": {
+							"type": "kotlin",
+							"request": "launch",
+							"name": "Kotlin Launch",
+							"jarPath": "^\"\\${workspaceFolder}/YOUR_JAR_FILE.jar\"",
+							"mainClass": "YourMainClassKt"
+						}
+					}
+				]
+			}
+		]
 	}
 }

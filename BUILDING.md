@@ -19,6 +19,10 @@ Contains the commands required to build this project. Note that you might need t
 ## Testing the Debug Adapter
 * `./gradlew test`
 
+## Running the VSCode extension
+* `npm run compile` (or `npm run watch` for incremental compilation)
+* Launch the `Extension` configuration
+
 ## Packaging the VSCode extension
 * `vsce package -o build.vsix`
 * The extension is located as `build.vsix` in the repository folder
