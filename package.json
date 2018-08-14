@@ -1,0 +1,41 @@
+{
+	"name": "kotlindebug",
+	"version": "0.0.1",
+	"description": "Debugging for Kotlin JVM",
+	"main": "./out/extension",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"watch": "tsc -w"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/fwcd/KotlinDebugAdapter.git"
+	},
+	"keywords": [
+		"kotlin",
+		"debugger"
+	],
+	"categories": [
+		"Debuggers"
+	],
+	"author": "fwcd",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/fwcd/KotlinDebugAdapter/issues"
+	},
+	"homepage": "https://github.com/fwcd/KotlinDebugAdapter#readme",
+	"dependencies": {
+		"vscode-debugadapter": "^1.31.0",
+		"vscode-debugprotocol": "^1.31.0"
+	},
+	"engines": {
+		"vscode": "^1.21.0"
+	},
+	"devDependencies": {
+		"@types/node": "^10.7.0",
+		"typescript": "^3.0.1",
+		"vsce": "^1.46.0",
+		"vscode": "^1.1.21"
+	}
+}

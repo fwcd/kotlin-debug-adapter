@@ -1,5 +1,4 @@
 .gradle
-.vscode
 .settings
 .project
 .classpath
@@ -8,3 +7,6 @@ build
 bin
 target
 .DS_Store
+node_modules
+*.vsix
+out
