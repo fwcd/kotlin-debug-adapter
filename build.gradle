@@ -27,5 +27,6 @@ repositories {
 
 dependencies {
 	implementation "org.jetbrains.kotlin:kotlin-stdlib"
+	implementation "org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.4.1"
 	testImplementation "junit:junit:4.12"
 }
