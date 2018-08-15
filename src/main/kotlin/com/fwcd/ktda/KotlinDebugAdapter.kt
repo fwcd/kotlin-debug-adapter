@@ -54,7 +54,6 @@ import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 
 class KotlinDebugAdapter: IDebugProtocolServer {
-	@JsonRequest
 	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> {
 		val capabilities = Capabilities()
 		// TODO
@@ -65,157 +64,126 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		// TODO: Add client hooks here
 	}
 	
-	@JsonRequest
 	override fun runInTerminal(args: RunInTerminalRequestArguments): CompletableFuture<RunInTerminalResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun configurationDone(args: ConfigurationDoneArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun launch(args: Map<String, Any>): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun attach(args: Map<String, Any>): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun restart(args: RestartArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun disconnect(args: DisconnectArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun setBreakpoints(args: SetBreakpointsArguments): CompletableFuture<SetBreakpointsResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest(value = "continue")
 	override fun continue_(args: ContinueArguments): CompletableFuture<ContinueResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun next(args: NextArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun stepIn(args: StepInArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun stepOut(args: StepOutArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun stepBack(args: StepBackArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun reverseContinue(args: ReverseContinueArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun restartFrame(args: RestartFrameArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest(value = "goto")
 	override fun goto_(args: GotoArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun pause(args: PauseArguments): CompletableFuture<Void> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun stackTrace(args: StackTraceArguments): CompletableFuture<StackTraceResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun scopes(args: ScopesArguments): CompletableFuture<ScopesResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun variables(args: VariablesArguments): CompletableFuture<VariablesResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun setVariable(args: SetVariableArguments): CompletableFuture<SetVariableResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun source(args: SourceArguments): CompletableFuture<SourceResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun threads(): CompletableFuture<ThreadsResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun modules(args: ModulesArguments): CompletableFuture<ModulesResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun loadedSources(args: LoadedSourcesArguments): CompletableFuture<LoadedSourcesResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun evaluate(args: EvaluateArguments): CompletableFuture<EvaluateResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun stepInTargets(args: StepInTargetsArguments): CompletableFuture<StepInTargetsResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun gotoTargets(args: GotoTargetsArguments): CompletableFuture<GotoTargetsResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun completions(args: CompletionsArguments): CompletableFuture<CompletionsResponse> {
 		TODO("not implemented yet")
 	}
 	
-	@JsonRequest
 	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> {
 		TODO("not implemented yet")
 	}
