@@ -30,7 +30,7 @@ dependencies {
 	// The JSON-RPC and Debug Adapter Protocol implementations
 	// implementation "org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.5.0"
 	// TODO: Temporary solution until LSP4J 0.5.0 is released
-	implementation "com.github.eclipse.lsp4j:org.eclipse.lsp4j.debug:master-SNAPSHOT"
+	implementation "com.github.eclipse.lsp4j:org.eclipse.lsp4j.debug:df617d49eea034c3eb8a298e04584a30ccfb3f37"
 	implementation "org.jetbrains.kotlin:kotlin-stdlib"
 	// The Java Debug Interface classes (com.sun.jdi.*)
 	implementation files("${System.properties['java.home']}/../lib/tools.jar")
