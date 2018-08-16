@@ -22,7 +22,7 @@ fun readBuildGradle(buildFile: Path): Set<Path> {
     if (dependencies.isEmpty()) {
         LOG.warning("Could not resolve Gradle dependencies using any resolution strategy!")
     }
-
+    
     return dependencies
 }
 

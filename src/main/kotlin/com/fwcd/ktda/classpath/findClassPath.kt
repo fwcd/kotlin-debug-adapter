@@ -24,7 +24,21 @@ fun findClassPath(projectRoots: Collection<Path>): Set<Path> {
             .flatMap { projectFiles(it) }
             .flatMap { readProjectFile(it) }
             .toSet()
-    ).ifEmpty(::backupClassPath)
+    ).ifEmpty(::backupClassPath) +
+        projectRoots
+            .flatMap { listOf(
+                resolveIfExists(it, "build", "classes", "kotlin", "main"),
+                resolveIfExists(it, "target", "classes", "kotlin", "main")
+            ) }
+            .filterNotNull()
+}
+
+private fun resolveIfExists(root: Path, vararg segments: String): Path? {
+    var result = root
+    for (segment in segments) {
+        result = result.resolve(segment)
+    }
+    return if (Files.exists(result)) result else null
 }
 
 private fun ensureStdlibInPaths(paths: Set<Path>): Set<Path> {
