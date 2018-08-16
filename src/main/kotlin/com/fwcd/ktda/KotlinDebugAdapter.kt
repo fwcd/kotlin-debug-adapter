@@ -61,150 +61,141 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		val capabilities = Capabilities()
 		// TODO: Configure capabilities
 		// TODO: Configure debugger (for example whether lines are zero-indexed)
+		client?.initialized()
 		return completedFuture(capabilities)
 	}
 	
 	fun connect(client: IDebugProtocolClient) {
 		this.client = client
-		LOG.connectOutputBackend { output(it, OutputCategory.CONSOLE) }
-		LOG.connectErrorBackend { output(it, OutputCategory.STDERR) }
 		LOG.info("Connected to client")
 	}
 	
 	override fun runInTerminal(args: RunInTerminalRequestArguments): CompletableFuture<RunInTerminalResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun configurationDone(args: ConfigurationDoneArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun launch(args: Map<String, Any>): CompletableFuture<Void> {
-		return unimplemented()
+		LOG.info("$args")
+		return notImplementedDAPMethod()
 	}
 	
 	override fun attach(args: Map<String, Any>): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun restart(args: RestartArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun disconnect(args: DisconnectArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun setBreakpoints(args: SetBreakpointsArguments): CompletableFuture<SetBreakpointsResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun continue_(args: ContinueArguments): CompletableFuture<ContinueResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun next(args: NextArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun stepIn(args: StepInArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun stepOut(args: StepOutArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun stepBack(args: StepBackArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun reverseContinue(args: ReverseContinueArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun restartFrame(args: RestartFrameArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun goto_(args: GotoArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun pause(args: PauseArguments): CompletableFuture<Void> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun stackTrace(args: StackTraceArguments): CompletableFuture<StackTraceResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun scopes(args: ScopesArguments): CompletableFuture<ScopesResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun variables(args: VariablesArguments): CompletableFuture<VariablesResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun setVariable(args: SetVariableArguments): CompletableFuture<SetVariableResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun source(args: SourceArguments): CompletableFuture<SourceResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun threads(): CompletableFuture<ThreadsResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun modules(args: ModulesArguments): CompletableFuture<ModulesResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun loadedSources(args: LoadedSourcesArguments): CompletableFuture<LoadedSourcesResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun evaluate(args: EvaluateArguments): CompletableFuture<EvaluateResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun stepInTargets(args: StepInTargetsArguments): CompletableFuture<StepInTargetsResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun gotoTargets(args: GotoTargetsArguments): CompletableFuture<GotoTargetsResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun completions(args: CompletionsArguments): CompletableFuture<CompletionsResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
 	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> {
-		return unimplemented()
+		return notImplementedDAPMethod()
 	}
 	
-	private fun output(msg: String, category: OutputCategory) {
-		client?.let {
-			val outputEvent = OutputEventArguments()
-			outputEvent.output = msg
-			outputEvent.category = category.value
-			it.output(outputEvent)
-		}
-	}
-	
-	private fun <T> unimplemented(): CompletableFuture<T> {
+	private fun <T> notImplementedDAPMethod(): CompletableFuture<T> {
 		TODO("not implemented yet")
 	}
 }

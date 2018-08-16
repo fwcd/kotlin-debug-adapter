@@ -62,14 +62,14 @@
 				"configurationAttributes": {
 					"launch": {
 						"required": [
-							"jarPath",
+							"projectRoot",
 							"mainClass"
 						],
 						"properties": {
-							"jarPath": {
+							"projectRoot": {
 								"type": "string",
-								"description": "Absolute path to your Kotlin JAR",
-								"default": "${workspaceFolder}/YOUR_JAR_FILE.jar"
+								"description": "Absolute path to your project's root folder",
+								"default": "${workspaceFolder}"
 							},
 							"mainClass": {
 								"type": "string",
@@ -84,19 +84,19 @@
 						"type": "kotlin",
 						"request": "launch",
 						"name": "Kotlin Launch",
-						"jarPath": "${workspaceFolder}/YOUR_JAR_FILE.jar",
+						"projectRoot": "${workspaceFolder}",
 						"mainClass": "YourMainClassKt"
 					}
 				],
 				"configurationSnippets": [
 					{
-						"label": "Kotlin: Launch JAR",
-						"description": "A new Kotlin JAR launch configuration",
+						"label": "Kotlin: Launch Project",
+						"description": "A new Kotlin launch configuration",
 						"body": {
 							"type": "kotlin",
 							"request": "launch",
 							"name": "Kotlin Launch",
-							"jarPath": "^\"\\${workspaceFolder}/YOUR_JAR_FILE.jar\"",
+							"projectRoot": "^\"\\${workspaceFolder}\"",
 							"mainClass": "YourMainClassKt"
 						}
 					}
