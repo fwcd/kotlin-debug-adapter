@@ -2,6 +2,7 @@ package com.fwcd.ktda
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
+import java.nio.file.Paths
 import org.eclipse.lsp4j.debug.Capabilities
 import org.eclipse.lsp4j.debug.CompletionsArguments
 import org.eclipse.lsp4j.debug.CompletionsResponse
@@ -53,16 +54,21 @@ import org.eclipse.lsp4j.debug.VariablesResponse
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
+import com.fwcd.ktda.util.KotlinDAException
+import com.fwcd.ktda.util.AsyncExecutor
+import com.fwcd.ktda.classpath.findClassPath
 
 class KotlinDebugAdapter: IDebugProtocolServer {
+	private val async = AsyncExecutor()
+	private var debugSession: JVMDebugSession? = null
 	private var client: IDebugProtocolClient? = null
 	
-	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> {
+	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> = async.compute {
 		val capabilities = Capabilities()
 		// TODO: Configure capabilities
 		// TODO: Configure debugger (for example whether lines are zero-indexed)
 		client?.initialized()
-		return completedFuture(capabilities)
+		capabilities
 	}
 	
 	fun connect(client: IDebugProtocolClient) {
@@ -78,9 +84,19 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun launch(args: Map<String, Any>): CompletableFuture<Void> {
-		LOG.info("$args")
-		return notImplementedDAPMethod()
+	override fun launch(args: Map<String, Any>): CompletableFuture<Void> = async.run {
+		val projectRoot = args["projectRoot"] as? String
+		if (projectRoot == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'projectRoot' argument")
+		
+		val mainClass = args["mainClass"] as? String
+		if (mainClass == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'mainClass' argument")
+		
+		debugSession = JVMDebugSession(
+			findClassPath(listOf(Paths.get(projectRoot))),
+			mainClass
+		).apply {
+			start()
+		}
 	}
 	
 	override fun attach(args: Map<String, Any>): CompletableFuture<Void> {
@@ -91,8 +107,8 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun disconnect(args: DisconnectArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
+	override fun disconnect(args: DisconnectArguments): CompletableFuture<Void> = async.run {
+		debugSession?.stop()
 	}
 	
 	override fun setBreakpoints(args: SetBreakpointsArguments): CompletableFuture<SetBreakpointsResponse> {

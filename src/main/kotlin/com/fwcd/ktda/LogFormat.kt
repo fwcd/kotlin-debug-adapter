@@ -42,7 +42,7 @@ object LogFormat: Formatter() {
             sourceWidth = 45
         } else {
             source = record.loggerName.split(".").last()
-            sourceWidth = 15
+            sourceWidth = 10
         }
 
         val message = formatMessage(record)
