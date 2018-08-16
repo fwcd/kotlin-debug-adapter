@@ -4,7 +4,10 @@ import com.fwcd.ktda.LOG
 import java.io.InputStream
 
 /** An input stream that terminates the application when closed */
-class ExitingInputStream(private val delegate: InputStream): InputStream() {
+class ExitingInputStream(
+	private val delegate: InputStream,
+	private val exiter: () -> Unit
+): InputStream() {
 	override fun read(): Int = exitIfNegative { delegate.read() }
 	
 	override fun read(b: ByteArray): Int = exitIfNegative { delegate.read(b) }
@@ -16,7 +19,7 @@ class ExitingInputStream(private val delegate: InputStream): InputStream() {
 		
 		if (result < 0) {
 			LOG.info("Exiting upon close of System.in")
-			System.exit(0)
+			exiter()
 		}
 		
 		return result

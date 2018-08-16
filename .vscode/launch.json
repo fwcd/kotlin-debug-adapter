@@ -12,6 +12,13 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			]
+		},
+		{
+			"type": "java",
+			"name": "JVM Debug (Attach)",
+			"request": "attach",
+			"hostName": "localhost",
+			"port": 5005
 		}
 	]
 }

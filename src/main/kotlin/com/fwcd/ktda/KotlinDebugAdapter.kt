@@ -47,6 +47,7 @@ import org.eclipse.lsp4j.debug.StepInTargetsArguments
 import org.eclipse.lsp4j.debug.StepInTargetsResponse
 import org.eclipse.lsp4j.debug.StepOutArguments
 import org.eclipse.lsp4j.debug.ThreadsResponse
+import org.eclipse.lsp4j.debug.OutputEventArguments
 import org.eclipse.lsp4j.debug.VariablesArguments
 import org.eclipse.lsp4j.debug.VariablesResponse
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
@@ -54,137 +55,156 @@ import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 
 class KotlinDebugAdapter: IDebugProtocolServer {
+	private var client: IDebugProtocolClient? = null
+	
 	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> {
 		val capabilities = Capabilities()
-		// TODO
+		// TODO: Configure capabilities
+		// TODO: Configure debugger (for example whether lines are zero-indexed)
 		return completedFuture(capabilities)
 	}
 	
 	fun connect(client: IDebugProtocolClient) {
-		// TODO: Add client hooks here
+		this.client = client
+		LOG.connectOutputBackend { output(it, OutputCategory.CONSOLE) }
+		LOG.connectErrorBackend { output(it, OutputCategory.STDERR) }
+		LOG.info("Connected to client")
 	}
 	
 	override fun runInTerminal(args: RunInTerminalRequestArguments): CompletableFuture<RunInTerminalResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun configurationDone(args: ConfigurationDoneArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun launch(args: Map<String, Any>): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun attach(args: Map<String, Any>): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun restart(args: RestartArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun disconnect(args: DisconnectArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun setBreakpoints(args: SetBreakpointsArguments): CompletableFuture<SetBreakpointsResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun continue_(args: ContinueArguments): CompletableFuture<ContinueResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun next(args: NextArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun stepIn(args: StepInArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun stepOut(args: StepOutArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun stepBack(args: StepBackArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun reverseContinue(args: ReverseContinueArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun restartFrame(args: RestartFrameArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun goto_(args: GotoArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun pause(args: PauseArguments): CompletableFuture<Void> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun stackTrace(args: StackTraceArguments): CompletableFuture<StackTraceResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun scopes(args: ScopesArguments): CompletableFuture<ScopesResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun variables(args: VariablesArguments): CompletableFuture<VariablesResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun setVariable(args: SetVariableArguments): CompletableFuture<SetVariableResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun source(args: SourceArguments): CompletableFuture<SourceResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun threads(): CompletableFuture<ThreadsResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun modules(args: ModulesArguments): CompletableFuture<ModulesResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun loadedSources(args: LoadedSourcesArguments): CompletableFuture<LoadedSourcesResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun evaluate(args: EvaluateArguments): CompletableFuture<EvaluateResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun stepInTargets(args: StepInTargetsArguments): CompletableFuture<StepInTargetsResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun gotoTargets(args: GotoTargetsArguments): CompletableFuture<GotoTargetsResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun completions(args: CompletionsArguments): CompletableFuture<CompletionsResponse> {
-		TODO("not implemented yet")
+		return unimplemented()
 	}
 	
 	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> {
+		return unimplemented()
+	}
+	
+	private fun output(msg: String, category: OutputCategory) {
+		client?.let {
+			val outputEvent = OutputEventArguments()
+			outputEvent.output = msg
+			outputEvent.category = category.value
+			it.output(outputEvent)
+		}
+	}
+	
+	private fun <T> unimplemented(): CompletableFuture<T> {
 		TODO("not implemented yet")
 	}
 }

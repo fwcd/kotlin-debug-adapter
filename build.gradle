@@ -15,7 +15,7 @@ apply plugin: "application"
 
 version = '0.1.1'
 
-mainClassName = "com.fwcd.ktda.KotlinDebugAdapterMainKt"
+mainClassName = "com.fwcd.ktda.KDAMainKt"
 description = "Debug Adapter for Kotlin"
 
 sourceCompatibility = 1.8
