@@ -57,6 +57,7 @@ import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.classpath.findClassPath
+import com.fwcd.ktda.jdi.JVMDebugSession
 
 class KotlinDebugAdapter: IDebugProtocolServer {
 	private val async = AsyncExecutor()
@@ -85,18 +86,17 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	}
 	
 	override fun launch(args: Map<String, Any>): CompletableFuture<Void> = async.run {
-		val projectRoot = args["projectRoot"] as? String
+		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
 		if (projectRoot == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'projectRoot' argument")
 		
 		val mainClass = args["mainClass"] as? String
 		if (mainClass == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'mainClass' argument")
 		
 		debugSession = JVMDebugSession(
-			findClassPath(listOf(Paths.get(projectRoot))),
-			mainClass
-		).apply {
-			start()
-		}
+			findClassPath(listOf(projectRoot)),
+			mainClass,
+			projectRoot
+		)
 	}
 	
 	override fun attach(args: Map<String, Any>): CompletableFuture<Void> {
