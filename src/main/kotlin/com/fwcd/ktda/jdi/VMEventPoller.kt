@@ -11,7 +11,6 @@ import com.sun.jdi.VMDisconnectedException
  */
 class VMEventPoller(private val vm: VirtualMachine) {
 	private var stopped = false
-	val eventListeners = ListenerList<DebugEvent>()
 	val stopListeners = ListenerList<Unit>()
 	
 	init {
@@ -27,7 +26,7 @@ class VMEventPoller(private val vm: VirtualMachine) {
 					var resumeThreads = true
 					for (jdiEvent in eventSet) {
 						val event = DebugEvent(jdiEvent, eventSet)
-						eventListeners.fire(event)
+						dispatchEvent(event)
 						resumeThreads = resumeThreads && event.resumeThreads
 					}
 					if (resumeThreads) {
@@ -41,5 +40,9 @@ class VMEventPoller(private val vm: VirtualMachine) {
 			}
 			stopListeners.fire(Unit)
 		}, "VM EventBus").start()
+	}
+	
+	private fun dispatchEvent(event: DebugEvent) {
+		// TODO
 	}
 }

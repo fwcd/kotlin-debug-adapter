@@ -11,6 +11,9 @@ import java.net.URLDecoder
 
 import com.sun.jdi.Bootstrap
 import com.sun.jdi.VirtualMachine
+import com.sun.jdi.VMDisconnectedException
+import com.sun.jdi.request.StepRequest
+import com.sun.jdi.request.EventRequest
 import com.sun.jdi.connect.Connector
 import com.sun.tools.jdi.SunCommandLineLauncher
 
@@ -26,8 +29,7 @@ class JVMDebugSession(
 	private val environmentVariables: Collection<String>? = null
 ) {
 	private val vm: VirtualMachine
-	private val eventPoller: VMEventPoller
-	val stopListeners = ListenerList<Unit>()
+	val vmEvents: VMEventPoller
 	
 	init {
 		LOG.info("Starting JVM debug session with main class $mainClass")
@@ -44,9 +46,7 @@ class JVMDebugSession(
 		args["env"]?.setValue(urlEncode(environmentVariables) ?: "")
 		
 		vm = connector.launch(args)
-		eventPoller = VMEventPoller(vm)
-		
-		eventPoller.stopListeners.propagateTo(stopListeners)
+		vmEvents = VMEventPoller(vm)
 	}
 	
 	fun stop() {
@@ -55,6 +55,34 @@ class JVMDebugSession(
 			vm.exit(0)
 		}
 	}
+	
+	fun stepOver(threadId: Long) = stepRequest(threadId, StepRequest.STEP_LINE, StepRequest.STEP_OVER)?.let(::performStep)
+	
+	fun stepInto(threadId: Long) = stepRequest(threadId, StepRequest.STEP_LINE, StepRequest.STEP_INTO)?.let(::performStep)
+	
+	fun stepOut(threadId: Long) = stepRequest(threadId, StepRequest.STEP_LINE, StepRequest.STEP_OUT)?.let(::performStep)
+	
+	private fun performStep(request: StepRequest) = request.enable()
+	
+	private fun stepRequest(threadId: Long, size: Int, depth: Int) = threadNr(threadId)
+		?.let {
+			it.virtualMachine()
+				.eventRequestManager()
+				.createStepRequest(it, size, depth)
+		}?.also {
+			it.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD)
+			it.addCountFilter(1)
+		}
+	
+	private fun threadNr(id: Long) = allThreads()
+		.filter { (it.uniqueID() == id) && (!it.isCollected()) }
+		.firstOrNull()
+	
+	private fun allThreads() = try {
+		vm.allThreads()
+	} catch (e: VMDisconnectedException) {
+		null
+	}.orEmpty()
 	
 	private fun formatOptions(): String {
 		var options = ""
@@ -84,4 +112,6 @@ class JVMDebugSession(
 		?.split("\n")
 		?.map { URLDecoder.decode(it, StandardCharsets.UTF_8.name()) }
 		?.toList()
+	
+	
 }

@@ -60,6 +60,7 @@ import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.util.waitUntil
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.jdi.JVMDebugSession
+import com.fwcd.ktda.jdi.VMEventPoller
 
 class KotlinDebugAdapter: IDebugProtocolServer {
 	private val async = AsyncExecutor()
@@ -97,7 +98,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return response
 	}
 	
-	override fun launch(args: Map<String, Any>): CompletableFuture<Void> = launcherAsync.run {
+	override fun launch(args: Map<String, Any>) = launcherAsync.run {
 		client!!.initialized()
 		
 		// Wait for configurationDone response to fully return
@@ -119,14 +120,16 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 			findClassPath(listOf(projectRoot)),
 			mainClass,
 			projectRoot
-		).apply {
-			stopListeners.add {
-				client!!.exited(ExitedEventArguments().apply {
-					// TODO: Use actual exitCode instead
-					exitCode = 0L
-				})
-				LOG.info("Sent exit event")
-			}
+		).apply { setupVMListeners(vmEvents) }
+	}
+	
+	private fun setupVMListeners(events: VMEventPoller) {
+		events.stopListeners.add {
+			client!!.exited(ExitedEventArguments().apply {
+				// TODO: Use actual exitCode instead
+				exitCode = 0L
+			})
+			LOG.info("Sent exit event")
 		}
 	}
 	
@@ -138,7 +141,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun disconnect(args: DisconnectArguments): CompletableFuture<Void> = async.run {
+	override fun disconnect(args: DisconnectArguments) = async.run {
 		debugSession?.stop()
 	}
 	
@@ -160,16 +163,16 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun next(args: NextArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
+	override fun next(args: NextArguments) = async.run {
+		debugSession?.stepOver(args.threadId)
 	}
 	
-	override fun stepIn(args: StepInArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
+	override fun stepIn(args: StepInArguments) = async.run {
+		debugSession?.stepInto(args.threadId)
 	}
 	
-	override fun stepOut(args: StepOutArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
+	override fun stepOut(args: StepOutArguments) = async.run {
+		debugSession?.stepOut(args.threadId)
 	}
 	
 	override fun stepBack(args: StepBackArguments): CompletableFuture<Void> {
