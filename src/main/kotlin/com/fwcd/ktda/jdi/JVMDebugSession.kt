@@ -2,6 +2,7 @@ package com.fwcd.ktda.jdi
 
 import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.KotlinDAException
+import com.fwcd.ktda.util.ListenerList
 import java.nio.file.Path
 import java.nio.charset.StandardCharsets
 import java.io.File
@@ -25,10 +26,11 @@ class JVMDebugSession(
 	private val environmentVariables: Collection<String>? = null
 ) {
 	private val vm: VirtualMachine
-	private val eventBus: VMEventBus
+	private val eventPoller: VMEventPoller
+	val stopListeners = ListenerList<Unit>()
 	
 	init {
-		LOG.info("Starting JVM debug session with classpath $classpath and mainClass $mainClass")
+		LOG.info("Starting JVM debug session with main class $mainClass")
 		val vmManager = Bootstrap.virtualMachineManager()
 		val connector = vmManager.launchingConnectors()
 			.find { it is SunCommandLineLauncher }
@@ -42,7 +44,9 @@ class JVMDebugSession(
 		args["env"]?.setValue(urlEncode(environmentVariables) ?: "")
 		
 		vm = connector.launch(args)
-		eventBus = VMEventBus(vm)
+		eventPoller = VMEventPoller(vm)
+		
+		eventPoller.stopListeners.propagateTo(stopListeners)
 	}
 	
 	fun stop() {

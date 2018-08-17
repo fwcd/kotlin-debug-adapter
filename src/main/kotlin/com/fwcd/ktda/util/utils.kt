@@ -46,6 +46,16 @@ fun <T> nonNull(item: T?, errorMsgIfNull: String): T =
         throw NullPointerException(errorMsgIfNull)
     } else item
 
+/**
+ * Blocks the current thread until the condition becomes true.
+ * Checks are performed in 80 ms intervals.
+ */
+inline fun waitUntil(condition: () -> Boolean) {
+    while (!condition()) {
+        Thread.sleep(80)
+    }
+}
+
 fun <T> tryResolving(what: String, resolver: () -> T?): T? {
     try {
         val resolved = resolver()

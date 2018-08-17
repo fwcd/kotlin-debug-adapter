@@ -14,6 +14,7 @@ import org.eclipse.lsp4j.debug.EvaluateArguments
 import org.eclipse.lsp4j.debug.EvaluateResponse
 import org.eclipse.lsp4j.debug.ExceptionInfoArguments
 import org.eclipse.lsp4j.debug.ExceptionInfoResponse
+import org.eclipse.lsp4j.debug.ExitedEventArguments
 import org.eclipse.lsp4j.debug.GotoArguments
 import org.eclipse.lsp4j.debug.GotoTargetsArguments
 import org.eclipse.lsp4j.debug.GotoTargetsResponse
@@ -56,24 +57,32 @@ import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.AsyncExecutor
+import com.fwcd.ktda.util.waitUntil
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.jdi.JVMDebugSession
 
 class KotlinDebugAdapter: IDebugProtocolServer {
 	private val async = AsyncExecutor()
+	private val launcherAsync = AsyncExecutor()
 	private var debugSession: JVMDebugSession? = null
 	private var client: IDebugProtocolClient? = null
+	
+	// TODO: This is a workaround for https://github.com/eclipse/lsp4j/issues/229
+	// For more information, see launch() method
+	private var configurationDoneResponse: CompletableFuture<Void>? = null
 	
 	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> = async.compute {
 		val capabilities = Capabilities()
 		// TODO: Configure capabilities
 		// TODO: Configure debugger (for example whether lines are zero-indexed)
-		client?.initialized()
+		capabilities.supportsConfigurationDoneRequest = true
+		LOG.info("Returning capabilities...")
 		capabilities
 	}
 	
 	fun connect(client: IDebugProtocolClient) {
 		this.client = client
+		client.initialized()
 		LOG.info("Connected to client")
 	}
 	
@@ -82,10 +91,24 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	}
 	
 	override fun configurationDone(args: ConfigurationDoneArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
+		LOG.info("Got configurationDone request")
+		val response = CompletableFuture<Void>()
+		configurationDoneResponse = response
+		return response
 	}
 	
-	override fun launch(args: Map<String, Any>): CompletableFuture<Void> = async.run {
+	override fun launch(args: Map<String, Any>): CompletableFuture<Void> = launcherAsync.run {
+		client!!.initialized()
+		
+		// Wait for configurationDone response to fully return
+		// as sketched in https://github.com/Microsoft/vscode/issues/4902#issuecomment-368583522
+		// TODO: Find a cleaner solution once https://github.com/eclipse/lsp4j/issues/229 is resolved
+		// (LSP4J does currently not provide a mechanism to hook into the request/response machinery)
+		
+		LOG.info("Waiting for configurationDoneResponse")
+		waitUntil { (configurationDoneResponse?.numberOfDependents ?: 0) != 0 }
+		LOG.info("Done waiting for configurationDoneResponse")
+		
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
 		if (projectRoot == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'projectRoot' argument")
 		
@@ -96,7 +119,15 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 			findClassPath(listOf(projectRoot)),
 			mainClass,
 			projectRoot
-		)
+		).apply {
+			stopListeners.add {
+				client!!.exited(ExitedEventArguments().apply {
+					// TODO: Use actual exitCode instead
+					exitCode = 0L
+				})
+				LOG.info("Sent exit event")
+			}
+		}
 	}
 	
 	override fun attach(args: Map<String, Any>): CompletableFuture<Void> {
@@ -111,8 +142,10 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		debugSession?.stop()
 	}
 	
-	override fun setBreakpoints(args: SetBreakpointsArguments): CompletableFuture<SetBreakpointsResponse> {
-		return notImplementedDAPMethod()
+	override fun setBreakpoints(args: SetBreakpointsArguments): CompletableFuture<SetBreakpointsResponse> = async.compute {
+		LOG.info("${args.breakpoints.size} breakpoints found")
+		// TODO: Register these breakpoints
+		null
 	}
 	
 	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> {

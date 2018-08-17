@@ -1,6 +1,7 @@
 package com.fwcd.ktda.jdi
 
 import com.fwcd.ktda.LOG
+import com.fwcd.ktda.util.ListenerList
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
 
@@ -8,9 +9,10 @@ import com.sun.jdi.VMDisconnectedException
  * Asynchronously polls and publishes any events from
  * a debuggee virtual machine. 
  */
-class VMEventBus(private val vm: VirtualMachine) {
-	private val listeners = mutableListOf<(DebugEvent) -> Unit>()
+class VMEventPoller(private val vm: VirtualMachine) {
 	private var stopped = false
+	val eventListeners = ListenerList<DebugEvent>()
+	val stopListeners = ListenerList<Unit>()
 	
 	init {
 		startAsyncPoller()
@@ -25,7 +27,7 @@ class VMEventBus(private val vm: VirtualMachine) {
 					var resumeThreads = true
 					for (jdiEvent in eventSet) {
 						val event = DebugEvent(jdiEvent, eventSet)
-						fire(event)
+						eventListeners.fire(event)
 						resumeThreads = resumeThreads && event.resumeThreads
 					}
 					if (resumeThreads) {
@@ -37,12 +39,7 @@ class VMEventBus(private val vm: VirtualMachine) {
 			} catch (e: VMDisconnectedException) {
 				LOG.info("VMEventBus event poller terminated by disconnect: ${e.message}")
 			}
+			stopListeners.fire(Unit)
 		}, "VM EventBus").start()
 	}
-	
-	private fun fire(event: DebugEvent) = listeners.forEach { it(event) }
-	
-	fun subscribe(listener: (DebugEvent) -> Unit) = listeners.add(listener)
-	
-	fun unsubscribe(listener: (DebugEvent) -> Unit) = listeners.remove(listener)
 }
