@@ -215,10 +215,8 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun threads(): CompletableFuture<ThreadsResponse> = async.compute {
-		waitUntil { debugSession != null }
-		debugSession!!
-			.allThreads()
+	override fun threads(): CompletableFuture<ThreadsResponse> = async.compute { withDebugSession {
+		it.allThreads()
 			.map { org.eclipse.lsp4j.debug.Thread().apply {
 				name = it.name()
 				id = it.uniqueID()
@@ -226,7 +224,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 			.let { ThreadsResponse().apply {
 				threads = it.toTypedArray()
 			} }
-	}
+	} }
 	
 	override fun modules(args: ModulesArguments): CompletableFuture<ModulesResponse> {
 		return notImplementedDAPMethod()
@@ -254,6 +252,11 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	
 	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> {
 		return notImplementedDAPMethod()
+	}
+	
+	private inline fun <T> withDebugSession(body: (JVMDebugSession) -> T): T {
+		waitUntil { debugSession != null }
+		return body(debugSession!!)
 	}
 	
 	private fun <T> notImplementedDAPMethod(): CompletableFuture<T> {
