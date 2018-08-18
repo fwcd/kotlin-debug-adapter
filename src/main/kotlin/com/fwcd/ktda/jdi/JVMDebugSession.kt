@@ -78,7 +78,7 @@ class JVMDebugSession(
 		.filter { (it.uniqueID() == id) && (!it.isCollected()) }
 		.firstOrNull()
 	
-	private fun allThreads() = try {
+	fun allThreads() = try {
 		vm.allThreads()
 	} catch (e: VMDisconnectedException) {
 		null

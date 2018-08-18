@@ -91,7 +91,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun configurationDone(args: ConfigurationDoneArguments): CompletableFuture<Void> {
+	override fun configurationDone(args: ConfigurationDoneArguments?): CompletableFuture<Void> {
 		LOG.info("Got configurationDone request")
 		val response = CompletableFuture<Void>()
 		configurationDoneResponse = response
@@ -215,8 +215,17 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun threads(): CompletableFuture<ThreadsResponse> {
-		return notImplementedDAPMethod()
+	override fun threads(): CompletableFuture<ThreadsResponse> = async.compute {
+		waitUntil { debugSession != null }
+		debugSession!!
+			.allThreads()
+			.map { org.eclipse.lsp4j.debug.Thread().apply {
+				name = it.name()
+				id = it.uniqueID()
+			} }
+			.let { ThreadsResponse().apply {
+				threads = it.toTypedArray()
+			} }
 	}
 	
 	override fun modules(args: ModulesArguments): CompletableFuture<ModulesResponse> {
