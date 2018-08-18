@@ -3,55 +3,7 @@ package com.fwcd.ktda
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.nio.file.Paths
-import org.eclipse.lsp4j.debug.Capabilities
-import org.eclipse.lsp4j.debug.CompletionsArguments
-import org.eclipse.lsp4j.debug.CompletionsResponse
-import org.eclipse.lsp4j.debug.ConfigurationDoneArguments
-import org.eclipse.lsp4j.debug.ContinueArguments
-import org.eclipse.lsp4j.debug.ContinueResponse
-import org.eclipse.lsp4j.debug.DisconnectArguments
-import org.eclipse.lsp4j.debug.EvaluateArguments
-import org.eclipse.lsp4j.debug.EvaluateResponse
-import org.eclipse.lsp4j.debug.ExceptionInfoArguments
-import org.eclipse.lsp4j.debug.ExceptionInfoResponse
-import org.eclipse.lsp4j.debug.ExitedEventArguments
-import org.eclipse.lsp4j.debug.GotoArguments
-import org.eclipse.lsp4j.debug.GotoTargetsArguments
-import org.eclipse.lsp4j.debug.GotoTargetsResponse
-import org.eclipse.lsp4j.debug.InitializeRequestArguments
-import org.eclipse.lsp4j.debug.LoadedSourcesArguments
-import org.eclipse.lsp4j.debug.LoadedSourcesResponse
-import org.eclipse.lsp4j.debug.ModulesArguments
-import org.eclipse.lsp4j.debug.ModulesResponse
-import org.eclipse.lsp4j.debug.NextArguments
-import org.eclipse.lsp4j.debug.PauseArguments
-import org.eclipse.lsp4j.debug.RestartArguments
-import org.eclipse.lsp4j.debug.RestartFrameArguments
-import org.eclipse.lsp4j.debug.ReverseContinueArguments
-import org.eclipse.lsp4j.debug.RunInTerminalRequestArguments
-import org.eclipse.lsp4j.debug.RunInTerminalResponse
-import org.eclipse.lsp4j.debug.ScopesArguments
-import org.eclipse.lsp4j.debug.ScopesResponse
-import org.eclipse.lsp4j.debug.SetBreakpointsArguments
-import org.eclipse.lsp4j.debug.SetBreakpointsResponse
-import org.eclipse.lsp4j.debug.SetExceptionBreakpointsArguments
-import org.eclipse.lsp4j.debug.SetFunctionBreakpointsArguments
-import org.eclipse.lsp4j.debug.SetFunctionBreakpointsResponse
-import org.eclipse.lsp4j.debug.SetVariableArguments
-import org.eclipse.lsp4j.debug.SetVariableResponse
-import org.eclipse.lsp4j.debug.SourceArguments
-import org.eclipse.lsp4j.debug.SourceResponse
-import org.eclipse.lsp4j.debug.StackTraceArguments
-import org.eclipse.lsp4j.debug.StackTraceResponse
-import org.eclipse.lsp4j.debug.StepBackArguments
-import org.eclipse.lsp4j.debug.StepInArguments
-import org.eclipse.lsp4j.debug.StepInTargetsArguments
-import org.eclipse.lsp4j.debug.StepInTargetsResponse
-import org.eclipse.lsp4j.debug.StepOutArguments
-import org.eclipse.lsp4j.debug.ThreadsResponse
-import org.eclipse.lsp4j.debug.OutputEventArguments
-import org.eclipse.lsp4j.debug.VariablesArguments
-import org.eclipse.lsp4j.debug.VariablesResponse
+import org.eclipse.lsp4j.debug.*
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
@@ -62,11 +14,15 @@ import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.jdi.JVMDebugSession
 import com.fwcd.ktda.jdi.VMEventBus
 
+typealias JDIBreakpointEvent = com.sun.jdi.event.BreakpointEvent
+typealias JDIVMDeathEvent = com.sun.jdi.event.VMDeathEvent
+
 class KotlinDebugAdapter: IDebugProtocolServer {
 	private val async = AsyncExecutor()
 	private val launcherAsync = AsyncExecutor()
 	private var debugSession: JVMDebugSession? = null
 	private var client: IDebugProtocolClient? = null
+	private val breakpointManager = BreakpointManager()
 	
 	// TODO: This is a workaround for https://github.com/eclipse/lsp4j/issues/229
 	// For more information, see launch() method
@@ -119,7 +75,8 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		debugSession = JVMDebugSession(
 			findClassPath(listOf(projectRoot)),
 			mainClass,
-			projectRoot
+			projectRoot,
+			breakpointManager
 		).apply { setupVMListeners(vmEvents) }
 	}
 	
@@ -130,6 +87,12 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 				exitCode = 0L
 			})
 			LOG.info("Sent exit event")
+		}
+		events.subscribe(JDIBreakpointEvent::class) {
+			val breakpoint = breakpointManager.breakpointAt(it.jdiEvent.location())
+			client!!.stopped(StoppedEventArguments().also {
+				it.reason = StoppedEventArgumentsReason.BREAKPOINT
+			})
 		}
 	}
 	
@@ -145,10 +108,17 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		debugSession?.stop()
 	}
 	
-	override fun setBreakpoints(args: SetBreakpointsArguments): CompletableFuture<SetBreakpointsResponse> = async.compute {
+	override fun setBreakpoints(args: SetBreakpointsArguments) = async.compute {
 		LOG.info("${args.breakpoints.size} breakpoints found")
-		// TODO: Register these breakpoints
-		null
+		
+		// TODO: Support logpoints and conditional breakpoints
+		// TODO: 0- or 1-indexed line numbers?
+		
+		val breakpoints = breakpointManager.setAllInSource(args.source, args.breakpoints)
+		
+		SetBreakpointsResponse().also {
+			it.breakpoints = breakpoints.toTypedArray()
+		}
 	}
 	
 	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> {
@@ -215,8 +185,8 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun threads(): CompletableFuture<ThreadsResponse> = async.compute { withDebugSession {
-		it.allThreads()
+	override fun threads() = async.compute { withDebugSession { session ->
+		session.allThreads()
 			.map { org.eclipse.lsp4j.debug.Thread().apply {
 				name = it.name()
 				id = it.uniqueID()

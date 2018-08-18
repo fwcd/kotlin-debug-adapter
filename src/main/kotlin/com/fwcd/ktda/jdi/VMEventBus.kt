@@ -29,6 +29,7 @@ class VMEventBus(private val vm: VirtualMachine) {
 					val eventSet = eventQueue.remove()
 					var resumeThreads = true
 					for (event in eventSet) {
+						LOG.info("VM Event: ${event::class.simpleName}") // DEBUG
 						val resume = dispatchEvent(event, eventSet)
 						resumeThreads = resumeThreads && resume
 					}
@@ -42,7 +43,7 @@ class VMEventBus(private val vm: VirtualMachine) {
 				LOG.info("VMEventBus event poller terminated by disconnect: ${e.message}")
 			}
 			stopListeners.fire(Unit)
-		}, "VM EventBus").start()
+		}, "VMEventBus").start()
 	}
 	
 	@Suppress("UNCHECKED_CAST")
@@ -61,7 +62,11 @@ class VMEventBus(private val vm: VirtualMachine) {
 	
 	private fun dispatchEvent(event: Event, eventSet: EventSet): Boolean {
 		val debugEvent = DebugEvent(event, eventSet)
-		eventListeners[event::class]?.fire(debugEvent)
+		val eventClass = event::class.java
+		eventListeners
+			.filterKeys { it.java.isAssignableFrom(eventClass) }
+			.values
+			.forEach { it.fire(debugEvent) }
 		return debugEvent.resumeThreads
 	}
 }

@@ -3,18 +3,26 @@ package com.fwcd.ktda.jdi
 import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.ListenerList
+import com.fwcd.ktda.classpath.toJVMClassNames
+import com.fwcd.ktda.BreakpointManager
 import java.nio.file.Path
 import java.nio.charset.StandardCharsets
 import java.io.File
 import java.net.URLEncoder
 import java.net.URLDecoder
-
+import java.util.concurrent.CompletableFuture
+import org.eclipse.lsp4j.debug.Breakpoint
 import com.sun.jdi.Bootstrap
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
+import com.sun.jdi.event.ClassPrepareEvent
 import com.sun.jdi.request.StepRequest
 import com.sun.jdi.request.EventRequest
+import com.sun.jdi.request.ClassPrepareRequest
+import com.sun.jdi.request.BreakpointRequest
+import com.sun.jdi.Location
 import com.sun.jdi.connect.Connector
+import com.sun.jdi.ReferenceType
 import com.sun.tools.jdi.SunCommandLineLauncher
 
 /**
@@ -24,6 +32,7 @@ class JVMDebugSession(
 	private val classpath: Set<Path>,
 	private val mainClass: String,
 	private val currentWorkingDirectory: Path,
+	private val breakpointManager: BreakpointManager,
 	private val vmArguments: String? = null,
 	private val modulePaths: String? = null,
 	private val environmentVariables: Collection<String>? = null
@@ -39,14 +48,21 @@ class JVMDebugSession(
 			?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
 		val args: MutableMap<String, Connector.Argument> = connector.defaultArguments()
 		
-		args["suspend"]?.setValue("true")
-		args["options"]?.setValue(formatOptions())
-		args["main"]?.setValue(formatMainClass())
+		args["suspend"]!!.setValue("true")
+		args["options"]!!.setValue(formatOptions())
+		args["main"]!!.setValue(formatMainClass())
 		args["cwd"]?.setValue(currentWorkingDirectory.toAbsolutePath().toString())
 		args["env"]?.setValue(urlEncode(environmentVariables) ?: "")
 		
 		vm = connector.launch(args)
 		vmEvents = VMEventBus(vm)
+		
+		hookBreakpoints()
+	}
+	
+	private fun hookBreakpoints() {
+		breakpointManager.listeners.add(::setAllBreakpoints)
+		setAllBreakpoints(breakpointManager.allBreakpoints())
 	}
 	
 	fun stop() {
@@ -79,16 +95,76 @@ class JVMDebugSession(
 		.firstOrNull()
 	
 	fun allThreads() = try {
-		vm.allThreads()
-	} catch (e: VMDisconnectedException) {
-		null
-	}.orEmpty()
+			vm.allThreads()
+		} catch (e: VMDisconnectedException) {
+			null
+		}.orEmpty()
+	
+	private fun setAllBreakpoints(breakpoints: List<Breakpoint>) {
+		// FIXME: Clear breakpoints
+		breakpoints.forEach { bp ->
+			bp.source.path
+				?.let { setBreakpoint(it, bp.line) }
+			// TODO: Deal with the case where Breakpoint.source.path is absent
+		}
+	}
+	
+	/** Tries to set a breakpoint - will return whether this was successful */
+	private fun setBreakpoint(filePath: String, lineNumber: Long): CompletableFuture<Boolean> {
+		val future = CompletableFuture<Boolean>()
+		
+		toJVMClassNames(filePath)
+			.forEach { className ->
+				// Try setting breakpoint using a ClassPrepareRequest
+				
+				vm.eventRequestManager()
+					.createClassPrepareRequest()
+					.apply { addClassFilter(className) } // For global types
+					.enable()
+				vm.eventRequestManager()
+					.createClassPrepareRequest()
+					.apply { addClassFilter(className + "$*") } // For local types
+					.enable()
+				
+				vmEvents.subscribe(ClassPrepareEvent::class) {
+					if (!future.isDone()) {
+						future.complete(setBreakpointAtType(it.jdiEvent.referenceType(), lineNumber))
+						LOG.info("Could set breakpoint using ClassPrepareEvent: ${future.get()}") // DEBUG
+					}
+				}
+				
+				// Try setting breakpoint using loaded VM classes
+				
+				vm.classesByName(className).forEach {
+					if (!future.isDone()) {
+						future.complete(setBreakpointAtType(it, lineNumber))
+						LOG.info("Could set breakpoint using VM classes: ${future.get()}") // DEBUG
+					}
+				}
+			}
+		
+		return future
+	}
+	
+	private fun setBreakpointAtType(refType: ReferenceType, lineNumber: Long): Boolean {
+		val location = refType
+			.locationsOfLine(lineNumber.toInt())
+			?.firstOrNull() ?: return false
+		val request = vm.eventRequestManager()
+			.createBreakpointRequest(location)
+		request?.let {
+			it.enable()
+		}
+		return request != null
+	}
+	
+	// TODO: Removable breakpoints
 	
 	private fun formatOptions(): String {
 		var options = ""
 		vmArguments?.let { options += it }
 		modulePaths?.let { options += " --module-path \"$modulePaths\"" }
-		options += " -cp \"${formatClasspath()}\""
+		options += " -classpath \"${formatClasspath()}\""
 		return options
 	}
 	
