@@ -60,7 +60,7 @@ import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.util.waitUntil
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.jdi.JVMDebugSession
-import com.fwcd.ktda.jdi.VMEventPoller
+import com.fwcd.ktda.jdi.VMEventBus
 
 class KotlinDebugAdapter: IDebugProtocolServer {
 	private val async = AsyncExecutor()
@@ -123,7 +123,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		).apply { setupVMListeners(vmEvents) }
 	}
 	
-	private fun setupVMListeners(events: VMEventPoller) {
+	private fun setupVMListeners(events: VMEventBus) {
 		events.stopListeners.add {
 			client!!.exited(ExitedEventArguments().apply {
 				// TODO: Use actual exitCode instead

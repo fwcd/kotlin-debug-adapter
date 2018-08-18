@@ -29,7 +29,7 @@ class JVMDebugSession(
 	private val environmentVariables: Collection<String>? = null
 ) {
 	private val vm: VirtualMachine
-	val vmEvents: VMEventPoller
+	val vmEvents: VMEventBus
 	
 	init {
 		LOG.info("Starting JVM debug session with main class $mainClass")
@@ -46,7 +46,7 @@ class JVMDebugSession(
 		args["env"]?.setValue(urlEncode(environmentVariables) ?: "")
 		
 		vm = connector.launch(args)
-		vmEvents = VMEventPoller(vm)
+		vmEvents = VMEventBus(vm)
 	}
 	
 	fun stop() {
