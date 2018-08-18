@@ -4,6 +4,18 @@ import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.ListenerList
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
+import com.sun.jdi.event.Event
+import com.sun.jdi.event.EventSet
+
+private class DebugEvent(
+	val jdiEvent: Event,
+	val jdiEventSet: EventSet
+) {
+	var resumeThreads = true
+}
+
+typealias JDIBreakpointEvent = com.sun.jdi.event.BreakpointEvent
+typealias JDIStepEvent = com.sun.jdi.event.StepEvent
 
 /**
  * Asynchronously polls and publishes any events from
@@ -12,6 +24,8 @@ import com.sun.jdi.VMDisconnectedException
 class VMEventPoller(private val vm: VirtualMachine) {
 	private var stopped = false
 	val stopListeners = ListenerList<Unit>()
+	val stepListeners = ListenerList<StepEvent>()
+	val breakpointListeners = ListenerList<BreakpointEvent>()
 	
 	init {
 		startAsyncPoller()
@@ -42,7 +56,11 @@ class VMEventPoller(private val vm: VirtualMachine) {
 		}, "VM EventBus").start()
 	}
 	
-	private fun dispatchEvent(event: DebugEvent) {
-		// TODO
+	private fun dispatchEvent(debugEvent: DebugEvent) {
+		val e = debugEvent.jdiEvent
+		when (e) {
+			is JDIBreakpointEvent -> breakpointListeners.fire(BreakpointEvent())
+			is JDIStepEvent -> stepListeners.fire(StepEvent())
+		}
 	}
 }
