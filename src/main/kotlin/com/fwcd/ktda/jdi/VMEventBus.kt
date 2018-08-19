@@ -30,7 +30,7 @@ class VMEventBus(private val vm: VirtualMachine) {
 					val eventSet = eventQueue.remove()
 					var resumeThreads = true
 					for (event in eventSet) {
-						LOG.info("VM Event: ${event::class.simpleName}") // DEBUG
+						// LOG.info("VM Event: ${event::class.simpleName}") // DEBUG
 						val resume = dispatchEvent(event, eventSet)
 						resumeThreads = resumeThreads && resume
 					}
