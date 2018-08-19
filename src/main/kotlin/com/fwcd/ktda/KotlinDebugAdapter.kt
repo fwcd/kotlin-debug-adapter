@@ -127,10 +127,10 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		// TODO: Support logpoints and conditional breakpoints
 		// TODO: 0- or 1-indexed line numbers?
 		
-		val breakpoints = breakpointManager.setAllInSource(args.source, args.breakpoints)
+		val placedBreakpoints = breakpointManager.setAllInSource(args.source, args.breakpoints)
 		
-		SetBreakpointsResponse().also {
-			it.breakpoints = breakpoints.toTypedArray()
+		SetBreakpointsResponse().apply {
+			breakpoints = placedBreakpoints.toTypedArray()
 		}
 	}
 	
