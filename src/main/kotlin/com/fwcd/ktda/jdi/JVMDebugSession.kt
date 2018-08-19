@@ -109,10 +109,8 @@ class JVMDebugSession(
 		}
 	}
 	
-	/** Tries to set a breakpoint - will return whether this was successful */
-	private fun setBreakpoint(filePath: String, lineNumber: Long): CompletableFuture<Boolean> {
-		val future = CompletableFuture<Boolean>()
-		
+	/** Tries to set a breakpoint */
+	private fun setBreakpoint(filePath: String, lineNumber: Long) {
 		toJVMClassNames(filePath)
 			.forEach { className ->
 				// Try setting breakpoint using a ClassPrepareRequest
@@ -127,25 +125,18 @@ class JVMDebugSession(
 					.enable()
 				
 				vmEvents.subscribe(ClassPrepareEvent::class) {
-					if (!future.isDone()) {
-						future.complete(setBreakpointAtType(it.jdiEvent.referenceType(), lineNumber))
-						LOG.info("Could set breakpoint using ClassPrepareEvent: ${future.get()}") // DEBUG
-					}
+					setBreakpointAtType(it.jdiEvent.referenceType(), lineNumber)
 				}
 				
 				// Try setting breakpoint using loaded VM classes
 				
 				vm.classesByName(className).forEach {
-					if (!future.isDone()) {
-						future.complete(setBreakpointAtType(it, lineNumber))
-						LOG.info("Could set breakpoint using VM classes: ${future.get()}") // DEBUG
-					}
+					setBreakpointAtType(it, lineNumber)
 				}
 			}
-		
-		return future
 	}
 	
+	/** Tries to set a breakpoint - Will return whether this was successful */
 	private fun setBreakpointAtType(refType: ReferenceType, lineNumber: Long): Boolean {
 		val location = refType
 			.locationsOfLine(lineNumber.toInt())

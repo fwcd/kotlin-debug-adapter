@@ -89,10 +89,11 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 			LOG.info("Sent exit event")
 		}
 		events.subscribe(JDIBreakpointEvent::class) {
-			val breakpoint = breakpointManager.breakpointAt(it.jdiEvent.location())
-			client!!.stopped(StoppedEventArguments().also {
-				it.reason = StoppedEventArgumentsReason.BREAKPOINT
+			// val breakpoint = breakpointManager.breakpointAt(it.jdiEvent.location())
+			client!!.stopped(StoppedEventArguments().apply {
+				reason = StoppedEventArgumentsReason.BREAKPOINT
 			})
+			it.resumeThreads = false
 		}
 	}
 	

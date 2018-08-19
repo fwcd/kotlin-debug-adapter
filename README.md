@@ -10,6 +10,7 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) for Kotli
 * See [KotlinQuickStart](https://github.com/fwcd/KotlinQuickStart) for a sample project
 
 ## Usage
+* `./gradlew build` your project
 * Invoke the debug adapter with a `launch` request after the initialization procedure [as sketched here](https://microsoft.github.io/debug-adapter-protocol/img/init-launch.png)
     * The `projectRoot` and `mainClass` arguments must be specified
     * The `projectRoot` argument should contain the absolute path to a Maven or a Gradle project folder with

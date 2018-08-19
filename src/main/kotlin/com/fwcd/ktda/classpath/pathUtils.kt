@@ -24,7 +24,6 @@ fun toJVMClassNames(filePath: String): List<String> {
 		} else if (filePath.endsWith(".kts")) {
 			rawClassName.dropLast(4)
 		} else throw IllegalArgumentException("Can't convert non-Kotlin source file '" + filePath + "' to JVM class name")
-	LOG.info(rawClassName) // DEBUG
 	val ktClassName = className
 		.capitalizeCharAt(className.lastIndexOf(".") + 1) + "Kt" // Class name to PascalCase
 	
