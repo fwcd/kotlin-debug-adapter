@@ -28,6 +28,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	private var project: Project? = null
 	private var debugSession: JVMDebugSession? = null
 	private var client: IDebugProtocolClient? = null
+	private var lineOffset: Int = 0 // JDI line number + lineOffset = DAP line number
 	
 	private val stackFramePool = ObjectPool<Long, JDIStackFrame>() // Contains stack frames owned by thread ids
 	private val breakpointManager = BreakpointManager()
@@ -37,10 +38,11 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	private var configurationDoneResponse: CompletableFuture<Void>? = null
 	
 	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> = async.compute {
+		lineOffset = if (args.linesStartAt1) 0 else -1
+		
 		val capabilities = Capabilities()
-		// TODO: Configure capabilities
-		// TODO: Configure debugger (for example whether lines are zero-indexed)
 		capabilities.supportsConfigurationDoneRequest = true
+		
 		LOG.info("Returning capabilities...")
 		capabilities
 	}
@@ -93,20 +95,31 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	
 	private fun setupVMListeners(events: VMEventBus) {
 		events.stopListeners.add {
-			client!!.exited(ExitedEventArguments().apply {
-				// TODO: Use actual exitCode instead
-				exitCode = 0L
-			})
-			LOG.info("Sent exit event")
+			// TODO: Use actual exitCode instead
+			sendExitEvent(0L)
 		}
 		events.subscribe(JDIBreakpointEvent::class) {
 			// val breakpoint = breakpointManager.breakpointAt(it.jdiEvent.location())
-			client!!.stopped(StoppedEventArguments().apply {
-				reason = StoppedEventArgumentsReason.BREAKPOINT
-				threadId = it.jdiEvent.thread().uniqueID()
-			})
+			sendStopEvent(
+				it.jdiEvent.thread().uniqueID(),
+				StoppedEventArgumentsReason.BREAKPOINT
+			)
 			it.resumeThreads = false
 		}
+	}
+	
+	private fun sendStopEvent(threadId: Long, reason: String) {
+		client!!.stopped(StoppedEventArguments().also {
+			it.reason = reason
+			it.threadId = threadId
+		})
+	}
+	
+	private fun sendExitEvent(exitCode: Long) {
+		client!!.exited(ExitedEventArguments().also {
+			it.exitCode = exitCode
+		})
+		LOG.info("Sent exit event")
 	}
 	
 	override fun attach(args: Map<String, Any>): CompletableFuture<Void> {
@@ -142,8 +155,11 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun continue_(args: ContinueArguments): CompletableFuture<ContinueResponse> {
-		return notImplementedDAPMethod()
+	override fun continue_(args: ContinueArguments) = async.compute {
+		debugSession!!.resumeThread(args.threadId)
+		ContinueResponse().apply {
+			allThreadsContinued = false
+		}
 	}
 	
 	override fun next(args: NextArguments) = async.run {
@@ -174,8 +190,15 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun pause(args: PauseArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
+	override fun pause(args: PauseArguments) = async.run {
+		val threadId = args.threadId
+		debugSession!!.pauseThread(threadId)?.let {
+			// If successful
+			sendStopEvent(
+				threadId,
+				StoppedEventArgumentsReason.PAUSE
+			)
+		}
 	}
 	
 	override fun stackTrace(args: StackTraceArguments) = async.compute {
@@ -185,11 +208,10 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 			stackFrames = debugSession!!.stackTrace(threadId)
 				?.map { jdiFrame ->
 					val location = jdiFrame.location()
-					LOG.info("Source name ${location?.sourceName()}, source path ${location?.sourcePath()}")
 					StackFrame().apply {
 						id = stackFramePool.store(threadId, jdiFrame)
 						name = location?.method()?.name() ?: "???"
-						line = location?.lineNumber()?.toLong() ?: 0L
+						line = location?.lineNumber()?.toLong() /* + lineOffset */ ?: 0L
 						column = 0L
 						source = Source().apply {
 							name = location?.sourceName() ?: "???"

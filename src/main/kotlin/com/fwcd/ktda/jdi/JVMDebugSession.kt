@@ -71,6 +71,14 @@ class JVMDebugSession(
 		}
 	}
 	
+	fun pause() = vm.suspend()
+	
+	fun resume() = vm.resume()
+	
+	fun pauseThread(threadId: Long) = threadNr(threadId)?.suspend()
+	
+	fun resumeThread(threadId: Long) = threadNr(threadId)?.resume()
+	
 	// TODO: Cache stack traces?
 	fun stackTrace(threadId: Long) = threadNr(threadId)?.frames()
 	
@@ -103,7 +111,7 @@ class JVMDebugSession(
 		}.orEmpty()
 	
 	private fun setAllBreakpoints(breakpoints: List<Breakpoint>) {
-		// FIXME: Clear breakpoints
+		vm.eventRequestManager().deleteAllBreakpoints()
 		breakpoints.forEach { bp ->
 			bp.source.path
 				?.let { setBreakpoint(it, bp.line) }
@@ -181,6 +189,4 @@ class JVMDebugSession(
 		?.split("\n")
 		?.map { URLDecoder.decode(it, StandardCharsets.UTF_8.name()) }
 		?.toList()
-	
-	
 }
