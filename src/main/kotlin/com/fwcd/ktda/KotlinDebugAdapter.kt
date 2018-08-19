@@ -262,7 +262,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 					?.map { jdiVariable -> Variable().apply {
 						name = jdiVariable.name()
 						// TODO: Find a better string representation of variables
-						value = jdiFrame!!.getValue(jdiVariable).toString()
+						value = jdiFrame.getValue(jdiVariable).toString()
 						type = jdiVariable.type().signature()
 						// TODO: Child variables
 					} }

@@ -34,10 +34,12 @@ fun toJVMClassNames(filePath: String): List<String> {
 	return listOf(className, ktClassName)
 }
 
+// TODO: Better path resolution, especially when dealing with
+// *.class files inside JARs
 fun findValidFilePath(filePathToClass: Path) = firstNonNull(
 	{ filePathToClass.ifExists() },
 	{ filePathToClass.withExtension(".kt").ifExists() }
-)
+) ?: filePathToClass
 
 private fun Path.ifExists() = if (Files.exists(this)) this else null
 
