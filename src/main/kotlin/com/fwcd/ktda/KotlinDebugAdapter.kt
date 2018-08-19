@@ -189,6 +189,8 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 					StackFrame().apply {
 						id = stackFramePool.store(threadId, jdiFrame)
 						name = location?.method()?.name() ?: "???"
+						line = location?.lineNumber()?.toLong() ?: 0L
+						column = 0L
 						source = Source().apply {
 							name = location?.sourceName() ?: "???"
 							// TODO: Use source references to load locations in compiled classes
