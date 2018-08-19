@@ -28,6 +28,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	private var project: Project? = null
 	private var debugSession: JVMDebugSession? = null
 	private var client: IDebugProtocolClient? = null
+	// TODO: Consistently apply this lineOffset
 	private var lineOffset: Int = 0 // JDI line number + lineOffset = DAP line number
 	
 	private val stackFramePool = ObjectPool<Long, JDIStackFrame>() // Contains stack frames owned by thread ids
