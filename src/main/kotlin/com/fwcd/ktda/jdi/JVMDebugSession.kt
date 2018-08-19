@@ -3,6 +3,7 @@ package com.fwcd.ktda.jdi
 import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.ListenerList
+import com.fwcd.ktda.util.Subscription
 import com.fwcd.ktda.classpath.toJVMClassNames
 import com.fwcd.ktda.BreakpointManager
 import com.fwcd.ktda.Project
@@ -12,11 +13,15 @@ import java.io.File
 import java.net.URLEncoder
 import java.net.URLDecoder
 import java.util.concurrent.CompletableFuture
+import kotlin.reflect.KClass
 import org.eclipse.lsp4j.debug.Breakpoint
 import com.sun.jdi.Bootstrap
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
+import com.sun.jdi.event.Event
 import com.sun.jdi.event.ClassPrepareEvent
+import com.sun.jdi.event.BreakpointEvent
+import com.sun.jdi.event.StepEvent
 import com.sun.jdi.request.StepRequest
 import com.sun.jdi.request.EventRequest
 import com.sun.jdi.request.ClassPrepareRequest
@@ -38,6 +43,7 @@ class JVMDebugSession(
 ) {
 	private val vm: VirtualMachine
 	val vmEvents: VMEventBus
+	val pendingStepRequestThreadIds = mutableSetOf<Long>()
 	
 	init {
 		LOG.info("Starting JVM debug session with main class ${project.mainClass}")
@@ -71,33 +77,65 @@ class JVMDebugSession(
 		}
 	}
 	
-	fun pause() = vm.suspend()
+	fun pauseThread(threadId: Long) = threadNr(threadId)?.let { thread ->
+		if (!thread.isSuspended()) {
+			thread.suspend()
+		}
+	}
 	
-	fun resume() = vm.resume()
-	
-	fun pauseThread(threadId: Long) = threadNr(threadId)?.suspend()
-	
-	fun resumeThread(threadId: Long) = threadNr(threadId)?.resume()
+	fun resumeThread(threadId: Long) = threadNr(threadId)?.let { thread ->
+		(0 until thread.suspendCount()).forEach {
+			thread.resume()
+		}
+	}
 	
 	// TODO: Cache stack traces?
 	fun stackTrace(threadId: Long) = threadNr(threadId)?.frames()
 	
-	fun stepOver(threadId: Long) = stepRequest(threadId, StepRequest.STEP_LINE, StepRequest.STEP_OVER)?.let(::performStep)
+	fun stepOver(threadId: Long) = stepLine(threadId, StepRequest.STEP_OVER)
 	
-	fun stepInto(threadId: Long) = stepRequest(threadId, StepRequest.STEP_LINE, StepRequest.STEP_INTO)?.let(::performStep)
+	fun stepInto(threadId: Long) = stepLine(threadId, StepRequest.STEP_INTO)
 	
-	fun stepOut(threadId: Long) = stepRequest(threadId, StepRequest.STEP_LINE, StepRequest.STEP_OUT)?.let(::performStep)
+	fun stepOut(threadId: Long) = stepLine(threadId, StepRequest.STEP_OUT)
 	
-	private fun performStep(request: StepRequest) = request.enable()
+	private fun stepLine(threadId: Long, depth: Int) = stepRequest(threadId, StepRequest.STEP_LINE, depth)
+		?.let { performStep(threadId, it) }
 	
-	private fun stepRequest(threadId: Long, size: Int, depth: Int) = threadNr(threadId)
-		?.let {
-			it.virtualMachine()
-				.eventRequestManager()
-				.createStepRequest(it, size, depth)
-		}?.also {
-			it.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD)
-			it.addCountFilter(1)
+	private fun performStep(threadId: Long, request: StepRequest) {
+		request.enable()
+		resumeThread(threadId)
+	}
+	
+	private fun stepRequest(threadId: Long, size: Int, depth: Int) =
+		if (pendingStepRequestThreadIds.contains(threadId)) null else {
+			threadNr(threadId)
+				?.let {
+					it.virtualMachine()
+						.eventRequestManager()
+						.createStepRequest(it, size, depth)
+				}?.also { request ->
+					request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD)
+					request.addCountFilter(1)
+					
+					// Abort pending StepRequest when a breakpoint is hit
+					pendingStepRequestThreadIds.add(threadId)
+					
+					fun abortUponEvent(eventClass: KClass<out Event>) {
+						var sub: Subscription? = null
+						
+						sub = vmEvents.subscribe(eventClass) {
+							val pending = pendingStepRequestThreadIds.contains(threadId)
+							if (pending) {
+								vm.eventRequestManager().deleteEventRequest(request)
+								pendingStepRequestThreadIds.remove(threadId)
+							}
+							sub?.unsubscribe()
+						}
+					}
+					
+					abortUponEvent(StepEvent::class)
+					abortUponEvent(BreakpointEvent::class)
+				}
 		}
 	
 	private fun threadNr(id: Long) = allThreads()

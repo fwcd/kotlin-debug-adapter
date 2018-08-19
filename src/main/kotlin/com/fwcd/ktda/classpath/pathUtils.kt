@@ -1,6 +1,10 @@
 package com.fwcd.ktda.classpath
 
 import com.fwcd.ktda.LOG
+import com.fwcd.ktda.util.firstNonNull
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.Path
 
 private val fileSeparator by lazy { "[/\\\\]".toRegex() }
 
@@ -29,6 +33,15 @@ fun toJVMClassNames(filePath: String): List<String> {
 	
 	return listOf(className, ktClassName)
 }
+
+fun findValidFilePath(filePathToClass: Path) = firstNonNull(
+	{ filePathToClass.ifExists() },
+	{ filePathToClass.withExtension(".kt").ifExists() }
+)
+
+private fun Path.ifExists() = if (Files.exists(this)) this else null
+
+private fun Path.withExtension(extension: String) = resolveSibling(fileName.toString() + extension)
 
 private fun String.capitalizeCharAt(index: Int) =
 	take(index) + this[index].toUpperCase() + substring(index + 1)

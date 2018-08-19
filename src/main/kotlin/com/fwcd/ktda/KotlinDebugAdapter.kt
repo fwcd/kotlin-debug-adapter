@@ -14,10 +14,13 @@ import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.util.waitUntil
 import com.fwcd.ktda.util.ObjectPool
 import com.fwcd.ktda.classpath.findClassPath
+import com.fwcd.ktda.classpath.findValidFilePath
 import com.fwcd.ktda.jdi.JVMDebugSession
 import com.fwcd.ktda.jdi.VMEventBus
 
+typealias JDIAbsentInformationException = com.sun.jdi.AbsentInformationException
 typealias JDIBreakpointEvent = com.sun.jdi.event.BreakpointEvent
+typealias JDIStepEvent = com.sun.jdi.event.StepEvent
 typealias JDIVMDeathEvent = com.sun.jdi.event.VMDeathEvent
 typealias JDIStackFrame = com.sun.jdi.StackFrame
 
@@ -104,6 +107,13 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 			sendStopEvent(
 				it.jdiEvent.thread().uniqueID(),
 				StoppedEventArgumentsReason.BREAKPOINT
+			)
+			it.resumeThreads = false
+		}
+		events.subscribe(JDIStepEvent::class) {
+			sendStopEvent(
+				it.jdiEvent.thread().uniqueID(),
+				StoppedEventArgumentsReason.STEP
 			)
 			it.resumeThreads = false
 		}
@@ -220,6 +230,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 							// TODO: Use source references to load locations in compiled classes
 							path = location?.sourcePath()
 								?.let(project!!.sourcesRoot::resolve)
+								?.let(::findValidFilePath)
 								?.toAbsolutePath()
 								?.toString()
 								?: "???"
@@ -242,18 +253,23 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	
 	override fun variables(args: VariablesArguments) = async.compute {
 		val id = args.variablesReference
-		val jdiFrame = stackFramePool.getByID(id) ?: throw KotlinDAException("Could not find stack frame for ID " + id)
+		val jdiFrame = stackFramePool.getByID(id)
 		
 		VariablesResponse().apply {
-			variables = jdiFrame.visibleVariables()
-				.map { jdiVariable -> Variable().apply {
-					name = jdiVariable.name()
-					// TODO: Find a better string representation of variables
-					value = jdiFrame.getValue(jdiVariable).toString()
-					type = jdiVariable.type().signature()
-					// TODO: Child variables
-				} }
-				.toTypedArray()
+			variables = try {
+				jdiFrame
+					?.visibleVariables()
+					?.map { jdiVariable -> Variable().apply {
+						name = jdiVariable.name()
+						// TODO: Find a better string representation of variables
+						value = jdiFrame!!.getValue(jdiVariable).toString()
+						type = jdiVariable.type().signature()
+						// TODO: Child variables
+					} }
+					?.toTypedArray()
+			} catch (e: JDIAbsentInformationException) {
+				null
+			}.orEmpty()
 		}
 	}
 	

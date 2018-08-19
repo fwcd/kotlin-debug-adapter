@@ -2,6 +2,7 @@ package com.fwcd.ktda.jdi
 
 import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.ListenerList
+import com.fwcd.ktda.util.Subscription
 import kotlin.reflect.KClass
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
@@ -47,17 +48,17 @@ class VMEventBus(private val vm: VirtualMachine) {
 	}
 	
 	@Suppress("UNCHECKED_CAST")
-	fun <E: Event> subscribe(eventClass: KClass<E>, listener: (DebugEvent<E>) -> Unit) {
+	fun <E: Event> subscribe(eventClass: KClass<E>, listener: (DebugEvent<E>) -> Unit): Subscription {
 		eventListeners.putIfAbsent(eventClass, ListenerList())
 		// This cast is safe, because dispatchEvent uses
 		// reflection to assure that only a correct 'Event' type is passed
 		// and due to type erasure on JVM
 		eventListeners[eventClass]!!.add(listener as (DebugEvent<Event>) -> Unit)
-	}
-	
-	@Suppress("UNCHECKED_CAST")
-	fun <E: Event> unsubscribe(eventClass: KClass<E>, listener: (DebugEvent<E>) -> Unit) {
-		eventListeners[eventClass]?.remove(listener as (DebugEvent<Event>) -> Unit)
+		return object: Subscription {
+			override fun unsubscribe() {
+				eventListeners[eventClass]?.remove(listener as (DebugEvent<Event>) -> Unit)
+			}
+		}
 	}
 	
 	private fun dispatchEvent(event: Event, eventSet: EventSet): Boolean {
