@@ -203,6 +203,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	
 	override fun stackTrace(args: StackTraceArguments) = async.compute {
 		val threadId = args.threadId
+		stackFramePool.removeAllOwnedBy(threadId)
 		
 		StackTraceResponse().apply {
 			stackFrames = debugSession!!.stackTrace(threadId)
