@@ -19,6 +19,13 @@
 			"request": "attach",
 			"hostName": "localhost",
 			"port": 5005
+		},
+		{
+			"type": "kotlin",
+			"request": "launch",
+			"name": "Debug KotlinDebugAdapter",
+			"projectRoot": "${workspaceFolder}",
+			"mainClass": "com.fwcd.ktda.KDAMainKt"
 		}
 	]
 }

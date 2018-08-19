@@ -1,7 +1,5 @@
 # KotlinDebugAdapter
-A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) for Kotlin that provides IDE-independent JVM debugging support and a VSCode extension that uses the debug adapter.
-
-## [WIP] Many features are still missing from the current version of the debug adapter
+A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that provides IDE-independent debugging support for Kotlin/JVM and a VSCode extension that uses the debug adapter.
 
 ![Icon](Icon128.png)
 
