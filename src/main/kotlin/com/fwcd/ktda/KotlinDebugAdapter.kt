@@ -3,6 +3,7 @@ package com.fwcd.ktda
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.nio.file.Paths
+import java.util.concurrent.ThreadLocalRandom
 import org.eclipse.lsp4j.debug.*
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
@@ -92,6 +93,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 			// val breakpoint = breakpointManager.breakpointAt(it.jdiEvent.location())
 			client!!.stopped(StoppedEventArguments().apply {
 				reason = StoppedEventArgumentsReason.BREAKPOINT
+				threadId = it.jdiEvent.thread().uniqueID()
 			})
 			it.resumeThreads = false
 		}
@@ -166,8 +168,17 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun stackTrace(args: StackTraceArguments): CompletableFuture<StackTraceResponse> {
-		return notImplementedDAPMethod()
+	override fun stackTrace(args: StackTraceArguments) = async.compute {
+		// TODO: Cache these stack frames for variable requests later on
+		StackTraceResponse().apply {
+			stackFrames = debugSession!!.stackTrace(args.threadId)
+				?.map { StackFrame().apply {
+					id = ThreadLocalRandom.current().nextLong() // TODO
+					name = it.location()?.method()?.name() ?: "???"
+				} }
+				?.toTypedArray()
+				.orEmpty()
+		}
 	}
 	
 	override fun scopes(args: ScopesArguments): CompletableFuture<ScopesResponse> {
@@ -186,7 +197,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	override fun threads() = async.compute { withDebugSession { session ->
+	override fun threads() = async.compute { onceDebugSessionIsPresent { session ->
 		session.allThreads()
 			.map { org.eclipse.lsp4j.debug.Thread().apply {
 				name = it.name()
@@ -225,7 +236,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		return notImplementedDAPMethod()
 	}
 	
-	private inline fun <T> withDebugSession(body: (JVMDebugSession) -> T): T {
+	private inline fun <T> onceDebugSessionIsPresent(body: (JVMDebugSession) -> T): T {
 		waitUntil { debugSession != null }
 		return body(debugSession!!)
 	}

@@ -72,6 +72,9 @@ class JVMDebugSession(
 		}
 	}
 	
+	// TODO: Cache stack traces?
+	fun stackTrace(threadId: Long) = threadNr(threadId)?.frames()
+	
 	fun stepOver(threadId: Long) = stepRequest(threadId, StepRequest.STEP_LINE, StepRequest.STEP_OVER)?.let(::performStep)
 	
 	fun stepInto(threadId: Long) = stepRequest(threadId, StepRequest.STEP_LINE, StepRequest.STEP_INTO)?.let(::performStep)
