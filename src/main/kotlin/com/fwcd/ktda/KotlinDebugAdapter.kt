@@ -43,6 +43,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	
 	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> = async.compute {
 		lineOffset = if (args.linesStartAt1) 0 else -1
+		breakpointManager.lineOffset = lineOffset
 		
 		val capabilities = Capabilities()
 		capabilities.supportsConfigurationDoneRequest = true
@@ -223,7 +224,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 					StackFrame().apply {
 						id = stackFramePool.store(threadId, jdiFrame)
 						name = location?.method()?.name() ?: "???"
-						line = location?.lineNumber()?.toLong() /* + lineOffset */ ?: 0L
+						line = location?.lineNumber()?.toLong()?.let { it + lineOffset } ?: 0L
 						column = 0L
 						source = Source().apply {
 							name = location?.sourceName() ?: "???"

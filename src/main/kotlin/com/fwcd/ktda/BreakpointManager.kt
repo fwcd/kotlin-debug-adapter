@@ -10,6 +10,7 @@ import com.sun.jdi.Location
 class BreakpointManager {
 	private val breakpoints = mutableMapOf<Source, List<Breakpoint>>()
 	val listeners = ListenerList<List<Breakpoint>>()
+	var lineOffset = 0 // JDI line number + lineOffset = DAP line number
 	
 	fun setAllInSource(source: Source, srcBreakpoints: Array<out SourceBreakpoint>): List<Breakpoint> {
 		val convertedBreakpoints = srcBreakpoints
@@ -24,7 +25,7 @@ class BreakpointManager {
 		.filterKeys { Paths.get(it.path) == Paths.get(location.sourcePath()) }
 		.values
 		.flatten()
-		.filter { it.line.toInt() == location.lineNumber() }
+		.filter { it.line.toInt() == (location.lineNumber() + lineOffset) }
 		.firstOrNull()
 	
 	private fun fireListeners() = listeners.fire(allBreakpoints())
