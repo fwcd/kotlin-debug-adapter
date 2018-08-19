@@ -16,7 +16,7 @@ fun toJVMClassNames(filePath: String): List<String> {
 	// TODO: Implement this using the Kotlin compiler API instead
 	// See https://github.com/JetBrains/kotlin-netbeans/blob/c3360e8c89c1d4dac1e6f18267052ff740705079/src/main/java/org/jetbrains/kotlin/debugger/KotlinDebugUtils.java#L166-L194
 	
-	val rawClassName = filePath.split(fileSeparator)
+	val rawClassName = filePath.split(fileSeparator) // TODO: Use Project.sourcesRoot instead
 		.takeLastWhile { it != "kotlin" } // Assuming .../src/main/kotlin/... directory structure
 		.joinToString(separator = ".")
 	val className = if (filePath.endsWith(".kt")) {

@@ -5,6 +5,7 @@ import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.ListenerList
 import com.fwcd.ktda.classpath.toJVMClassNames
 import com.fwcd.ktda.BreakpointManager
+import com.fwcd.ktda.Project
 import java.nio.file.Path
 import java.nio.charset.StandardCharsets
 import java.io.File
@@ -29,9 +30,7 @@ import com.sun.tools.jdi.SunCommandLineLauncher
  * The debugging backend that uses the Java Debug Interface.
  */
 class JVMDebugSession(
-	private val classpath: Set<Path>,
-	private val mainClass: String,
-	private val currentWorkingDirectory: Path,
+	private val project: Project,
 	private val breakpointManager: BreakpointManager,
 	private val vmArguments: String? = null,
 	private val modulePaths: String? = null,
@@ -41,7 +40,7 @@ class JVMDebugSession(
 	val vmEvents: VMEventBus
 	
 	init {
-		LOG.info("Starting JVM debug session with main class $mainClass")
+		LOG.info("Starting JVM debug session with main class ${project.mainClass}")
 		val vmManager = Bootstrap.virtualMachineManager()
 		val connector = vmManager.launchingConnectors()
 			.find { it is SunCommandLineLauncher }
@@ -51,7 +50,7 @@ class JVMDebugSession(
 		args["suspend"]!!.setValue("true")
 		args["options"]!!.setValue(formatOptions())
 		args["main"]!!.setValue(formatMainClass())
-		args["cwd"]?.setValue(currentWorkingDirectory.toAbsolutePath().toString())
+		args["cwd"]?.setValue(project.rootPath.toAbsolutePath().toString())
 		args["env"]?.setValue(urlEncode(environmentVariables) ?: "")
 		
 		vm = connector.launch(args)
@@ -163,14 +162,14 @@ class JVMDebugSession(
 	}
 	
 	private fun formatMainClass(): String {
-		val mainClasses = mainClass.split("/")
+		val mainClasses = project.mainClass.split("/")
 		return if ((modulePaths != null) || (mainClasses.size == 2)) {
 			// Required for Java 9 compatibility
-			"-m $mainClass"
-		} else mainClass
+			"-m ${project.mainClass}"
+		} else project.mainClass
 	}
 	
-	private fun formatClasspath(): String = classpath
+	private fun formatClasspath(): String = project.classpath
 		.map { it.toAbsolutePath().toString() }
 		.reduce { prev, next -> "$prev${File.pathSeparatorChar}$next" }
 		
