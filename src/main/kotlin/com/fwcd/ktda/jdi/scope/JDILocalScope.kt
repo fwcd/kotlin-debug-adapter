@@ -1,4 +1,4 @@
-package com.fwcd.ktda.jdi
+package com.fwcd.ktda.jdi.scope
 
 import com.fwcd.ktda.core.scope.VariableTreeNode
 import com.sun.jdi.AbsentInformationException

@@ -1,8 +1,10 @@
-package com.fwcd.ktda.jdi
+package com.fwcd.ktda.jdi.stack
 
 import com.fwcd.ktda.core.Position
 import com.fwcd.ktda.core.scope.VariableTreeNode
 import com.fwcd.ktda.core.stack.StackFrame
+import com.fwcd.ktda.jdi.JDIConversionFacade
+import com.fwcd.ktda.jdi.scope.JDILocalScope
 
 class JDIStackFrame(
 	frame: com.sun.jdi.StackFrame,
