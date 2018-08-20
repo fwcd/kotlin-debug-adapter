@@ -6,7 +6,7 @@ import com.fwcd.ktda.util.ListenerList
 import com.fwcd.ktda.util.Subscription
 import com.fwcd.ktda.classpath.toJVMClassNames
 import com.fwcd.ktda.adapter.BreakpointManager
-import com.fwcd.ktda.core.LaunchConfiguration
+import com.fwcd.ktda.core.launch.LaunchConfiguration
 import java.nio.file.Path
 import java.nio.charset.StandardCharsets
 import java.io.File

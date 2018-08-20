@@ -14,7 +14,7 @@ import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.util.waitUntil
 import com.fwcd.ktda.util.ObjectPool
-import com.fwcd.ktda.core.LaunchConfiguration
+import com.fwcd.ktda.core.launch.LaunchConfiguration
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.classpath.findValidFilePath
 import com.fwcd.ktda.jdi.JVMDebugSession

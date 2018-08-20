@@ -2,6 +2,6 @@ package com.fwcd.ktda.core.event
 
 import com.fwcd.ktda.core.DebuggeeThread
 
-class BreakpointEvent(
+class BreakpointPauseEvent(
 	val thread: DebuggeeThread
 )
