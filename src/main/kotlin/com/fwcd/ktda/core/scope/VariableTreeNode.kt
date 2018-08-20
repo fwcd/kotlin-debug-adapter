@@ -8,4 +8,6 @@ interface VariableTreeNode {
 	val name: String
 	val value: String
 	val childs: List<VariableTreeNode>
+	
+	// TODO: Setters for values?
 }

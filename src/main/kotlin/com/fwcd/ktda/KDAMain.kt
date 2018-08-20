@@ -10,12 +10,12 @@ import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 import org.eclipse.lsp4j.debug.TerminatedEventArguments
 
 /** Logs the raw JSON messages from stdin (useful for debugging) */
-const val JSON_IN_LOGGING = false
-const val JSON_IN_LOGGING_BUFFER_LINES = false
+private const val JSON_IN_LOGGING = false
+private const val JSON_IN_LOGGING_BUFFER_LINES = false
 
 /** Logs the raw JSON messages from stdout (useful for debugging) */
-const val JSON_OUT_LOGGING = false
-const val JSON_OUT_LOGGING_BUFFER_LINES = false
+private const val JSON_OUT_LOGGING = false
+private const val JSON_OUT_LOGGING_BUFFER_LINES = false
 
 fun main(args: Array<String>) {
 	var client: IDebugProtocolClient? = null
