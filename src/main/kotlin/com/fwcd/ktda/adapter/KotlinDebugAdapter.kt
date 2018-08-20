@@ -265,11 +265,11 @@ class KotlinDebugAdapter(
 	
 	override fun scopes(args: ScopesArguments) = async.compute {
 		ScopesResponse().apply {
-			scopes = arrayOf(Scope().apply {
-				name = "Locals"
-				variablesReference = args.frameId
-				expensive = false // TODO
-			})
+			scopes = converter.toInternalStackFrame(args.frameId)
+				?.scopes
+				?.map(converter::toDAPScope)
+				?.toTypedArray()
+				.orEmpty()
 		}
 	}
 	

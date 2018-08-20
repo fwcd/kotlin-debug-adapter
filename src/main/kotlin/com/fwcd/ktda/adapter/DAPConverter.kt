@@ -66,6 +66,8 @@ class DAPConverter(
 		verified = true
 	}
 	
+	fun toInternalStackFrame(frameId: Long) = stackFramePool.getByID(frameId)
+	
 	fun toDAPStackFrame(internalFrame: InternalStackFrame, threadId: Long) = DAPStackFrame().apply {
 		id = stackFramePool.store(threadId, internalFrame)
 		name = internalFrame.name
