@@ -1,8 +1,5 @@
 # TODO
 
-## High Priority
-* Pipe stdio to the Debug Console
-
 ## Medium Priority
 * Stop on exception
 

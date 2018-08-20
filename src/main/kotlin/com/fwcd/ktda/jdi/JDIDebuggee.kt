@@ -25,6 +25,8 @@ import com.sun.tools.jdi.SunCommandLineLauncher
 import java.net.URLEncoder
 import java.net.URLDecoder
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 
 class JDIDebuggee(
@@ -38,6 +40,9 @@ class JDIDebuggee(
 	override val threads = ObservableList<DebuggeeThread>()
 	override val eventBus: VMEventBus
 	override val pendingStepRequestThreadIds = mutableSetOf<Long>()
+	override val stdin: OutputStream?
+	override val stdout: InputStream?
+	override val stderr: InputStream?
 	
 	init {
 		LOG.info("Starting JVM debug session with main class ${config.mainClass}")
@@ -55,6 +60,11 @@ class JDIDebuggee(
 		
 		vm = connector.launch(args)
 		eventBus = VMEventBus(vm)
+		
+		val process = vm?.process()
+		stdin = process?.outputStream
+		stdout = process?.inputStream
+		stderr = process?.errorStream
 		
 		updateThreads()
 		hookBreakpoints()

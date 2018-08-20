@@ -2,6 +2,7 @@ package com.fwcd.ktda.adapter
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
+import java.io.InputStream
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.ThreadLocalRandom
@@ -31,6 +32,8 @@ class KotlinDebugAdapter(
 ): IDebugProtocolServer {
 	private val async = AsyncExecutor()
 	private val launcherAsync = AsyncExecutor()
+	private val stdoutAsync = AsyncExecutor()
+	private val stderrAsync = AsyncExecutor()
 	
 	private var config: LaunchConfiguration? = null
 	private var debuggee: Debuggee? = null
@@ -97,10 +100,11 @@ class KotlinDebugAdapter(
 		debuggee = launcher.launch(
 			config!!,
 			context
-		).apply { setupDebuggeeListeners(eventBus) }
+		).also(::setupDebuggeeListeners)
 	}
 	
-	private fun setupDebuggeeListeners(eventBus: DebuggeeEventBus) {
+	private fun setupDebuggeeListeners(debuggee: Debuggee) {
+		val eventBus = debuggee.eventBus
 		eventBus.stopListeners.add {
 			// TODO: Use actual exitCode instead
 			sendExitEvent(0L)
@@ -116,6 +120,20 @@ class KotlinDebugAdapter(
 				it.threadID,
 				StoppedEventArgumentsReason.STEP
 			)
+		}
+		stdoutAsync.run { debuggee.stdout?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDOUT) } }
+		stderrAsync.run { debuggee.stderr?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDERR) } }
+	}
+	
+	private fun pipeStreamToOutput(stream: InputStream, outputCategory: String) {
+		stream.bufferedReader().use {
+			var line = it.readLine()
+			while (line != null) {
+				client?.output(OutputEventArguments().apply {
+					category = outputCategory
+					output = line
+				})
+			}
 		}
 	}
 	
