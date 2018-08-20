@@ -160,9 +160,10 @@ class KotlinDebugAdapter(
 				args.breakpoints.map { converter.toInternalSourceBreakpoint(args.source, it) }
 			)
 			.let(converter::toDAPBreakpoint)
+			.toTypedArray()
 		
 		SetBreakpointsResponse().apply {
-			breakpoints = placedBreakpoints.toTypedArray()
+			breakpoints = placedBreakpoints
 		}
 	}
 	
@@ -175,7 +176,7 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun continue_(args: ContinueArguments) = async.compute {
-		debuggee!!.threadByID(args.threadId).resume()
+		debuggee!!.threadByID(args.threadId)?.resume()
 		ContinueResponse().apply {
 			allThreadsContinued = false
 		}
@@ -211,8 +212,8 @@ class KotlinDebugAdapter(
 	
 	override fun pause(args: PauseArguments) = async.run {
 		val threadId = args.threadId
-		val success = debuggee!!.threadByID(threadId).pause()
-		if (success) {
+		val success = debuggee!!.threadByID(threadId)?.pause()
+		if (success ?: false) {
 			// If successful
 			sendStopEvent(
 				threadId,
@@ -226,26 +227,12 @@ class KotlinDebugAdapter(
 		stackFramePool.removeAllOwnedBy(threadId)
 		
 		StackTraceResponse().apply {
-			stackFrames = debugSession!!.stackTrace(threadId)
-				?.map { jdiFrame ->
-					val location = jdiFrame.location()
-					StackFrame().apply {
-						id = stackFramePool.store(threadId, jdiFrame)
-						name = location?.method()?.name() ?: "???"
-						line = location?.lineNumber()?.let { it + lineOffset } ?: 0L
-						column = 0L
-						source = Source().apply {
-							name = location?.sourceName() ?: "???"
-							// TODO: Use source references to load locations in compiled classes
-							path = location?.sourcePath()
-								?.let(config!!.sourcesRoot::resolve)
-								?.let(::findValidKtFilePath)
-								?.toAbsolutePath()
-								?.toString()
-								?: "???"
-						}
-					}
-				}?.toTypedArray()
+			stackFrames = debuggee!!
+				.threadByID(threadId)
+				?.stackTrace()
+				?.frames
+				?.map { converter.toDAPStackFrame(it, stackFramePool.store(threadId, it)) }
+				?.toTypedArray()
 				.orEmpty()
 		}
 	}
