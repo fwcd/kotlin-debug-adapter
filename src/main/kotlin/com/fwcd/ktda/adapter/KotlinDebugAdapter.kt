@@ -131,8 +131,9 @@ class KotlinDebugAdapter(
 			while (line != null) {
 				client?.output(OutputEventArguments().apply {
 					category = outputCategory
-					output = line
+					output = line + System.lineSeparator()
 				})
+				line = it.readLine()
 			}
 		}
 	}

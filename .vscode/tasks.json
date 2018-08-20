@@ -4,7 +4,11 @@
 		{
 			"label": "Compile Debug Adapter",
 			"type": "shell",
-			"command": "gradle build"
+			"command": "gradle installDist",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		}
 	]
 }
