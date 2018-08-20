@@ -5,8 +5,6 @@
 
 ## Medium Priority
 * Stop on exception
-* Move the entire Java Debug Interface into the `jdi` package and add facade classes for breakpoints, stack frames, events, ... to decouple the backend from the debug adapter
-* Split `KotlinDebugAdapter` into smaller handler classes
 
 ## Low Priority
 * Add further capabilities using the Capabilities API in `KotlinDebugAdapter`
