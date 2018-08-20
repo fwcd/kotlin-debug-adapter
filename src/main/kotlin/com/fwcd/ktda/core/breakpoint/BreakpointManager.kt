@@ -1,5 +1,6 @@
-package com.fwcd.ktda.core
+package com.fwcd.ktda.core.breakpoint
 
+import com.fwcd.ktda.core.Source
 import com.fwcd.ktda.util.ListenerList
 
 class BreakpointManager {
