@@ -24,5 +24,11 @@ class JDIThread(
 		}
 	}
 	
+	override fun stepOver() = TODO("Stepping not implemented")
+	
+	override fun stepInto() = TODO("Stepping not implemented")
+	
+	override fun stepOut() = TODO("Stepping not implemented")
+	
 	override fun stackTrace() = JDIStackTrace(threadRef.frames(), converter)
 }

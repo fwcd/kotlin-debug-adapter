@@ -63,12 +63,6 @@ class JDIDebuggee(
 		}
 	}
 	
-	override fun stepOver() = TODO("JDIDebuggee not implemented")
-	
-	override fun stepInto() = TODO("JDIDebuggee not implemented")
-	
-	override fun stepOut() = TODO("JDIDebuggee not implemented")
-	
 	override fun positionOf(location: Location): Position? = extractSource(location)
 		?.let { Position(it, location.lineNumber()) }
 	

@@ -10,12 +10,6 @@ interface Debuggee {
 	
 	fun stop()
 	
-	fun stepOver()
-	
-	fun stepInto()
-	
-	fun stepOut()
-	
 	fun threadByID(id: Long): DebuggeeThread? = threads
 		.asSequence()
 		.filter { it.id == id }

@@ -9,5 +9,11 @@ interface DebuggeeThread {
 	
 	fun resume()
 	
+	fun stepOver()
+	
+	fun stepInto()
+	
+	fun stepOut()
+	
 	fun stackTrace(): StackTrace
 }
