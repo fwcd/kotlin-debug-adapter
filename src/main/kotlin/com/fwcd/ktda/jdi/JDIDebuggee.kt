@@ -29,10 +29,11 @@ class JDIDebuggee(
 	private val vmArguments: String? = null,
 	private val modulePaths: String? = null,
 	private val environmentVariables: Collection<String>? = null
-): Debuggee, JDIConversionFacade {
+): Debuggee, JDISessionContext {
 	private val vm: VirtualMachine
 	override val threads = ObservableList<DebuggeeThread>()
 	override val eventBus: VMEventBus
+	override val pendingStepRequestThreadIds = mutableSetOf<Long>()
 	
 	init {
 		LOG.info("Starting JVM debug session with main class ${config.mainClass}")

@@ -2,13 +2,18 @@ package com.fwcd.ktda.jdi
 
 import com.fwcd.ktda.core.DebuggeeThread
 import com.fwcd.ktda.core.stack.StackTrace
+import com.fwcd.ktda.util.Subscription
 import com.fwcd.ktda.jdi.stack.JDIStackTrace
-import com.fwcd.ktda.jdi.JDIConversionFacade
+import com.fwcd.ktda.jdi.JDISessionContext
 import com.sun.jdi.ThreadReference
+import com.sun.jdi.event.Event
+import com.sun.jdi.request.EventRequest
+import com.sun.jdi.request.StepRequest
+import kotlin.reflect.KClass
 
 class JDIThread(
 	private val threadRef: ThreadReference,
-	private val converter: JDIConversionFacade
+	private val context: JDISessionContext
 ): DebuggeeThread {
 	override val id: Long = threadRef.uniqueID()
 	
@@ -24,11 +29,51 @@ class JDIThread(
 		}
 	}
 	
-	override fun stepOver() = TODO("Stepping not implemented")
+	override fun stackTrace() = JDIStackTrace(threadRef.frames(), context)
 	
-	override fun stepInto() = TODO("Stepping not implemented")
+	override fun stepOver() = stepLine(StepRequest.STEP_OVER)
 	
-	override fun stepOut() = TODO("Stepping not implemented")
+	override fun stepInto() = stepLine(StepRequest.STEP_INTO)
 	
-	override fun stackTrace() = JDIStackTrace(threadRef.frames(), converter)
+	override fun stepOut() = stepLine(StepRequest.STEP_OUT)
+	
+	private fun stepLine(depth: Int) {
+		stepRequest(StepRequest.STEP_LINE, depth)
+			?.let { performStep(it) }
+	}
+	
+	private fun performStep(request: StepRequest) {
+		request.enable()
+		resume()
+	}
+	
+	private fun stepRequest(size: Int, depth: Int) =
+		if (context.pendingStepRequestThreadIds.contains(id)) null else {
+			val eventRequestManager = threadRef.virtualMachine().eventRequestManager()
+			eventRequestManager
+				.createStepRequest(threadRef, size, depth)
+				?.also { request ->
+					request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD)
+					request.addCountFilter(1)
+					
+					// Abort pending StepRequest when a breakpoint is hit
+					context.pendingStepRequestThreadIds.add(id)
+					
+					fun abortUponEvent(eventClass: KClass<out Event>) {
+						var sub: Subscription? = null
+						
+						sub = context.eventBus.subscribe(eventClass) {
+							val pending = context.pendingStepRequestThreadIds.contains(id)
+							if (pending) {
+								eventRequestManager.deleteEventRequest(request)
+								context.pendingStepRequestThreadIds.remove(id)
+							}
+							sub?.unsubscribe()
+						}
+					}
+					
+					abortUponEvent(com.sun.jdi.event.StepEvent::class)
+					abortUponEvent(com.sun.jdi.event.BreakpointEvent::class)
+				}
+		}
 }
