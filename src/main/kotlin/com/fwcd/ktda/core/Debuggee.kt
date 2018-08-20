@@ -1,7 +1,12 @@
 package com.fwcd.ktda.core
 
+import com.fwcd.ktda.core.event.DebuggeeEventBus
+import com.fwcd.ktda.util.ObservableList
+
 interface Debuggee {
-	val threads: List<DebuggeeThread>
+	val threads: ObservableList<DebuggeeThread>
+	val breakpointManager: BreakpointManager
+	val eventBus: DebuggeeEventBus
 	
 	fun start()
 	
