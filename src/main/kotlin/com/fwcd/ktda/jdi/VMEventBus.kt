@@ -13,6 +13,7 @@ import com.sun.jdi.event.EventSet
  * Asynchronously polls and publishes any events from
  * a debuggee virtual machine. 
  */
+@Deprecated("Migration to the new architecture")
 class VMEventBus(private val vm: VirtualMachine) {
 	private var stopped = false
 	private val eventListeners = mutableMapOf<KClass<out Event>, ListenerList<DebugEvent<Event>>>()

@@ -34,6 +34,7 @@ import com.sun.tools.jdi.SunCommandLineLauncher
 /**
  * The debugging backend that uses the Java Debug Interface.
  */
+@Deprecated("Migration to the new architecture")
 class JVMDebugSession(
 	private val project: LaunchConfiguration,
 	private val breakpointManager: BreakpointManager,

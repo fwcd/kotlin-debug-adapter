@@ -7,6 +7,7 @@ import org.eclipse.lsp4j.debug.Breakpoint
 import org.eclipse.lsp4j.debug.Source
 import com.sun.jdi.Location
 
+@Deprecated("Use newer BreakpointManager instead")
 class BreakpointManager {
 	private val breakpoints = mutableMapOf<Source, List<Breakpoint>>()
 	val listeners = ListenerList<List<Breakpoint>>()
