@@ -7,6 +7,8 @@ import com.sun.jdi.ThreadReference
 class JDIThread(
 	private val threadRef: ThreadReference
 ): DebuggeeThread {
+	override val id: Long = threadRef.uniqueID()
+	
 	override fun pause() {
 		if (!threadRef.isSuspended()) {
 			threadRef.suspend()

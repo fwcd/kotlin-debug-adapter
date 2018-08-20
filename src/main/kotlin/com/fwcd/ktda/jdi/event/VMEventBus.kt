@@ -4,11 +4,14 @@ import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.ListenerList
 import com.fwcd.ktda.util.Subscription
 import com.fwcd.ktda.core.event.DebuggeeEventBus
-import kotlin.reflect.KClass
+import com.fwcd.ktda.core.event.StopEvent
+import com.fwcd.ktda.core.event.BreakpointPauseEvent
+import com.fwcd.ktda.core.event.StepPauseEvent
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
 import com.sun.jdi.event.Event
 import com.sun.jdi.event.EventSet
+import kotlin.reflect.KClass
 
 /**
  * Asynchronously polls and publishes any events from
@@ -17,10 +20,13 @@ import com.sun.jdi.event.EventSet
 class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	private var stopped = false
 	private val eventListeners = mutableMapOf<KClass<out Event>, ListenerList<VMEvent<Event>>>()
-	val stopListeners = ListenerList<Unit>()
+	override val stopListeners = ListenerList<StopEvent>()
+	override val breakpointListeners = ListenerList<BreakpointPauseEvent>()
+	override val stepListeners = ListenerList<StepPauseEvent>()
 	
 	init {
 		startAsyncPoller()
+		hookListeners()
 	}
 	
 	private fun startAsyncPoller() {
@@ -44,8 +50,21 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 			} catch (e: VMDisconnectedException) {
 				LOG.info("VMEventBus event poller terminated by disconnect: ${e.message}")
 			}
-			stopListeners.fire(Unit)
+			stopListeners.fire(StopEvent())
 		}, "VMEventBus").start()
+	}
+	
+	private fun hookListeners() {
+		subscribe(com.sun.jdi.event.BreakpointEvent::class) {
+			breakpointListeners.fire(BreakpointPauseEvent(
+				threadID = it.jdiEvent.thread().uniqueID()
+			))
+		}
+		subscribe(com.sun.jdi.event.StepEvent::class) {
+			stepListeners.fire(StepPauseEvent(
+				threadID = it.jdiEvent.thread().uniqueID()
+			))
+		}
 	}
 	
 	@Suppress("UNCHECKED_CAST")

@@ -18,7 +18,7 @@ import com.fwcd.ktda.core.launch.LaunchConfiguration
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.classpath.findValidKtFilePath
 import com.fwcd.ktda.jdi.JVMDebugSession
-import com.fwcd.ktda.jdi.VMEventBus
+import com.fwcd.ktda.jdi.event.VMEventBus
 
 typealias JDIAbsentInformationException = com.sun.jdi.AbsentInformationException
 typealias JDIBreakpointEvent = com.sun.jdi.event.BreakpointEvent

@@ -7,6 +7,7 @@ import com.fwcd.ktda.util.Subscription
 import com.fwcd.ktda.classpath.toJVMClassNames
 import com.fwcd.ktda.adapter.BreakpointManager
 import com.fwcd.ktda.core.launch.LaunchConfiguration
+import com.fwcd.ktda.jdi.event.VMEventBus
 import java.nio.file.Path
 import java.nio.charset.StandardCharsets
 import java.io.File
@@ -197,8 +198,6 @@ class JVMDebugSession(
 		}
 		return request != null
 	}
-	
-	// TODO: Removable breakpoints
 	
 	private fun formatOptions(): String {
 		var options = ""
