@@ -8,6 +8,7 @@ import com.fwcd.ktda.core.Source
 import com.fwcd.ktda.core.launch.LaunchConfiguration
 import com.fwcd.ktda.core.event.DebuggeeEventBus
 import com.fwcd.ktda.core.breakpoint.Breakpoint
+import com.fwcd.ktda.core.breakpoint.ExceptionBreakpoint
 import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.ObservableList
 import com.fwcd.ktda.util.KotlinDAException
@@ -21,6 +22,7 @@ import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
 import com.sun.jdi.connect.Connector
 import com.sun.jdi.event.ClassPrepareEvent
+import com.sun.jdi.request.EventRequest
 import com.sun.tools.jdi.SunCommandLineLauncher
 import java.net.URLEncoder
 import java.net.URLDecoder
@@ -73,9 +75,9 @@ class JDIDebuggee(
 	private fun updateThreads() = threads.setAll(vm.allThreads().map { JDIThread(it, this) })
 	
 	private fun hookBreakpoints() {
-		context.breakpointManager.also {
-			it.listeners.add(::setAllBreakpoints)
-			setAllBreakpoints(context.breakpointManager.allBreakpoints())
+		context.breakpointManager.also { manager ->
+			manager.breakpoints.listenAndFire { setAllBreakpoints(it.values.flatten()) }
+			manager.exceptionBreakpoints.listenAndFire(::setExceptionBreakpoints)
 		}
 	}
 	
@@ -88,6 +90,16 @@ class JDIDebuggee(
 			) }
 		}
 	}
+	
+	private fun setExceptionBreakpoints(breakpoints: Set<ExceptionBreakpoint>) = vm
+		.eventRequestManager()
+		.createExceptionRequest(
+			null,
+			breakpoints.contains(ExceptionBreakpoint.CAUGHT),
+			breakpoints.contains(ExceptionBreakpoint.UNCAUGHT)
+		)
+		.apply { setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD) }
+		.enable()
 	
 	/** Tries to set a breakpoint */
 	private fun setBreakpoint(filePath: String, lineNumber: Long) {
@@ -144,7 +156,7 @@ class JDIDebuggee(
 		?.let(config.sourcesRoot::resolve)
 		?.let(::findValidKtFilePath)
 		?.let { Source(
-			name = location?.sourceName() ?: it.fileName.toString(),
+			name = location.sourceName() ?: it.fileName.toString(),
 			filePath = it
 		) }
 	

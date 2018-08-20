@@ -6,10 +6,12 @@ import com.fwcd.ktda.util.Subscription
 import com.fwcd.ktda.core.event.DebuggeeEventBus
 import com.fwcd.ktda.core.event.StopEvent
 import com.fwcd.ktda.core.event.BreakpointPauseEvent
+import com.fwcd.ktda.core.event.ExceptionPauseEvent
 import com.fwcd.ktda.core.event.StepPauseEvent
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
 import com.sun.jdi.event.Event
+import com.sun.jdi.event.LocatableEvent
 import com.sun.jdi.event.EventSet
 import kotlin.reflect.KClass
 
@@ -23,6 +25,7 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	override val stopListeners = ListenerList<StopEvent>()
 	override val breakpointListeners = ListenerList<BreakpointPauseEvent>()
 	override val stepListeners = ListenerList<StepPauseEvent>()
+	override var exceptionListeners = ListenerList<ExceptionPauseEvent>()
 	
 	init {
 		startAsyncPoller()
@@ -57,17 +60,26 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	private fun hookListeners() {
 		subscribe(com.sun.jdi.event.BreakpointEvent::class) {
 			breakpointListeners.fire(BreakpointPauseEvent(
-				threadID = it.jdiEvent.thread().uniqueID()
+				threadID = toThreadID(it.jdiEvent)
 			))
 			it.resumeThreads = false
 		}
 		subscribe(com.sun.jdi.event.StepEvent::class) {
 			stepListeners.fire(StepPauseEvent(
-				threadID = it.jdiEvent.thread().uniqueID()
+				threadID = toThreadID(it.jdiEvent)
 			))
 			it.resumeThreads = false
 		}
+		subscribe(com.sun.jdi.event.ExceptionEvent::class) {
+			val exception = it.jdiEvent.exception()
+			exceptionListeners.fire(ExceptionPauseEvent(
+				threadID = toThreadID(it.jdiEvent),
+				exceptionName = exception.referenceType().name()
+			))
+		}
 	}
+	
+	private fun toThreadID(event: LocatableEvent) = event.thread().uniqueID()
 	
 	@Suppress("UNCHECKED_CAST")
 	fun <E: Event> subscribe(eventClass: KClass<E>, listener: (VMEvent<E>) -> Unit): Subscription {

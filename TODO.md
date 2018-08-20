@@ -1,8 +1,5 @@
 # TODO
 
-## Medium Priority
-* Stop on exception
-
 ## Low Priority
 * Add further capabilities using the Capabilities API in `KotlinDebugAdapter`
 

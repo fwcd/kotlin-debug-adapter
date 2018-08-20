@@ -5,6 +5,7 @@ import com.fwcd.ktda.core.Position
 import com.fwcd.ktda.core.DebuggeeThread
 import com.fwcd.ktda.core.scope.VariableTreeNode
 import com.fwcd.ktda.util.ObjectPool
+import com.fwcd.ktda.util.KotlinDAException
 
 private typealias DAPSource = org.eclipse.lsp4j.debug.Source
 private typealias DAPSourceBreakpoint = org.eclipse.lsp4j.debug.SourceBreakpoint
@@ -13,8 +14,10 @@ private typealias DAPStackFrame = org.eclipse.lsp4j.debug.StackFrame
 private typealias DAPScope = org.eclipse.lsp4j.debug.Scope
 private typealias DAPVariable = org.eclipse.lsp4j.debug.Variable
 private typealias DAPThread = org.eclipse.lsp4j.debug.Thread
+private typealias DAPExceptionBreakpointsFilter = org.eclipse.lsp4j.debug.ExceptionBreakpointsFilter
 private typealias InternalSource = com.fwcd.ktda.core.Source
 private typealias InternalSourceBreakpoint = com.fwcd.ktda.core.breakpoint.SourceBreakpoint
+private typealias InternalExceptionBreakpoint = com.fwcd.ktda.core.breakpoint.ExceptionBreakpoint
 private typealias InternalBreakpoint = com.fwcd.ktda.core.breakpoint.Breakpoint
 private typealias InternalStackFrame = com.fwcd.ktda.core.stack.StackFrame
 
@@ -45,6 +48,17 @@ class DAPConverter(
 			lineNumber = lineConverter.toInternalLine(dapSrcBreakpoint.line)
 		)
 	)
+	
+	fun toInternalExceptionBreakpoint(filterID: String) = InternalExceptionBreakpoint
+		.values()
+		.find { it.id == filterID }
+		?: throw KotlinDAException("${filterID} is not a valid exception breakpoint")
+	
+	fun toDAPExceptionBreakpointsFilter(internalBreakpoint: InternalExceptionBreakpoint) = DAPExceptionBreakpointsFilter().apply {
+		filter = internalBreakpoint.id
+		label = internalBreakpoint.label
+		default_ = false
+	}
 	
 	fun toDAPBreakpoint(internalBreakpoint: InternalBreakpoint) = DAPBreakpoint().apply {
 		source = toDAPSource(internalBreakpoint.position.source)

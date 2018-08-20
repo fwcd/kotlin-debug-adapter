@@ -22,6 +22,7 @@ import com.fwcd.ktda.core.event.StepPauseEvent
 import com.fwcd.ktda.core.stack.StackFrame
 import com.fwcd.ktda.core.launch.DebugLauncher
 import com.fwcd.ktda.core.launch.LaunchConfiguration
+import com.fwcd.ktda.core.breakpoint.ExceptionBreakpoint
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.classpath.findValidKtFilePath
 import com.fwcd.ktda.jdi.event.VMEventBus
@@ -52,6 +53,9 @@ class KotlinDebugAdapter(
 		
 		val capabilities = Capabilities()
 		capabilities.supportsConfigurationDoneRequest = true
+		capabilities.exceptionBreakpointFilters = ExceptionBreakpoint.values()
+			.map(converter::toDAPExceptionBreakpointsFilter)
+			.toTypedArray()
 		
 		LOG.info("Returning capabilities...")
 		capabilities
@@ -110,19 +114,20 @@ class KotlinDebugAdapter(
 			sendExitEvent(0L)
 		}
 		eventBus.breakpointListeners.add {
-			sendStopEvent(
-				it.threadID,
-				StoppedEventArgumentsReason.BREAKPOINT
-			)
+			sendStopEvent(it.threadID, StoppedEventArgumentsReason.BREAKPOINT)
 		}
 		eventBus.stepListeners.add {
-			sendStopEvent(
-				it.threadID,
-				StoppedEventArgumentsReason.STEP
-			)
+			sendStopEvent(it.threadID, StoppedEventArgumentsReason.STEP)
 		}
-		stdoutAsync.run { debuggee.stdout?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDOUT) } }
-		stderrAsync.run { debuggee.stderr?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDERR) } }
+		eventBus.exceptionListeners.add {
+			sendStopEvent(it.threadID, StoppedEventArgumentsReason.EXCEPTION)
+		}
+		stdoutAsync.run {
+			debuggee.stdout?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDOUT) }
+		}
+		stderrAsync.run {
+			debuggee.stderr?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDERR) }
+		}
 	}
 	
 	private fun pipeStreamToOutput(stream: InputStream, outputCategory: String) {
@@ -187,8 +192,11 @@ class KotlinDebugAdapter(
 		return notImplementedDAPMethod()
 	}
 	
-	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
+	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments) = async.run {
+		args.filters
+			.map(converter::toInternalExceptionBreakpoint)
+			.toSet()
+			.let(context.breakpointManager.exceptionBreakpoints::setAll)
 	}
 	
 	override fun continue_(args: ContinueArguments) = async.compute {
@@ -234,8 +242,7 @@ class KotlinDebugAdapter(
 		val success = debuggee!!.threadByID(threadId)?.pause()
 		if (success ?: false) {
 			// If successful
-			sendStopEvent(
-				threadId,
+			sendStopEvent(threadId,
 				StoppedEventArgumentsReason.PAUSE
 			)
 		}
