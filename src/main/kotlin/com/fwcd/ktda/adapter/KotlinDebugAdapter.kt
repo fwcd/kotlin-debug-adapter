@@ -13,7 +13,6 @@ import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.util.waitUntil
-import com.fwcd.ktda.util.ObjectPool
 import com.fwcd.ktda.core.Debuggee
 import com.fwcd.ktda.core.DebugContext
 import com.fwcd.ktda.core.event.DebuggeeEventBus
@@ -36,10 +35,8 @@ class KotlinDebugAdapter(
 	private var config: LaunchConfiguration? = null
 	private var debuggee: Debuggee? = null
 	private var client: IDebugProtocolClient? = null
-	private var converter = DAPConversionFacade()
-	
+	private var converter = DAPConverter()
 	private val context = DebugContext()
-	private val stackFramePool = ObjectPool<Long, StackFrame>() // Contains stack frames owned by thread ids
 	
 	// TODO: This is a workaround for https://github.com/eclipse/lsp4j/issues/229
 	// For more information, see launch() method
@@ -159,7 +156,7 @@ class KotlinDebugAdapter(
 				converter.toInternalSource(args.source),
 				args.breakpoints.map { converter.toInternalSourceBreakpoint(args.source, it) }
 			)
-			.let(converter::toDAPBreakpoint)
+			.map(converter::toDAPBreakpoint)
 			.toTypedArray()
 		
 		SetBreakpointsResponse().apply {
@@ -176,7 +173,10 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun continue_(args: ContinueArguments) = async.compute {
-		debuggee!!.threadByID(args.threadId)?.resume()
+		val success = debuggee!!.threadByID(args.threadId)?.resume()
+		if (success ?: false) {
+			converter.variablesPool.clear()
+		}
 		ContinueResponse().apply {
 			allThreadsContinued = false
 		}
@@ -224,14 +224,14 @@ class KotlinDebugAdapter(
 	
 	override fun stackTrace(args: StackTraceArguments) = async.compute {
 		val threadId = args.threadId
-		stackFramePool.removeAllOwnedBy(threadId)
+		converter.stackFramePool.removeAllOwnedBy(threadId)
 		
 		StackTraceResponse().apply {
 			stackFrames = debuggee!!
 				.threadByID(threadId)
 				?.stackTrace()
 				?.frames
-				?.map { converter.toDAPStackFrame(it, stackFramePool.store(threadId, it)) }
+				?.map { converter.toDAPStackFrame(it, threadId) }
 				?.toTypedArray()
 				.orEmpty()
 		}
@@ -248,24 +248,13 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun variables(args: VariablesArguments) = async.compute {
-		val id = args.variablesReference
-		val jdiFrame = stackFramePool.getByID(id)
-		
 		VariablesResponse().apply {
-			variables = try {
-				jdiFrame
-					?.visibleVariables()
-					?.map { jdiVariable -> Variable().apply {
-						name = jdiVariable.name()
-						// TODO: Find a better string representation of variables
-						value = jdiFrame.getValue(jdiVariable).toString()
-						type = jdiVariable.type().signature()
-						// TODO: Child variables
-					} }
-					?.toTypedArray()
-			} catch (e: JDIAbsentInformationException) {
-				null
-			}.orEmpty()
+			variables = args.variablesReference
+				.let(converter::toVariableTree)
+				?.childs
+				?.map(converter::toDAPVariable)
+				?.toTypedArray()
+				.orEmpty()
 		}
 	}
 	
@@ -277,15 +266,14 @@ class KotlinDebugAdapter(
 		return notImplementedDAPMethod()
 	}
 	
-	override fun threads() = async.compute { onceDebugSessionIsPresent { session ->
-		session.allThreads()
-			.map { org.eclipse.lsp4j.debug.Thread().apply {
-				name = it.name()
-				id = it.uniqueID()
-			} }
-			.let { ThreadsResponse().apply {
-				threads = it.toTypedArray()
-			} }
+	override fun threads() = async.compute { onceDebuggeeIsPresent { debuggee ->
+		ThreadsResponse().apply {
+			threads = debuggee.threads
+				.asSequence()
+				.map(converter::toDAPThread)
+				.toList()
+				.toTypedArray()
+		}
 	} }
 	
 	override fun modules(args: ModulesArguments): CompletableFuture<ModulesResponse> {
@@ -316,9 +304,9 @@ class KotlinDebugAdapter(
 		return notImplementedDAPMethod()
 	}
 	
-	private inline fun <T> onceDebugSessionIsPresent(body: (JVMDebugSession) -> T): T {
-		waitUntil { debugSession != null }
-		return body(debugSession!!)
+	private inline fun <T> onceDebuggeeIsPresent(body: (Debuggee) -> T): T {
+		waitUntil { debuggee != null }
+		return body(debuggee!!)
 	}
 	
 	private fun <T> notImplementedDAPMethod(): CompletableFuture<T> {

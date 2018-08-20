@@ -128,7 +128,7 @@ class JDIDebuggee(
 	}
 	
 	override fun positionOf(location: Location): Position? = extractSource(location)
-		?.let { Position(it, location.lineNumber()) }
+		?.let { Position(it, location.lineNumber().toLong()) }
 	
 	private fun extractSource(location: Location): Source? = location.sourcePath()
 		?.let(config.sourcesRoot::resolve)

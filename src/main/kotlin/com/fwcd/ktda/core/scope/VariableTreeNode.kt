@@ -6,8 +6,12 @@ package com.fwcd.ktda.core.scope
  */
 interface VariableTreeNode {
 	val name: String
-	val value: String
+	val value: String?
+		get() = null
+	val type: String?
+		get() = null
 	val childs: List<VariableTreeNode>
+		get() = emptyList()
 	
 	// TODO: Setters for values?
 }

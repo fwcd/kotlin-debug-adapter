@@ -7,7 +7,6 @@ class JDILocalScope(
 	frame: com.sun.jdi.StackFrame
 ): VariableTreeNode {
 	override val name: String = "Locals"
-	override val value: String = ""
 	override val childs: List<VariableTreeNode> = try {
 		frame.visibleVariables().map { JDIVariable(frame, it) }
 	} catch (e: AbsentInformationException) { emptyList() }

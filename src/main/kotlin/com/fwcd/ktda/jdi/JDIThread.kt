@@ -15,6 +15,7 @@ class JDIThread(
 	private val threadRef: ThreadReference,
 	private val context: JDISessionContext
 ): DebuggeeThread {
+	override val name: String = threadRef.name() ?: "Unnamed Thread"
 	override val id: Long = threadRef.uniqueID()
 	
 	override fun pause() =
@@ -23,7 +24,7 @@ class JDIThread(
 			true
 		} else false
 	
-	override fun resume() {
+	override fun resume(): Boolean {
 		val suspends = threadRef.suspendCount()
 		(0 until suspends).forEach {
 			threadRef.resume()

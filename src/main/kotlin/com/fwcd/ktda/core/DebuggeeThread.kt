@@ -3,6 +3,7 @@ package com.fwcd.ktda.core
 import com.fwcd.ktda.core.stack.StackTrace
 
 interface DebuggeeThread {
+	val name: String
 	val id: Long
 	
 	/** Tries to pause the thread, returning whether the operation was successful or not */

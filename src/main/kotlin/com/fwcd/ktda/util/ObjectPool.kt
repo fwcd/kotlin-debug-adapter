@@ -25,6 +25,11 @@ class ObjectPool<O, V> {
 	val size: Int
 		get() = mappingsByID.size
 	
+	fun clear() {
+		mappingsByID.clear()
+		mappingsByOwner.clear()
+	}
+	
 	/** Stores an object and returns its (unique) id */
 	fun store(owner: O, value: V): Long {
 		val id = currentID

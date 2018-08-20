@@ -8,5 +8,6 @@ class JDIVariable(
 ): VariableTreeNode {
 	override val name: String = variable.name()
 	override val value: String = frame.getValue(variable).toString() // TODO: Better string representation
+	override val type: String = variable.typeName()
 	override val childs: List<VariableTreeNode> = emptyList() // TODO: Fields as child variables
 }

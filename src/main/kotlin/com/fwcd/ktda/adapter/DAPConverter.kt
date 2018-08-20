@@ -1,0 +1,82 @@
+package com.fwcd.ktda.adapter
+
+import java.nio.file.Paths
+import com.fwcd.ktda.core.Position
+import com.fwcd.ktda.core.DebuggeeThread
+import com.fwcd.ktda.core.scope.VariableTreeNode
+import com.fwcd.ktda.util.ObjectPool
+
+private typealias DAPSource = org.eclipse.lsp4j.debug.Source
+private typealias DAPSourceBreakpoint = org.eclipse.lsp4j.debug.SourceBreakpoint
+private typealias DAPBreakpoint = org.eclipse.lsp4j.debug.Breakpoint
+private typealias DAPStackFrame = org.eclipse.lsp4j.debug.StackFrame
+private typealias DAPScope = org.eclipse.lsp4j.debug.Scope
+private typealias DAPVariable = org.eclipse.lsp4j.debug.Variable
+private typealias DAPThread = org.eclipse.lsp4j.debug.Thread
+private typealias InternalSource = com.fwcd.ktda.core.Source
+private typealias InternalSourceBreakpoint = com.fwcd.ktda.core.breakpoint.SourceBreakpoint
+private typealias InternalBreakpoint = com.fwcd.ktda.core.breakpoint.Breakpoint
+private typealias InternalStackFrame = com.fwcd.ktda.core.stack.StackFrame
+
+/**
+ * Handles conversions between debug adapter types
+ * and internal types. This includes caching values
+ * using ObjectPools and ids.
+ */
+class DAPConverter(
+	var lineConverter: LineNumberConverter = LineNumberConverter()
+) {
+	val stackFramePool = ObjectPool<Long, InternalStackFrame>() // Contains stack frames owned by thread ids
+	val variablesPool = ObjectPool<Unit, VariableTreeNode>() // Contains unowned variable trees (the ids are used as 'variables references')
+	
+	fun toInternalSource(dapSource: DAPSource) = InternalSource(
+		name = dapSource.name,
+		filePath = Paths.get(dapSource.path)
+	)
+	
+	fun toDAPSource(internalSource: InternalSource) = DAPSource().apply {
+		name = internalSource.name
+		path = internalSource.filePath.toAbsolutePath().toString()
+	}
+	
+	fun toInternalSourceBreakpoint(dapSource: DAPSource, dapSrcBreakpoint: DAPSourceBreakpoint) = InternalSourceBreakpoint(
+		position = Position(
+			source = toInternalSource(dapSource),
+			lineNumber = lineConverter.toInternalLine(dapSrcBreakpoint.line)
+		)
+	)
+	
+	fun toDAPBreakpoint(internalBreakpoint: InternalBreakpoint) = DAPBreakpoint().apply {
+		source = toDAPSource(internalBreakpoint.position.source)
+		line = lineConverter.toExternalLine(internalBreakpoint.position.lineNumber)
+		verified = true
+	}
+	
+	fun toDAPStackFrame(internalFrame: InternalStackFrame, threadId: Long) = DAPStackFrame().apply {
+		id = stackFramePool.store(threadId, internalFrame)
+		name = internalFrame.name
+		line = internalFrame.position?.lineNumber?.let(lineConverter::toExternalLine) ?: 0L
+		column = 0L
+		source = internalFrame.position?.source?.let(::toDAPSource)
+	}
+	
+	fun toDAPScope(variableTree: VariableTreeNode) = DAPScope().apply {
+		name = variableTree.name
+		variablesReference = variablesPool.store(Unit, variableTree)
+		expensive = false
+	}
+	
+	fun toVariableTree(variablesReference: Long) = variablesPool.getByID(variablesReference)
+	
+	fun toDAPVariable(variableTree: VariableTreeNode) = DAPVariable().apply {
+		name = variableTree.name
+		value = variableTree.value
+		type = variableTree.type
+		variablesReference = variablesPool.store(Unit, variableTree)
+	}
+	
+	fun toDAPThread(internalThread: DebuggeeThread) = DAPThread().apply {
+		name = internalThread.name
+		id = internalThread.id
+	}
+}
