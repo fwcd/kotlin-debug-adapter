@@ -133,7 +133,10 @@ class JDIDebuggee(
 	private fun extractSource(location: Location): Source? = location.sourcePath()
 		?.let(config.sourcesRoot::resolve)
 		?.let(::findValidKtFilePath)
-		?.let(::Source)
+		?.let { Source(
+			name = location?.sourceName() ?: it.fileName.toString(),
+			filePath = it
+		) }
 	
 	private fun formatOptions(): String {
 		var options = ""

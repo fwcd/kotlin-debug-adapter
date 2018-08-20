@@ -2,6 +2,8 @@ package com.fwcd.ktda
 
 import java.util.concurrent.Executors
 import com.fwcd.ktda.adapter.KotlinDebugAdapter
+import com.fwcd.ktda.core.launch.DebugLauncher
+import com.fwcd.ktda.jdi.launch.JDILauncher
 import com.fwcd.ktda.util.ExitingInputStream
 import com.fwcd.ktda.util.LoggingInputStream
 import com.fwcd.ktda.util.LoggingOutputStream
@@ -18,6 +20,7 @@ private const val JSON_OUT_LOGGING = false
 private const val JSON_OUT_LOGGING_BUFFER_LINES = false
 
 fun main(args: Array<String>) {
+	val launcher: DebugLauncher = JDILauncher()
 	var client: IDebugProtocolClient? = null
 	
 	// Setup IO streams for JSON communication
@@ -30,10 +33,10 @@ fun main(args: Array<String>) {
 
 	// Create debug adapter and launcher
 	
-	val debugAdapter = KotlinDebugAdapter()
+	val debugAdapter = KotlinDebugAdapter(launcher)
 	val threads = Executors.newSingleThreadExecutor { Thread(it, "server") }
-	val launcher = DSPLauncher.createServerLauncher(debugAdapter, input, output, threads) { it }
+	val serverLauncher = DSPLauncher.createServerLauncher(debugAdapter, input, output, threads) { it }
 	
-	debugAdapter.connect(launcher.remoteProxy)
-	launcher.startListening()
+	debugAdapter.connect(serverLauncher.remoteProxy)
+	serverLauncher.startListening()
 }

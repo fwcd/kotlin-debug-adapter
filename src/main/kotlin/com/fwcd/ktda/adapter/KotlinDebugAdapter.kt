@@ -14,38 +14,41 @@ import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.util.waitUntil
 import com.fwcd.ktda.util.ObjectPool
+import com.fwcd.ktda.core.Debuggee
+import com.fwcd.ktda.core.DebugContext
+import com.fwcd.ktda.core.event.DebuggeeEventBus
+import com.fwcd.ktda.core.event.BreakpointPauseEvent
+import com.fwcd.ktda.core.event.StepPauseEvent
+import com.fwcd.ktda.core.stack.StackFrame
+import com.fwcd.ktda.core.launch.DebugLauncher
 import com.fwcd.ktda.core.launch.LaunchConfiguration
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.classpath.findValidKtFilePath
-import com.fwcd.ktda.jdi.JVMDebugSession
 import com.fwcd.ktda.jdi.event.VMEventBus
 
-typealias JDIAbsentInformationException = com.sun.jdi.AbsentInformationException
-typealias JDIBreakpointEvent = com.sun.jdi.event.BreakpointEvent
-typealias JDIStepEvent = com.sun.jdi.event.StepEvent
-typealias JDIVMDeathEvent = com.sun.jdi.event.VMDeathEvent
-typealias JDIStackFrame = com.sun.jdi.StackFrame
-
-class KotlinDebugAdapter: IDebugProtocolServer {
+/** The debug server interface conforming to the Debug Adapter Protocol */
+class KotlinDebugAdapter(
+	private val launcher: DebugLauncher
+): IDebugProtocolServer {
 	private val async = AsyncExecutor()
 	private val launcherAsync = AsyncExecutor()
 	
-	private var project: LaunchConfiguration? = null
-	private var debugSession: JVMDebugSession? = null
+	private var config: LaunchConfiguration? = null
+	private var debuggee: Debuggee? = null
 	private var client: IDebugProtocolClient? = null
-	// TODO: Consistently apply this lineOffset
-	private var lineOffset: Int = 0 // JDI line number + lineOffset = DAP line number
+	private var converter = DAPConversionFacade()
 	
-	private val stackFramePool = ObjectPool<Long, JDIStackFrame>() // Contains stack frames owned by thread ids
-	private val breakpointManager = BreakpointManager()
+	private val context = DebugContext()
+	private val stackFramePool = ObjectPool<Long, StackFrame>() // Contains stack frames owned by thread ids
 	
 	// TODO: This is a workaround for https://github.com/eclipse/lsp4j/issues/229
 	// For more information, see launch() method
 	private var configurationDoneResponse: CompletableFuture<Void>? = null
 	
 	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> = async.compute {
-		lineOffset = if (args.linesStartAt1) 0 else -1
-		breakpointManager.lineOffset = lineOffset
+		converter.lineConverter = LineNumberConverter(
+			externalLineOffset = if (args.linesStartAt1) 0 else -1
+		)
 		
 		val capabilities = Capabilities()
 		capabilities.supportsConfigurationDoneRequest = true
@@ -89,36 +92,33 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		val mainClass = args["mainClass"] as? String
 		if (mainClass == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'mainClass' argument")
 		
-		project = LaunchConfiguration(
+		config = LaunchConfiguration(
 			findClassPath(listOf(projectRoot)),
 			mainClass,
 			projectRoot
 		)
-		debugSession = JVMDebugSession(
-			project!!,
-			breakpointManager
-		).apply { setupVMListeners(vmEvents) }
+		debuggee = launcher.launch(
+			config!!,
+			context
+		).apply { setupDebuggeeListeners(eventBus) }
 	}
 	
-	private fun setupVMListeners(events: VMEventBus) {
-		events.stopListeners.add {
+	private fun setupDebuggeeListeners(eventBus: DebuggeeEventBus) {
+		eventBus.stopListeners.add {
 			// TODO: Use actual exitCode instead
 			sendExitEvent(0L)
 		}
-		events.subscribe(JDIBreakpointEvent::class) {
-			// val breakpoint = breakpointManager.breakpointAt(it.jdiEvent.location())
+		eventBus.breakpointListeners.add {
 			sendStopEvent(
-				it.jdiEvent.thread().uniqueID(),
+				it.threadID,
 				StoppedEventArgumentsReason.BREAKPOINT
 			)
-			it.resumeThreads = false
 		}
-		events.subscribe(JDIStepEvent::class) {
+		eventBus.stepListeners.add {
 			sendStopEvent(
-				it.jdiEvent.thread().uniqueID(),
+				it.threadID,
 				StoppedEventArgumentsReason.STEP
 			)
-			it.resumeThreads = false
 		}
 	}
 	
@@ -145,7 +145,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	}
 	
 	override fun disconnect(args: DisconnectArguments) = async.run {
-		debugSession?.stop()
+		debuggee?.stop()
 	}
 	
 	override fun setBreakpoints(args: SetBreakpointsArguments) = async.compute {
@@ -154,7 +154,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		// TODO: Support logpoints and conditional breakpoints
 		// TODO: 0- or 1-indexed line numbers?
 		
-		val placedBreakpoints = breakpointManager.setAllInSource(args.source, args.breakpoints)
+		val placedBreakpoints = context.breakpointManager.setAllInSource(args.source, args.breakpoints)
 		
 		SetBreakpointsResponse().apply {
 			breakpoints = placedBreakpoints.toTypedArray()
@@ -232,7 +232,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 							name = location?.sourceName() ?: "???"
 							// TODO: Use source references to load locations in compiled classes
 							path = location?.sourcePath()
-								?.let(project!!.sourcesRoot::resolve)
+								?.let(config!!.sourcesRoot::resolve)
 								?.let(::findValidKtFilePath)
 								?.toAbsolutePath()
 								?.toString()

@@ -59,11 +59,13 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 			breakpointListeners.fire(BreakpointPauseEvent(
 				threadID = it.jdiEvent.thread().uniqueID()
 			))
+			it.resumeThreads = false
 		}
 		subscribe(com.sun.jdi.event.StepEvent::class) {
 			stepListeners.fire(StepPauseEvent(
 				threadID = it.jdiEvent.thread().uniqueID()
 			))
+			it.resumeThreads = false
 		}
 	}
 	

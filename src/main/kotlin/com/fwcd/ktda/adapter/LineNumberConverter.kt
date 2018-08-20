@@ -1,4 +1,4 @@
-package com.fwcd.ktda.core
+package com.fwcd.ktda.adapter
 
 /**
  * Converts between external and internal line numbering.
@@ -10,7 +10,7 @@ package com.fwcd.ktda.core
  * In this case, externalLineOffset would be -1.
  */
 class LineNumberConverter(
-	private val externalLineOffset: Int // Internal line + externalLineOffset = External line
+	private val externalLineOffset: Int = 0 // Internal line + externalLineOffset = External line
 ) {
 	fun toInternalLine(lineNumber: Int) = lineNumber - externalLineOffset
 	
