@@ -3,6 +3,7 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that prov
 
 [![Version](https://vsmarketplacebadge.apphb.com/version-short/fwcd.kotlindebug.svg)](https://marketplace.visualstudio.com/items?itemName=fwcd.kotlindebug)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/fwcd.kotlindebug.svg)](https://marketplace.visualstudio.com/items?itemName=fwcd.kotlindebug)
+[![Build Status](https://travis-ci.org/fwcd/KotlinDebugAdapter.svg?branch=master)](https://travis-ci.org/fwcd/KotlinDebugAdapter)
 
 ![Icon](Icon128.png)
 
