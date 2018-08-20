@@ -1,4 +1,4 @@
-package com.fwcd.ktda.core
+package com.fwcd.ktda.core.launch
 
 import java.nio.file.Path
 

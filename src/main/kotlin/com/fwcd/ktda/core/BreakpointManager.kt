@@ -1,5 +1,7 @@
 package com.fwcd.ktda.core
 
-interface BreakpointManager {
-	fun setAllBreakpointsIn(source: Source, breakpoints: List<Breakpoint>)
+class BreakpointManager {
+	fun setAllBreakpointsIn(source: Source, breakpoints: List<Breakpoint>) {
+		
+	}
 }
