@@ -15,5 +15,8 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that prov
 		* a buildfile (`pom.xml` or `build.gradle`)
 		* compiled output classes (located in `build/classes/kotlin/main` or `target/classes/kotlin/main`)
 
+## Architecture
+`DAP client` <= JSON RPC => `KotlinDebugAdapter` <=> `Core abstractions` <=> `Java Debug Interface`
+
 ## See also
 * [KotlinLanguageServer](https://github.com/fwcd/KotlinLanguageServer) for smart code completion, diagnostics and more
