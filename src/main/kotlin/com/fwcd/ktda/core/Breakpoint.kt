@@ -1,5 +1,7 @@
 package com.fwcd.ktda.core
 
-class Breakpoint {
-	
-}
+class Breakpoint(
+	val position: Position
+)
+
+// TODO: Conditional breakpoints and logpoints

@@ -6,7 +6,7 @@ class ObservableList<T>(
 	private val listeners = ListenerList<List<T>>()
 	
 	val size: Int
-		get() = entires.size
+		get() = entries.size
 	
 	fun add(element: T) {
 		entries.add(element)
@@ -25,11 +25,11 @@ class ObservableList<T>(
 		fire()
 	}
 	
-	fun asSequence(): Sequence<T> = entries
+	fun asSequence(): Sequence<T> = entries.asSequence()
 	
 	fun listen(listener: (List<T>) -> Unit) = listeners.add(listener)
 	
 	fun unlisten(listener: (List<T>) -> Unit) = listeners.remove(listener)
 	
-	private fun fire() = listeners.fire(value)
+	private fun fire() = listeners.fire(entries)
 }

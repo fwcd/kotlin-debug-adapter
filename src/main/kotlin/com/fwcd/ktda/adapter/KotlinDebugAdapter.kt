@@ -14,7 +14,7 @@ import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.util.waitUntil
 import com.fwcd.ktda.util.ObjectPool
-import com.fwcd.ktda.core.Project
+import com.fwcd.ktda.core.LaunchConfiguration
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.classpath.findValidFilePath
 import com.fwcd.ktda.jdi.JVMDebugSession
@@ -30,7 +30,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 	private val async = AsyncExecutor()
 	private val launcherAsync = AsyncExecutor()
 	
-	private var project: Project? = null
+	private var project: LaunchConfiguration? = null
 	private var debugSession: JVMDebugSession? = null
 	private var client: IDebugProtocolClient? = null
 	// TODO: Consistently apply this lineOffset
@@ -89,7 +89,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 		val mainClass = args["mainClass"] as? String
 		if (mainClass == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'mainClass' argument")
 		
-		project = Project(
+		project = LaunchConfiguration(
 			findClassPath(listOf(projectRoot)),
 			mainClass,
 			projectRoot

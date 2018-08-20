@@ -6,7 +6,7 @@ import com.fwcd.ktda.util.ListenerList
 import com.fwcd.ktda.util.Subscription
 import com.fwcd.ktda.classpath.toJVMClassNames
 import com.fwcd.ktda.adapter.BreakpointManager
-import com.fwcd.ktda.core.Project
+import com.fwcd.ktda.core.LaunchConfiguration
 import java.nio.file.Path
 import java.nio.charset.StandardCharsets
 import java.io.File
@@ -35,7 +35,7 @@ import com.sun.tools.jdi.SunCommandLineLauncher
  * The debugging backend that uses the Java Debug Interface.
  */
 class JVMDebugSession(
-	private val project: Project,
+	private val project: LaunchConfiguration,
 	private val breakpointManager: BreakpointManager,
 	private val vmArguments: String? = null,
 	private val modulePaths: String? = null,

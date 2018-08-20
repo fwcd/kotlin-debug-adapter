@@ -22,7 +22,7 @@ fun findClassPath(projectRoots: Collection<Path>): Set<Path> {
     return ensureStdlibInPaths(
         projectRoots
             .flatMap { projectFiles(it) }
-            .flatMap { readProjectFile(it) }
+            .flatMap { readLaunchConfigurationFile(it) }
             .toSet()
     ).ifEmpty(::backupClassPath) +
         projectRoots
@@ -57,12 +57,12 @@ private fun projectFiles(workspaceRoot: Path): Set<Path> {
             .collect(Collectors.toSet())
 }
 
-private fun readProjectFile(file: Path): Set<Path> {
+private fun readLaunchConfigurationFile(file: Path): Set<Path> {
     if (isMavenBuildFile(file)) {
-        // Project uses a Maven model
+        // LaunchConfiguration uses a Maven model
         return readPom(file)
     } else if (isGradleBuildFile(file)) {
-        // Project uses a Gradle model
+        // LaunchConfiguration uses a Gradle model
         return readBuildGradle(file)
     } else {
         throw IllegalArgumentException("$file is not a valid project configuration file (pom.xml or build.gradle)")

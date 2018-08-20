@@ -5,7 +5,6 @@ import com.fwcd.ktda.util.ObservableList
 
 interface Debuggee {
 	val threads: ObservableList<DebuggeeThread>
-	val breakpointManager: BreakpointManager
 	val eventBus: DebuggeeEventBus
 	
 	fun start()
