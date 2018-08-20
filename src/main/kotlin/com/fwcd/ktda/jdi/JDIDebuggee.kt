@@ -7,16 +7,20 @@ import com.fwcd.ktda.core.Position
 import com.fwcd.ktda.core.Source
 import com.fwcd.ktda.core.launch.LaunchConfiguration
 import com.fwcd.ktda.core.event.DebuggeeEventBus
+import com.fwcd.ktda.core.breakpoint.Breakpoint
 import com.fwcd.ktda.LOG
 import com.fwcd.ktda.util.ObservableList
 import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.classpath.findValidKtFilePath
+import com.fwcd.ktda.classpath.toJVMClassNames
 import com.fwcd.ktda.jdi.event.VMEventBus
 import com.sun.jdi.Location
+import com.sun.jdi.ReferenceType
 import com.sun.jdi.Bootstrap
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
 import com.sun.jdi.connect.Connector
+import com.sun.jdi.event.ClassPrepareEvent
 import com.sun.tools.jdi.SunCommandLineLauncher
 import java.net.URLEncoder
 import java.net.URLDecoder
@@ -53,9 +57,68 @@ class JDIDebuggee(
 		eventBus = VMEventBus(vm)
 		
 		updateThreads()
+		hookBreakpoints()
 	}
 	
 	private fun updateThreads() = threads.setAll(vm.allThreads().map { JDIThread(it, this) })
+	
+	private fun hookBreakpoints() {
+		context.breakpointManager.also {
+			it.listeners.add(::setAllBreakpoints)
+			setAllBreakpoints(context.breakpointManager.allBreakpoints())
+		}
+	}
+	
+	private fun setAllBreakpoints(breakpoints: List<Breakpoint>) {
+		vm.eventRequestManager().deleteAllBreakpoints()
+		breakpoints.forEach { bp ->
+			bp.position.let { setBreakpoint(
+				it.source.filePath.toAbsolutePath().toString(),
+				it.lineNumber.toLong()
+			) }
+		}
+	}
+	
+	/** Tries to set a breakpoint */
+	private fun setBreakpoint(filePath: String, lineNumber: Long) {
+		val eventRequestManager = vm.eventRequestManager()
+		toJVMClassNames(filePath)
+			.forEach { className ->
+				// Try setting breakpoint using a ClassPrepareRequest
+				
+				eventRequestManager
+					.createClassPrepareRequest()
+					.apply { addClassFilter(className) } // For global types
+					.enable()
+				eventRequestManager
+					.createClassPrepareRequest()
+					.apply { addClassFilter(className + "$*") } // For local types
+					.enable()
+				
+				eventBus.subscribe(ClassPrepareEvent::class) {
+					setBreakpointAtType(it.jdiEvent.referenceType(), lineNumber)
+				}
+				
+				// Try setting breakpoint using loaded VM classes
+				
+				vm.classesByName(className).forEach {
+					setBreakpointAtType(it, lineNumber)
+				}
+			}
+	}
+	
+	/** Tries to set a breakpoint - Will return whether this was successful */
+	private fun setBreakpointAtType(refType: ReferenceType, lineNumber: Long): Boolean {
+		val location = refType
+			.locationsOfLine(lineNumber.toInt())
+			?.firstOrNull() ?: return false
+		val request = vm.eventRequestManager()
+			.createBreakpointRequest(location)
+		request?.let {
+			it.enable()
+		}
+		return request != null
+	}
 	
 	override fun stop() {
 		LOG.info("Stopping JDI session")
