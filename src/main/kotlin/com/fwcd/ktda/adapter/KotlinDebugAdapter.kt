@@ -16,7 +16,7 @@ import com.fwcd.ktda.util.waitUntil
 import com.fwcd.ktda.util.ObjectPool
 import com.fwcd.ktda.core.launch.LaunchConfiguration
 import com.fwcd.ktda.classpath.findClassPath
-import com.fwcd.ktda.classpath.findValidFilePath
+import com.fwcd.ktda.classpath.findValidKtFilePath
 import com.fwcd.ktda.jdi.JVMDebugSession
 import com.fwcd.ktda.jdi.VMEventBus
 
@@ -233,7 +233,7 @@ class KotlinDebugAdapter: IDebugProtocolServer {
 							// TODO: Use source references to load locations in compiled classes
 							path = location?.sourcePath()
 								?.let(project!!.sourcesRoot::resolve)
-								?.let(::findValidFilePath)
+								?.let(::findValidKtFilePath)
 								?.toAbsolutePath()
 								?.toString()
 								?: "???"

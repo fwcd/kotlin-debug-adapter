@@ -36,7 +36,7 @@ fun toJVMClassNames(filePath: String): List<String> {
 
 // TODO: Better path resolution, especially when dealing with
 // *.class files inside JARs
-fun findValidFilePath(filePathToClass: Path) = firstNonNull(
+fun findValidKtFilePath(filePathToClass: Path) = firstNonNull(
 	{ filePathToClass.ifExists() },
 	{ filePathToClass.withExtension(".kt").ifExists() }
 ) ?: filePathToClass

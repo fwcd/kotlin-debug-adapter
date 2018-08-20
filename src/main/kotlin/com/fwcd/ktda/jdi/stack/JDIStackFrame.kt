@@ -12,7 +12,7 @@ class JDIStackFrame(
 ): StackFrame {
 	private val location = frame.location()
 	override val name: String = location.method()?.name() ?: "Unknown"
-	override val position: Position = converter.positionOf(location)
+	override val position: Position? = converter.positionOf(location)
 	override val scopes: List<VariableTreeNode> by lazy { listOf(
 		JDILocalScope(frame)
 	) }
