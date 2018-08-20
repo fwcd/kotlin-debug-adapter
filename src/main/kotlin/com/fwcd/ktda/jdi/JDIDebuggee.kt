@@ -50,9 +50,18 @@ class JDIDebuggee(
 		
 		vm = connector.launch(args)
 		eventBus = VMEventBus(vm)
+		
+		updateThreads()
 	}
 	
-	override fun stop() = TODO("JDIDebuggee not implemented")
+	private fun updateThreads() = threads.setAll(vm.allThreads().map { JDIThread(it, this) })
+	
+	override fun stop() {
+		LOG.info("Stopping JDI session")
+		if (vm.process()?.isAlive() ?: true) {
+			vm.exit(0)
+		}
+	}
 	
 	override fun stepOver() = TODO("JDIDebuggee not implemented")
 	

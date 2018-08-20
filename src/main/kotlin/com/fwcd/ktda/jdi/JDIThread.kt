@@ -2,10 +2,13 @@ package com.fwcd.ktda.jdi
 
 import com.fwcd.ktda.core.DebuggeeThread
 import com.fwcd.ktda.core.stack.StackTrace
+import com.fwcd.ktda.jdi.stack.JDIStackTrace
+import com.fwcd.ktda.jdi.JDIConversionFacade
 import com.sun.jdi.ThreadReference
 
 class JDIThread(
-	private val threadRef: ThreadReference
+	private val threadRef: ThreadReference,
+	private val converter: JDIConversionFacade
 ): DebuggeeThread {
 	override val id: Long = threadRef.uniqueID()
 	
@@ -21,5 +24,5 @@ class JDIThread(
 		}
 	}
 	
-	override fun stackTrace() = TODO("Stack trace not implemented")
+	override fun stackTrace() = JDIStackTrace(threadRef.frames(), converter)
 }

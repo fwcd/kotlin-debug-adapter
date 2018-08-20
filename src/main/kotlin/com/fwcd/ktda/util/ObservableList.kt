@@ -1,7 +1,7 @@
 package com.fwcd.ktda.util
 
 class ObservableList<T>(
-	private val entries: MutableList<T> = mutableListOf()
+	private var entries: MutableList<T> = mutableListOf()
 ) {
 	private val listeners = ListenerList<List<T>>()
 	
@@ -22,6 +22,11 @@ class ObservableList<T>(
 	
 	operator fun set(index: Int, value: T) {
 		entries[index] = value
+		fire()
+	}
+	
+	fun setAll(values: List<T>) {
+		entries = values.toMutableList()
 		fire()
 	}
 	
