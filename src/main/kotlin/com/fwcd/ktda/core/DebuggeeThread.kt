@@ -5,9 +5,11 @@ import com.fwcd.ktda.core.stack.StackTrace
 interface DebuggeeThread {
 	val id: Long
 	
-	fun pause()
+	/** Tries to pause the thread, returning whether the operation was successful or not */
+	fun pause(): Boolean
 	
-	fun resume()
+	/** Tries to resume the thread, returning whether the operation was successful or not */
+	fun resume(): Boolean
 	
 	fun stepOver()
 	

@@ -47,7 +47,7 @@ class KotlinDebugAdapter(
 	
 	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> = async.compute {
 		converter.lineConverter = LineNumberConverter(
-			externalLineOffset = if (args.linesStartAt1) 0 else -1
+			externalLineOffset = if (args.linesStartAt1) 0L else -1L
 		)
 		
 		val capabilities = Capabilities()
@@ -152,9 +152,14 @@ class KotlinDebugAdapter(
 		LOG.info("${args.breakpoints.size} breakpoints found")
 		
 		// TODO: Support logpoints and conditional breakpoints
-		// TODO: 0- or 1-indexed line numbers?
 		
-		val placedBreakpoints = context.breakpointManager.setAllInSource(args.source, args.breakpoints)
+		val placedBreakpoints = context
+			.breakpointManager
+			.setAllIn(
+				converter.toInternalSource(args.source),
+				args.breakpoints.map { converter.toInternalSourceBreakpoint(args.source, it) }
+			)
+			.let(converter::toDAPBreakpoint)
 		
 		SetBreakpointsResponse().apply {
 			breakpoints = placedBreakpoints.toTypedArray()
@@ -170,22 +175,22 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun continue_(args: ContinueArguments) = async.compute {
-		debugSession!!.resumeThread(args.threadId)
+		debuggee!!.threadByID(args.threadId).resume()
 		ContinueResponse().apply {
 			allThreadsContinued = false
 		}
 	}
 	
 	override fun next(args: NextArguments) = async.run {
-		debugSession?.stepOver(args.threadId)
+		debuggee!!.threadByID(args.threadId)?.stepOver()
 	}
 	
 	override fun stepIn(args: StepInArguments) = async.run {
-		debugSession?.stepInto(args.threadId)
+		debuggee!!.threadByID(args.threadId)?.stepInto()
 	}
 	
 	override fun stepOut(args: StepOutArguments) = async.run {
-		debugSession?.stepOut(args.threadId)
+		debuggee!!.threadByID(args.threadId)?.stepOut()
 	}
 	
 	override fun stepBack(args: StepBackArguments): CompletableFuture<Void> {
@@ -206,7 +211,8 @@ class KotlinDebugAdapter(
 	
 	override fun pause(args: PauseArguments) = async.run {
 		val threadId = args.threadId
-		debugSession!!.pauseThread(threadId)?.let {
+		val success = debuggee!!.threadByID(threadId).pause()
+		if (success) {
 			// If successful
 			sendStopEvent(
 				threadId,
@@ -226,7 +232,7 @@ class KotlinDebugAdapter(
 					StackFrame().apply {
 						id = stackFramePool.store(threadId, jdiFrame)
 						name = location?.method()?.name() ?: "???"
-						line = location?.lineNumber()?.toLong()?.let { it + lineOffset } ?: 0L
+						line = location?.lineNumber()?.let { it + lineOffset } ?: 0L
 						column = 0L
 						source = Source().apply {
 							name = location?.sourceName() ?: "???"

@@ -8,7 +8,7 @@ class BreakpointManager {
 	val listeners = ListenerList<List<Breakpoint>>()
 	
 	/** Attempts to place breakpoints in a source and returns the successfully placed ones */
-	fun setAllBreakpointsIn(source: Source, sourceBreakpoints: List<SourceBreakpoint>): List<Breakpoint> {
+	fun setAllIn(source: Source, sourceBreakpoints: List<SourceBreakpoint>): List<Breakpoint> {
 		val actualBreakpoints = sourceBreakpoints.mapNotNull { it.toActualBreakpoint() }
 		breakpoints[source] = actualBreakpoints
 		

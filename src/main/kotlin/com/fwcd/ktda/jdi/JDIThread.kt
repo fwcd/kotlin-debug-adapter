@@ -17,16 +17,18 @@ class JDIThread(
 ): DebuggeeThread {
 	override val id: Long = threadRef.uniqueID()
 	
-	override fun pause() {
+	override fun pause() =
 		if (!threadRef.isSuspended()) {
 			threadRef.suspend()
-		}
-	}
+			true
+		} else false
 	
 	override fun resume() {
-		(0 until threadRef.suspendCount()).forEach {
+		val suspends = threadRef.suspendCount()
+		(0 until suspends).forEach {
 			threadRef.resume()
 		}
+		return suspends > 0
 	}
 	
 	override fun stackTrace() = JDIStackTrace(threadRef.frames(), context)

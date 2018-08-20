@@ -74,7 +74,7 @@ class JDIDebuggee(
 		breakpoints.forEach { bp ->
 			bp.position.let { setBreakpoint(
 				it.source.filePath.toAbsolutePath().toString(),
-				it.lineNumber.toLong()
+				it.lineNumber
 			) }
 		}
 	}
