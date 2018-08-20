@@ -5,8 +5,8 @@ import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.ListenerList
 import com.fwcd.ktda.util.Subscription
 import com.fwcd.ktda.classpath.toJVMClassNames
-import com.fwcd.ktda.BreakpointManager
-import com.fwcd.ktda.Project
+import com.fwcd.ktda.adapter.BreakpointManager
+import com.fwcd.ktda.core.Project
 import java.nio.file.Path
 import java.nio.charset.StandardCharsets
 import java.io.File

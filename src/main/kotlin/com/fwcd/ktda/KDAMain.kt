@@ -1,6 +1,7 @@
 package com.fwcd.ktda
 
 import java.util.concurrent.Executors
+import com.fwcd.ktda.adapter.KotlinDebugAdapter
 import com.fwcd.ktda.util.ExitingInputStream
 import com.fwcd.ktda.util.LoggingInputStream
 import com.fwcd.ktda.util.LoggingOutputStream
