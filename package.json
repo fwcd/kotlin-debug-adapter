@@ -28,6 +28,7 @@
 	"author": "fwcd",
 	"publisher": "fwcd",
 	"license": "MIT",
+	"preview": true,
 	"bugs": {
 		"url": "https://github.com/fwcd/KotlinDebugAdapter/issues"
 	},
