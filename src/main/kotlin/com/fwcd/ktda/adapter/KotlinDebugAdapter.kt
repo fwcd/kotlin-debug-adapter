@@ -203,6 +203,7 @@ class KotlinDebugAdapter(
 		val success = debuggee!!.threadByID(args.threadId)?.resume()
 		if (success ?: false) {
 			converter.variablesPool.clear()
+			converter.stackFramePool.removeAllOwnedBy(args.threadId)
 		}
 		ContinueResponse().apply {
 			allThreadsContinued = false
@@ -248,11 +249,14 @@ class KotlinDebugAdapter(
 		}
 	}
 	
-	override fun stackTrace(args: StackTraceArguments) = async.compute {
+	/*
+	 * Stack traces, scopes and variables are computed synchronously
+	 * to avoid race conditions when fetching elements from the pools
+	 */
+	
+	override fun stackTrace(args: StackTraceArguments): CompletableFuture<StackTraceResponse> {
 		val threadId = args.threadId
-		converter.stackFramePool.removeAllOwnedBy(threadId)
-		
-		StackTraceResponse().apply {
+		return completedFuture(StackTraceResponse().apply {
 			stackFrames = debuggee!!
 				.threadByID(threadId)
 				?.stackTrace()
@@ -260,20 +264,20 @@ class KotlinDebugAdapter(
 				?.map { converter.toDAPStackFrame(it, threadId) }
 				?.toTypedArray()
 				.orEmpty()
-		}
+		})
 	}
 	
-	override fun scopes(args: ScopesArguments) = async.compute {
+	override fun scopes(args: ScopesArguments) = completedFuture(
 		ScopesResponse().apply {
-			scopes = converter.toInternalStackFrame(args.frameId)
-				?.scopes
-				?.map(converter::toDAPScope)
-				?.toTypedArray()
-				.orEmpty()
+			scopes = (converter.toInternalStackFrame(args.frameId)
+					?: throw KotlinDAException("Could not find stackTrace with ID ${args.frameId}"))
+				.scopes
+				.map(converter::toDAPScope)
+				.toTypedArray()
 		}
-	}
+	)
 	
-	override fun variables(args: VariablesArguments) = async.compute {
+	override fun variables(args: VariablesArguments) = completedFuture(
 		VariablesResponse().apply {
 			variables = (args.variablesReference
 				.let(converter::toVariableTree)
@@ -281,9 +285,8 @@ class KotlinDebugAdapter(
 				.childs
 				.map(converter::toDAPVariable)
 				.toTypedArray()
-				.orEmpty()
 		}
-	}
+	)
 	
 	override fun setVariable(args: SetVariableArguments): CompletableFuture<SetVariableResponse> {
 		return notImplementedDAPMethod()

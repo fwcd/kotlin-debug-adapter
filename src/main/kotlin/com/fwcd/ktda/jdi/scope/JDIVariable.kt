@@ -19,17 +19,11 @@ class JDIVariable(
 	
 	private fun childrenOf(jdiValue: Value): List<VariableTreeNode> {
 		val jdiType = jdiValue.type()
-		LOG.info("$name has type ${jdiType::class.simpleName}")
+		// LOG.info("$name has type ${jdiType::class.simpleName}") // DEBUG
 		return when (jdiType) {
 			is ReferenceType -> when (jdiType) {
-				is ArrayType -> {
-					LOG.info("Finding elements of $name: ${arrayElementsOf(jdiValue as ArrayReference).map { it.name }}")
-					arrayElementsOf(jdiValue as ArrayReference)
-				}
-				else -> {
-					LOG.info("Finding fields of $name: ${fieldsOf(jdiValue as ObjectReference, jdiType).map { it.name }}")
-					fieldsOf(jdiValue as ObjectReference, jdiType)
-				}
+				is ArrayType -> arrayElementsOf(jdiValue as ArrayReference)
+				else -> fieldsOf(jdiValue as ObjectReference, jdiType)
 			}
 			else -> emptyList()
 		}
