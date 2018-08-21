@@ -10,6 +10,7 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that prov
 ## Getting Started
 * See [BUILDING.md](BUILDING.md) for build instructions
 * See [KotlinQuickStart](https://github.com/fwcd/KotlinQuickStart) for a sample project
+* See [KotlinLanguageServer](https://github.com/fwcd/KotlinLanguageServer) for smart code completion, diagnostics and more
 
 ## Usage
 * `./gradlew build` your project
@@ -21,6 +22,3 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that prov
 
 ## Architecture
 `DAP client` <= JSON => `KotlinDebugAdapter` <=> `Core abstractions` <=> `Java Debug Interface`
-
-## See also
-* [KotlinLanguageServer](https://github.com/fwcd/KotlinLanguageServer) for smart code completion, diagnostics and more
