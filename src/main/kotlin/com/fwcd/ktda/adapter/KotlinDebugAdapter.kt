@@ -275,11 +275,12 @@ class KotlinDebugAdapter(
 	
 	override fun variables(args: VariablesArguments) = async.compute {
 		VariablesResponse().apply {
-			variables = args.variablesReference
+			variables = (args.variablesReference
 				.let(converter::toVariableTree)
-				?.childs
-				?.map(converter::toDAPVariable)
-				?.toTypedArray()
+					?: throw KotlinDAException("Could not find variablesReference with ID ${args.variablesReference}"))
+				.childs
+				.map(converter::toDAPVariable)
+				.toTypedArray()
 				.orEmpty()
 		}
 	}
