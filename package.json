@@ -1,7 +1,7 @@
 {
 	"name": "kotlindebug",
 	"displayName": "Kotlin Debugging",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Debugging for Kotlin on JVM",
 	"main": "./out/extension",
 	"files": [

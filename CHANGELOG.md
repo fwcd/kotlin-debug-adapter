@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to the KotlinDebugAdapter will be documented in this file.
 
+## [0.2.1]
+- Bugfixes to the variable list
+
 ## [0.2.0]
 - `this` is now part of the local scope
 - Inspection of variable fields and array elements
