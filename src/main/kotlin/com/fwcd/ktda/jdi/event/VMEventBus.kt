@@ -40,7 +40,7 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 					val eventSet = eventQueue.remove()
 					var resumeThreads = true
 					for (event in eventSet) {
-						// LOG.info("VM Event: ${event::class.simpleName}") // DEBUG
+						// LOG.info("VM Event: {}", event::class.simpleName) // DEBUG
 						val resume = dispatchEvent(event, eventSet)
 						resumeThreads = resumeThreads && resume
 					}
@@ -49,9 +49,9 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 					}
 				}
 			} catch (e: InterruptedException) {
-				LOG.fine("VMEventBus event poller terminated by interrupt")
+				LOG.debug("VMEventBus event poller terminated by interrupt")
 			} catch (e: VMDisconnectedException) {
-				LOG.info("VMEventBus event poller terminated by disconnect: ${e.message}")
+				LOG.info("VMEventBus event poller terminated by disconnect: {}", e.message)
 			}
 			stopListeners.fire(StopEvent())
 		}, "VMEventBus").start()

@@ -14,10 +14,10 @@ class LoggingOutputStream(
 		if (bufferLines) {
 			buffer.append(it)
 			if (it.contains(newline)) {
-				LOG.info("OUT << $buffer")
+				LOG.info("OUT << {}", buffer)
 				buffer.setLength(0)
 			}
-		} else LOG.info("OUT << $it")
+		} else LOG.info("OUT << {}", it)
 	}
 	
 	override fun write(b: Int) {

@@ -20,6 +20,8 @@ private const val JSON_OUT_LOGGING = false
 private const val JSON_OUT_LOGGING_BUFFER_LINES = false
 
 fun main(args: Array<String>) {
+	LOG.connectJULFrontend()
+	
 	val launcher: DebugLauncher = JDILauncher()
 	var client: IDebugProtocolClient? = null
 	

@@ -14,10 +14,10 @@ class LoggingInputStream(
 		if (bufferLines) {
 			buffer.append(it)
 			if (it.contains(newline)) {
-				LOG.info("IN >> $buffer")
+				LOG.info("IN >> {}", buffer)
 				buffer.setLength(0)
 			}
-		} else LOG.info("IN >> $it")
+		} else LOG.info("IN >> {}", it)
 	}
 	
 	override fun read(): Int {

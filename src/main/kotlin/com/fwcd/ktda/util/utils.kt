@@ -60,13 +60,13 @@ fun <T> tryResolving(what: String, resolver: () -> T?): T? {
     try {
         val resolved = resolver()
         if (resolved != null) {
-            LOG.info("Successfully resolved $what")
+            LOG.debug("Successfully resolved {}", what)
             return resolved
         } else {
-            LOG.info("Could not resolve $what as it is null")
+            LOG.debug("Could not resolve {} as it is null", what)
         }
     } catch (e: Exception) {
-        LOG.info("Could not resolve $what: ${e.message}")
+        LOG.debug("Could not resolve {}: {}", what, e.message)
     }
     return null
 }

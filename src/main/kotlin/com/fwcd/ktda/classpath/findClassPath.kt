@@ -78,9 +78,9 @@ private fun readPom(pom: Path): Set<Path> {
     val artifacts = mavenOutput?.let(::readMavenDependencyList) ?: throw KotlinDAException("No artifacts could be read from $pom")
 
     when {
-        artifacts.isEmpty() -> LOG.warning("No artifacts found in $pom")
-        artifacts.size < 5 -> LOG.info("Found ${artifacts.joinToString(", ")} in $pom")
-        else -> LOG.info("Found ${artifacts.size} artifacts in $pom")
+        artifacts.isEmpty() -> LOG.warn("No artifacts found in {}", pom)
+        artifacts.size < 5 -> LOG.info("Found {} in {}", artifacts, pom)
+        else -> LOG.info("Found {} artifacts in {}", artifacts.size, pom)
     }
 
     return artifacts.mapNotNull { findMavenArtifact(it, false) }.toSet()
@@ -90,7 +90,7 @@ private fun generateMavenDependencyList(pom: Path): Path? {
     val mavenOutput = Files.createTempFile("deps", ".txt")
     val workingDirectory = pom.toAbsolutePath().parent.toFile()
     val cmd = "${mvnCommand()} dependency:list -DincludeScope=test -DoutputFile=$mavenOutput"
-    LOG.info("Run ${cmd} in $workingDirectory")
+    LOG.info("Run {} in {}", cmd, workingDirectory)
     val process = Runtime.getRuntime().exec(cmd, null, workingDirectory)
 
     process.inputStream.bufferedReader().use { reader ->
@@ -98,7 +98,7 @@ private fun generateMavenDependencyList(pom: Path): Path? {
             val line = reader.readLine()?.trim()
             if (line == null) break
             if ((line.length > 0) && !line.startsWith("Progress")) {
-                LOG.info("Maven: $line")
+                LOG.info("Maven: {}", line)
             }
         }
     }
@@ -219,7 +219,7 @@ private fun findMavenArtifact(a: Artifact, source: Boolean): Path? {
     if (Files.exists(result))
         return result
     else {
-        LOG.warning("Couldn't find $a in $result")
+        LOG.warn("Couldn't find {} in {}", a, result)
         return null
     }
 }
@@ -257,7 +257,7 @@ private fun findExecutableOnPath(fileName: String): Path? {
         val file = File(dir, fileName)
 
         if (file.isFile && file.canExecute()) {
-            LOG.info("Found $fileName at ${file.absolutePath}")
+            LOG.info("Found {} at {}", fileName, file.absolutePath)
 
             return Paths.get(file.absolutePath)
         }

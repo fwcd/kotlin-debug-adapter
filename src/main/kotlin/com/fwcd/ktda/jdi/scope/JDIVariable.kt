@@ -20,7 +20,7 @@ class JDIVariable(
 	
 	private fun childrenOf(jdiValue: Value): List<VariableTreeNode> {
 		val jdiType = jdiValue.type()
-		// LOG.info("$name has type ${jdiType::class.simpleName}") // DEBUG
+		// LOG.info("$name has type {}", jdiType::class.simpleName) // DEBUG
 		return when (jdiType) {
 			is ReferenceType -> when (jdiType) {
 				is ArrayType -> arrayElementsOf(jdiValue as ArrayReference)

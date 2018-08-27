@@ -47,7 +47,7 @@ class JDIDebuggee(
 	override val stderr: InputStream?
 	
 	init {
-		LOG.info("Starting JVM debug session with main class ${config.mainClass}")
+		LOG.info("Starting JVM debug session with main class {}", config.mainClass)
 		val vmManager = Bootstrap.virtualMachineManager()
 		val connector = vmManager.launchingConnectors()
 			.find { it is SunCommandLineLauncher }

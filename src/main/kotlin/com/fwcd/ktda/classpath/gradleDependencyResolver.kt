@@ -20,7 +20,9 @@ fun readBuildGradle(buildFile: Path): Set<Path> {
     ).orEmpty()
 
     if (dependencies.isEmpty()) {
-        LOG.warning("Could not resolve Gradle dependencies using any resolution strategy!")
+        LOG.warn("Could not resolve Gradle dependencies using any resolution strategy!")
+    } else {
+        LOG.info("Successfully resolved Gradle dependencies")
     }
     
     return dependencies
@@ -30,7 +32,7 @@ private fun createTemporaryGradleFile(): File {
     val config = File.createTempFile("classpath", ".gradle")
     config.deleteOnExit()
     
-    LOG.info("Creating temporary gradle file ${config.absolutePath}")
+    LOG.trace("Creating temporary gradle file {}", config.absolutePath)
 
     config.bufferedWriter().use { configWriter ->
         ClassLoader.getSystemResourceAsStream("classpathFinder.gradle").bufferedReader().use { configReader ->
@@ -52,18 +54,18 @@ private fun getGradleCommand(workspace: Path): Path {
 }
 
 private fun readDependenciesViaGradleCLI(projectDirectory: Path): Set<Path>? {
-    LOG.info("Attempting dependency resolution through CLI...")
+    LOG.debug("Attempting dependency resolution through CLI...")
     val config = createTemporaryGradleFile()
     val gradle = getGradleCommand(projectDirectory)
     val cmd = "$gradle -I ${config.absolutePath} kotlinLSPDeps --console=plain"
-    LOG.fine("  -- executing $cmd")
+    LOG.debug("  -- executing {}", cmd)
     val dependencies = findGradleCLIDependencies(cmd, projectDirectory)
     return dependencies
 }
 
 private fun findGradleCLIDependencies(command: String, projectDirectory: Path): Set<Path>? {
     val result = execAndReadStdout(command, projectDirectory)
-    LOG.fine(result)
+    LOG.debug(result)
     return parseGradleCLIDependencies(result)
 }
 

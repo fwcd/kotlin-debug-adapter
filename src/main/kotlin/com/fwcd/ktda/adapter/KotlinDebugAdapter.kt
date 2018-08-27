@@ -11,6 +11,7 @@ import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 import com.fwcd.ktda.LOG
+import com.fwcd.ktda.LogMessage
 import com.fwcd.ktda.util.KotlinDAException
 import com.fwcd.ktda.util.AsyncExecutor
 import com.fwcd.ktda.util.waitUntil
@@ -57,11 +58,12 @@ class KotlinDebugAdapter(
 			.map(converter::toDAPExceptionBreakpointsFilter)
 			.toTypedArray()
 		
-		LOG.info("Returning capabilities...")
+		LOG.trace("Returning capabilities...")
 		capabilities
 	}
 	
 	fun connect(client: IDebugProtocolClient) {
+		connectLoggingBackend(client)
 		this.client = client
 		client.initialized()
 		LOG.info("Connected to client")
@@ -72,7 +74,7 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun configurationDone(args: ConfigurationDoneArguments?): CompletableFuture<Void> {
-		LOG.info("Got configurationDone request")
+		LOG.trace("Got configurationDone request")
 		val response = CompletableFuture<Void>()
 		configurationDoneResponse = response
 		return response
@@ -86,9 +88,9 @@ class KotlinDebugAdapter(
 		// TODO: Find a cleaner solution once https://github.com/eclipse/lsp4j/issues/229 is resolved
 		// (LSP4J does currently not provide a mechanism to hook into the request/response machinery)
 		
-		LOG.info("Waiting for configurationDoneResponse")
+		LOG.trace("Waiting for configurationDoneResponse")
 		waitUntil { (configurationDoneResponse?.numberOfDependents ?: 0) != 0 }
-		LOG.info("Done waiting for configurationDoneResponse")
+		LOG.trace("Done waiting for configurationDoneResponse")
 		
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
 		if (projectRoot == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'projectRoot' argument")
@@ -170,7 +172,7 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun setBreakpoints(args: SetBreakpointsArguments) = async.compute {
-		LOG.info("${args.breakpoints.size} breakpoints found")
+		LOG.debug("{} breakpoints found", args.breakpoints.size)
 		
 		// TODO: Support logpoints and conditional breakpoints
 		
@@ -332,6 +334,17 @@ class KotlinDebugAdapter(
 	
 	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> {
 		return notImplementedDAPMethod()
+	}
+	
+	private fun connectLoggingBackend(client: IDebugProtocolClient) {
+		val backend: (LogMessage) -> Unit = {
+			client.output(OutputEventArguments().apply {
+				category = OutputEventArgumentsCategory.CONSOLE
+				output = "[${it.level}] ${it.message}\n"
+			})
+		}
+		LOG.connectOutputBackend(backend)
+		LOG.connectErrorBackend(backend)
 	}
 	
 	private inline fun <T> onceDebuggeeIsPresent(body: (Debuggee) -> T): T {
