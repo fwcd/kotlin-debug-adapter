@@ -24,14 +24,11 @@ targetCompatibility = 1.8
 
 repositories {
 	mavenCentral()
-	maven { url 'https://jitpack.io' } // TODO: Temporary until LSP4J 0.5.0 is released
 }
 
 dependencies {
 	// The JSON-RPC and Debug Adapter Protocol implementations
-	// implementation "org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.5.0"
-	// TODO: Temporary solution until LSP4J 0.5.0 is released
-	implementation "com.github.eclipse.lsp4j:org.eclipse.lsp4j.debug:3cc299927400c1d7c124d058fce2dd59dc4f9316"
+	implementation "org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.5.0"
 	implementation "org.jetbrains.kotlin:kotlin-stdlib"
 	implementation "org.jetbrains.kotlin:kotlin-reflect"
 	// The Java Debug Interface classes (com.sun.jdi.*)
