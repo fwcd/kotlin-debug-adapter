@@ -32,7 +32,7 @@ fun main(args: Array<String>) {
 		System.exit(0)
 	}, JSON_IN_LOGGING, JSON_IN_LOGGING_BUFFER_LINES)
 	val output = LoggingOutputStream(System.out, JSON_OUT_LOGGING, JSON_OUT_LOGGING_BUFFER_LINES)
-
+	
 	// Create debug adapter and launcher
 	
 	val debugAdapter = KotlinDebugAdapter(launcher)
