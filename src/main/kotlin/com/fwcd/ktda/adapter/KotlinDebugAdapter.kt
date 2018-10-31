@@ -23,6 +23,7 @@ import com.fwcd.ktda.core.event.StepPauseEvent
 import com.fwcd.ktda.core.stack.StackFrame
 import com.fwcd.ktda.core.launch.DebugLauncher
 import com.fwcd.ktda.core.launch.LaunchConfiguration
+import com.fwcd.ktda.core.launch.AttachConfiguration
 import com.fwcd.ktda.core.breakpoint.ExceptionBreakpoint
 import com.fwcd.ktda.classpath.findClassPath
 import com.fwcd.ktda.classpath.findValidKtFilePath
@@ -37,7 +38,6 @@ class KotlinDebugAdapter(
 	private val stdoutAsync = AsyncExecutor()
 	private val stderrAsync = AsyncExecutor()
 	
-	private var config: LaunchConfiguration? = null
 	private var debuggee: Debuggee? = null
 	private var client: IDebugProtocolClient? = null
 	private var converter = DAPConverter()
@@ -81,6 +81,29 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun launch(args: Map<String, Any>) = launcherAsync.run {
+		performInitialization()
+		
+		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
+			?: throw missingRequestArgument("launch", "projectRoot")
+		
+		val mainClass = (args["mainClass"] as? String)
+			?: throw missingRequestArgument("launch", "mainClass")
+		
+		val config = LaunchConfiguration(
+			findClassPath(listOf(projectRoot)),
+			mainClass,
+			projectRoot
+		)
+		debuggee = launcher.launch(
+			config,
+			context
+		).also(::setupDebuggeeListeners)
+	}
+	
+	private fun missingRequestArgument(requestName: String, argumentName: String) =
+		KotlinDAException("Sent $requestName to debug adapter without the required argument'$argumentName'")
+	
+	private fun performInitialization() {
 		client!!.initialized()
 		
 		// Wait for configurationDone response to fully return
@@ -91,22 +114,6 @@ class KotlinDebugAdapter(
 		LOG.trace("Waiting for configurationDoneResponse")
 		waitUntil { (configurationDoneResponse?.numberOfDependents ?: 0) != 0 }
 		LOG.trace("Done waiting for configurationDoneResponse")
-		
-		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
-		if (projectRoot == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'projectRoot' argument")
-		
-		val mainClass = args["mainClass"] as? String
-		if (mainClass == null) throw KotlinDAException("Sent 'launch' request to debug adapter without the required 'mainClass' argument")
-		
-		config = LaunchConfiguration(
-			findClassPath(listOf(projectRoot)),
-			mainClass,
-			projectRoot
-		)
-		debuggee = launcher.launch(
-			config!!,
-			context
-		).also(::setupDebuggeeListeners)
 	}
 	
 	private fun setupDebuggeeListeners(debuggee: Debuggee) {
@@ -159,8 +166,25 @@ class KotlinDebugAdapter(
 		LOG.info("Sent exit event")
 	}
 	
-	override fun attach(args: Map<String, Any>): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
+	override fun attach(args: Map<String, Any>) = async.run {
+		performInitialization()
+		
+		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
+			?: throw missingRequestArgument("launch", "projectRoot")
+		
+		val hostName = (args["hostName"] as? String)
+			?: throw missingRequestArgument("attach", "hostName")
+		
+		val port = (args["port"] as? Int)
+			?: throw missingRequestArgument("attach", "port")
+		
+		val timeout = (args["timeout"] as? Int)
+			?: throw missingRequestArgument("attach", "timeout")
+		
+		debuggee = launcher.attach(
+			AttachConfiguration(projectRoot, hostName, port, timeout),
+			context
+		).also(::setupDebuggeeListeners)
 	}
 	
 	override fun restart(args: RestartArguments): CompletableFuture<Void> {

@@ -78,6 +78,30 @@
 								"default": "YourMainClassKt"
 							}
 						}
+					},
+					"attach": {
+						"required": [
+							"hostName",
+							"port",
+							"timeout"
+						],
+						"properties": {
+							"hostName": {
+								"type": "string",
+								"description": "The host name of your running JVM",
+								"default": "localhost"
+							},
+							"port": {
+								"type": "number",
+								"description": "The port number of your running JVM",
+								"default": 8000
+							},
+							"timeout": {
+								"type": "number",
+								"description": "The connection timeout",
+								"default": 30000
+							}
+						}
 					}
 				},
 				"initialConfigurations": [
@@ -99,6 +123,18 @@
 							"name": "Kotlin Launch",
 							"projectRoot": "^\"\\${workspaceFolder}\"",
 							"mainClass": "YourMainClassKt"
+						}
+					},
+					{
+						"label": "Kotlin: Attach VM",
+						"description": "Attaches a debugger to a running JVM",
+						"body": {
+							"type": "kotlin",
+							"request": "attach",
+							"name": "Kotlin Attach",
+							"hostName": "localhost",
+							"port": 8000,
+							"timeout": 30000
 						}
 					}
 				]

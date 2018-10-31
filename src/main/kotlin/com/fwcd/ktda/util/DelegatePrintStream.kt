@@ -1,8 +1,8 @@
 package com.fwcd.ktda.util
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.function.Consumer;
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
+import java.util.function.Consumer
 
 class DelegatePrintStream(private val delegate: (String) -> Unit): PrintStream(ByteArrayOutputStream(0)) {
 	private val newLine = System.lineSeparator()

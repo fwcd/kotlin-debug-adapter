@@ -15,7 +15,7 @@
 		},
 		{
 			"type": "java",
-			"name": "JVM Debug (Attach)",
+			"name": "Java Debug (Attach)",
 			"request": "attach",
 			"hostName": "localhost",
 			"port": 5005
