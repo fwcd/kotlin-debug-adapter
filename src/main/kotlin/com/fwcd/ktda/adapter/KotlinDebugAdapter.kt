@@ -69,9 +69,7 @@ class KotlinDebugAdapter(
 		LOG.info("Connected to client")
 	}
 	
-	override fun runInTerminal(args: RunInTerminalRequestArguments): CompletableFuture<RunInTerminalResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun runInTerminal(args: RunInTerminalRequestArguments): CompletableFuture<RunInTerminalResponse> = notImplementedDAPMethod()
 	
 	override fun configurationDone(args: ConfigurationDoneArguments?): CompletableFuture<Void> {
 		LOG.trace("Got configurationDone request")
@@ -187,9 +185,7 @@ class KotlinDebugAdapter(
 		).also(::setupDebuggeeListeners)
 	}
 	
-	override fun restart(args: RestartArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
-	}
+	override fun restart(args: RestartArguments): CompletableFuture<Void> = notImplementedDAPMethod()
 	
 	override fun disconnect(args: DisconnectArguments) = async.run {
 		debuggee?.stop()
@@ -214,9 +210,7 @@ class KotlinDebugAdapter(
 		}
 	}
 	
-	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> = notImplementedDAPMethod()
 	
 	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments) = async.run {
 		args.filters
@@ -248,21 +242,13 @@ class KotlinDebugAdapter(
 		debuggee!!.threadByID(args.threadId)?.stepOut()
 	}
 	
-	override fun stepBack(args: StepBackArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
-	}
+	override fun stepBack(args: StepBackArguments): CompletableFuture<Void> = notImplementedDAPMethod()
 	
-	override fun reverseContinue(args: ReverseContinueArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
-	}
+	override fun reverseContinue(args: ReverseContinueArguments): CompletableFuture<Void> = notImplementedDAPMethod()
 	
-	override fun restartFrame(args: RestartFrameArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
-	}
+	override fun restartFrame(args: RestartFrameArguments): CompletableFuture<Void> = notImplementedDAPMethod()
 	
-	override fun goto_(args: GotoArguments): CompletableFuture<Void> {
-		return notImplementedDAPMethod()
-	}
+	override fun goto_(args: GotoArguments): CompletableFuture<Void> = notImplementedDAPMethod()
 	
 	override fun pause(args: PauseArguments) = async.run {
 		val threadId = args.threadId
@@ -314,13 +300,9 @@ class KotlinDebugAdapter(
 		}
 	)
 	
-	override fun setVariable(args: SetVariableArguments): CompletableFuture<SetVariableResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun setVariable(args: SetVariableArguments): CompletableFuture<SetVariableResponse> = notImplementedDAPMethod()
 	
-	override fun source(args: SourceArguments): CompletableFuture<SourceResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun source(args: SourceArguments): CompletableFuture<SourceResponse> = notImplementedDAPMethod()
 	
 	override fun threads() = async.compute { onceDebuggeeIsPresent { debuggee ->
 		ThreadsResponse().apply {
@@ -332,33 +314,19 @@ class KotlinDebugAdapter(
 		}
 	} }
 	
-	override fun modules(args: ModulesArguments): CompletableFuture<ModulesResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun modules(args: ModulesArguments): CompletableFuture<ModulesResponse> = notImplementedDAPMethod()
 	
-	override fun loadedSources(args: LoadedSourcesArguments): CompletableFuture<LoadedSourcesResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun loadedSources(args: LoadedSourcesArguments): CompletableFuture<LoadedSourcesResponse> = notImplementedDAPMethod()
 	
-	override fun evaluate(args: EvaluateArguments): CompletableFuture<EvaluateResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun evaluate(args: EvaluateArguments): CompletableFuture<EvaluateResponse> = notImplementedDAPMethod()
 	
-	override fun stepInTargets(args: StepInTargetsArguments): CompletableFuture<StepInTargetsResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun stepInTargets(args: StepInTargetsArguments): CompletableFuture<StepInTargetsResponse> = notImplementedDAPMethod()
 	
-	override fun gotoTargets(args: GotoTargetsArguments): CompletableFuture<GotoTargetsResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun gotoTargets(args: GotoTargetsArguments): CompletableFuture<GotoTargetsResponse> = notImplementedDAPMethod()
 	
-	override fun completions(args: CompletionsArguments): CompletableFuture<CompletionsResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun completions(args: CompletionsArguments): CompletableFuture<CompletionsResponse> = notImplementedDAPMethod()
 	
-	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> {
-		return notImplementedDAPMethod()
-	}
+	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> = notImplementedDAPMethod()
 	
 	private fun connectLoggingBackend(client: IDebugProtocolClient) {
 		val backend: (LogMessage) -> Unit = {
