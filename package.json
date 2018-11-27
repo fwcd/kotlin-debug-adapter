@@ -44,7 +44,7 @@
 		"@types/node": "^10.7.0",
 		"typescript": "^3.0.1",
 		"vsce": "^1.46.0",
-		"vscode": "^1.1.21"
+		"vscode": "^1.1.22"
 	},
 	"activationEvents": [
 		"onDebug"
