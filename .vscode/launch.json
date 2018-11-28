@@ -27,5 +27,6 @@
 			"projectRoot": "${workspaceFolder}",
 			"mainClass": "com.fwcd.ktda.KDAMainKt"
 		}
+		Kotli
 	]
 }
