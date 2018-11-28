@@ -1,7 +1,7 @@
 {
 	"name": "kotlindebug",
-	"displayName": "Kotlin Debugging",
-	"version": "0.2.1",
+	"displayName": "Kotlin Debugger",
+	"version": "0.2.2",
 	"description": "Debugging for Kotlin on JVM",
 	"main": "./out/extension",
 	"files": [
@@ -34,16 +34,16 @@
 	},
 	"homepage": "https://github.com/fwcd/KotlinDebugAdapter#readme",
 	"dependencies": {
-		"vscode-debugadapter": "^1.31.0",
-		"vscode-debugprotocol": "^1.31.0"
+		"vscode-debugadapter": "^1.32.1",
+		"vscode-debugprotocol": "^1.32.0"
 	},
 	"engines": {
-		"vscode": "^1.21.0"
+		"vscode": "^1.28.0"
 	},
 	"devDependencies": {
 		"@types/node": "^10.7.0",
 		"typescript": "^3.0.1",
-		"vsce": "^1.46.0",
+		"vsce": "^1.53.2",
 		"vscode": "^1.1.22"
 	},
 	"activationEvents": [
