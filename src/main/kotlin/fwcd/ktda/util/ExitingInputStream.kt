@@ -7,7 +7,7 @@ import java.io.InputStream
 class ExitingInputStream(
 	private val delegate: InputStream,
 	private val exiter: () -> Unit
-): InputStream() {
+) : InputStream() {
 	override fun read(): Int = exitIfNegative { delegate.read() }
 	
 	override fun read(b: ByteArray): Int = exitIfNegative { delegate.read(b) }

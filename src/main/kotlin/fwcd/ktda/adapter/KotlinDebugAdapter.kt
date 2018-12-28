@@ -32,7 +32,7 @@ import fwcd.ktda.jdi.event.VMEventBus
 /** The debug server interface conforming to the Debug Adapter Protocol */
 class KotlinDebugAdapter(
 	private val launcher: DebugLauncher
-): IDebugProtocolServer {
+) : IDebugProtocolServer {
 	private val async = AsyncExecutor()
 	private val launcherAsync = AsyncExecutor()
 	private val stdoutAsync = AsyncExecutor()

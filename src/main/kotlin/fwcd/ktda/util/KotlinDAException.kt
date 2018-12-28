@@ -3,7 +3,7 @@ package fwcd.ktda.util
 /**
  * An exception related to the debug adapter
  */
-class KotlinDAException: RuntimeException {
+class KotlinDAException : RuntimeException {
 	constructor(msg: String) : super(msg)
 	
 	constructor(msg: String, cause: Throwable) : super(msg, cause)

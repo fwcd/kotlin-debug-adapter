@@ -25,7 +25,7 @@ class JDILauncher(
 	private val vmArguments: String? = null,
 	private val modulePaths: String? = null,
 	private val environmentVariables: Collection<String>? = null
-): DebugLauncher {
+) : DebugLauncher {
 	private val vmManager: VirtualMachineManager
 		get() = Bootstrap.virtualMachineManager()
 	

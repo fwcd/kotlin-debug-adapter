@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 class JDIThread(
 	private val threadRef: ThreadReference,
 	private val context: JDISessionContext
-): DebuggeeThread {
+) : DebuggeeThread {
 	override val name: String = threadRef.name() ?: "Unnamed Thread"
 	override val id: Long = threadRef.uniqueID()
 	

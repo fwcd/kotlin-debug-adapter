@@ -6,7 +6,7 @@ import com.sun.jdi.StackFrame
 
 class JDILocalScope(
 	frame: StackFrame
-): VariableTreeNode {
+) : VariableTreeNode {
 	override val name: String = "Locals"
 	override val childs: List<VariableTreeNode> = variablesIn(frame)
 	

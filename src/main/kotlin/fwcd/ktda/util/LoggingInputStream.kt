@@ -7,7 +7,7 @@ class LoggingInputStream(
 	private val upstream: InputStream,
 	private val logEnabled: Boolean,
 	private val bufferLines: Boolean
-): InputStream() {
+) : InputStream() {
 	private val newline = System.lineSeparator()
 	private val buffer = StringBuilder()
 	private val printStream = DelegatePrintStream {

@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.util.function.Consumer
 
-class DelegatePrintStream(private val delegate: (String) -> Unit): PrintStream(ByteArrayOutputStream(0)) {
+class DelegatePrintStream(private val delegate: (String) -> Unit) : PrintStream(ByteArrayOutputStream(0)) {
 	private val newLine = System.lineSeparator()
 	
 	override fun write(c: Int) = delegate((c.toChar()).toString())

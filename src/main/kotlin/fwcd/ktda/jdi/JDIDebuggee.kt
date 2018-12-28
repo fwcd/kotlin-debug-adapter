@@ -30,7 +30,7 @@ class JDIDebuggee(
 	private val vm: VirtualMachine,
 	private val sourcesRoot: Path,
 	private val context: DebugContext
-): Debuggee, JDISessionContext {
+) : Debuggee, JDISessionContext {
 	override val threads = ObservableList<DebuggeeThread>()
 	override val eventBus: VMEventBus
 	override val pendingStepRequestThreadIds = mutableSetOf<Long>()

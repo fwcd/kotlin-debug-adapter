@@ -13,7 +13,7 @@ class JDIVariable(
 	override val name: String,
 	jdiValue: Value?,
 	jdiType: Type? = null
-): VariableTreeNode {
+) : VariableTreeNode {
 	override val value: String = jdiValue?.toString() ?: "null" // TODO: Better string representation
 	override val type: String = (jdiType?.name() ?: jdiValue?.type()?.name()) ?: "Unknown type"
 	override val childs: List<VariableTreeNode> by lazy { jdiValue?.let(::childrenOf) ?: emptyList() }
