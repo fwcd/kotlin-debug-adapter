@@ -87,6 +87,11 @@
 								"type": "string",
 								"description": "Enables logging of debug server JSON messages into a file defined by 'jsonLogFile'",
 								"default": "${workspaceFolder}/ktDebugJsonLog.txt"
+							},
+							"logLevel": {
+								"type": "string",
+								"description": "Sets the logging level of the debug server for the messages in the Debug Console [NONE/ERROR/WARN/INFO/DEBUG/TRACE/DEEP_TRACE/ALL]",
+								"default": "INFO"
 							}
 						}
 					},
@@ -121,6 +126,11 @@
 								"type": "string",
 								"description": "Enables logging of debug server JSON messages into a file defined by 'jsonLogFile'",
 								"default": "${workspaceFolder}/ktDebugJsonLog.txt"
+							},
+							"logLevel": {
+								"type": "string",
+								"description": "Sets the logging level of the debug server for the messages in the Debug Console [NONE/ERROR/WARN/INFO/DEBUG/TRACE/DEEP_TRACE/ALL]",
+								"default": "INFO"
 							}
 						}
 					}

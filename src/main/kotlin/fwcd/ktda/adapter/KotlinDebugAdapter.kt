@@ -13,6 +13,7 @@ import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 import fwcd.ktda.LOG
 import fwcd.ktda.JSON_LOG
+import fwcd.ktda.LogLevel
 import fwcd.ktda.LogMessage
 import fwcd.ktda.util.KotlinDAException
 import fwcd.ktda.util.AsyncExecutor
@@ -89,7 +90,7 @@ class KotlinDebugAdapter(
 		val mainClass = (args["mainClass"] as? String)
 			?: throw missingRequestArgument("launch", "mainClass")
 		
-		connectJsonLoggingBackend(args)
+		setupCommonInitializationParams(args)
 		
 		val config = LaunchConfiguration(
 			findClassPath(listOf(projectRoot)),
@@ -183,12 +184,21 @@ class KotlinDebugAdapter(
 		val timeout = (args["timeout"] as? Int)
 			?: throw missingRequestArgument("attach", "timeout")
 		
-		connectJsonLoggingBackend(args)
+		setupCommonInitializationParams(args)
 		
 		debuggee = launcher.attach(
 			AttachConfiguration(projectRoot, hostName, port, timeout),
 			context
 		).also(::setupDebuggeeListeners)
+	}
+	
+	private fun setupCommonInitializationParams(args: Map<String, Any>) {
+		val logLevel = (args["logLevel"] as? String)?.let(LogLevel::valueOf)
+			?: LogLevel.INFO
+		
+		LOG.level = logLevel
+
+		connectJsonLoggingBackend(args)
 	}
 	
 	private fun connectJsonLoggingBackend(args: Map<String, Any>) {
