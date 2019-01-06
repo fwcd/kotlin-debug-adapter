@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import * as child_process from "child_process";
 import { LOG } from "./logger";
-import { isOSUnixoid } from "./osUtils";
+import { findJavaExecutableInJavaHome, correctBinname } from "./pathUtils";
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext): void {
@@ -14,23 +13,6 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.window.showErrorMessage("Couldn't locate java in $JAVA_HOME or $PATH");
 		return;
 	}
-	
-	let startScriptPath = path.resolve(context.extensionPath, "build", "install", "KotlinDebugAdapter", "bin", correctScriptName("KotlinDebugAdapter"));
-	let args = [];
-	
-	// Ensure that start script can be executed
-	if (isOSUnixoid()) {
-		child_process.exec("chmod +x " + startScriptPath);
-	}
-	
-	LOG.info("Found debug adapter {} with args {}", startScriptPath, args.join(" "));
-	
-	context.subscriptions.push(vscode.commands.registerCommand("extension.kotlindebug.adapterexecutablepath", () => {
-		return {
-			command: startScriptPath,
-			args: args
-		};
-	}));
 }
 
 // This method is called when your extension is deactivated
@@ -79,29 +61,4 @@ function findJavaExecutable(rawBinname: string) {
     // Else return the binary name directly (this will likely always fail downstream)
     LOG.debug("Could not find Java, will try using binary name directly");
 	return binname;
-}
-
-function correctBinname(binname: string) {
-	if (process.platform === 'win32')
-		return binname + '.exe';
-	else
-		return binname;
-}
-
-function correctScriptName(binname: string) {
-	if (process.platform === 'win32')
-		return binname + '.bat';
-	else
-		return binname;
-}
-
-function findJavaExecutableInJavaHome(javaHome: string, binname: string) {
-    let workspaces = javaHome.split(path.delimiter);
-
-    for (let i = 0; i < workspaces.length; i++) {
-        let binpath = path.join(workspaces[i], 'bin', binname);
-
-        if (fs.existsSync(binpath))
-            return binpath;
-    }
 }
