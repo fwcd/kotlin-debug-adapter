@@ -43,6 +43,10 @@ test {
 	}
 }
 
+run {
+	standardInput = System.in
+}
+
 task fixFilePermissions(type: Exec) {
 	// When running on macOS or Linux the start script
 	// needs executable permissions to run.
