@@ -11,6 +11,7 @@ import java.util.logging.Level
 import java.time.Instant
 
 val LOG = Logger()
+val JSON_LOG = Logger()
 
 private class JULRedirector(private val downstream: Logger) : Handler() {
     override fun publish(record: LogRecord) {
@@ -45,14 +46,14 @@ class LogMessage(
     val message: String
 )
 
-class Logger {
-    private var outBackend: ((LogMessage) -> Unit)? = null
+class Logger(
+    private var outBackend: ((LogMessage) -> Unit)? = null,
     private var errBackend: ((LogMessage) -> Unit)? = null
+) {
     private val outQueue: Queue<LogMessage> = ArrayDeque()
     private val errQueue: Queue<LogMessage> = ArrayDeque()
     private val errStream = DelegatePrintStream { outputError(LogMessage(LogLevel.ERROR, it)) }
     
-    private val newline = System.lineSeparator()
     val logTime = false
     var level = LogLevel.INFO
     

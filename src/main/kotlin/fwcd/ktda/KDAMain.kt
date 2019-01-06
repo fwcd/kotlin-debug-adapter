@@ -11,11 +11,11 @@ import org.eclipse.lsp4j.debug.launch.DSPLauncher
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 import org.eclipse.lsp4j.debug.TerminatedEventArguments
 
-/** Logs the raw JSON messages from stdin (useful for debugging) */
-private const val JSON_IN_LOGGING = false
+/** Enable logging of raw input JSON messages (if it is enabled in the user's debug configuration). */
+private const val JSON_IN_LOGGING = true
 private const val JSON_IN_LOGGING_BUFFER_LINES = false
 
-/** Logs the raw JSON messages from stdout (useful for debugging) */
+/** Enable logging of raw output JSON messages (if it is enabled in the user's debug configuration). */
 private const val JSON_OUT_LOGGING = false
 private const val JSON_OUT_LOGGING_BUFFER_LINES = false
 

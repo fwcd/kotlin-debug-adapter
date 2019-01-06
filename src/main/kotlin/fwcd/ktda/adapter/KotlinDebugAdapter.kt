@@ -3,6 +3,7 @@ package fwcd.ktda.adapter
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.io.InputStream
+import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.ThreadLocalRandom
@@ -11,6 +12,7 @@ import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 import fwcd.ktda.LOG
+import fwcd.ktda.JSON_LOG
 import fwcd.ktda.LogMessage
 import fwcd.ktda.util.KotlinDAException
 import fwcd.ktda.util.AsyncExecutor
@@ -86,6 +88,8 @@ class KotlinDebugAdapter(
 		
 		val mainClass = (args["mainClass"] as? String)
 			?: throw missingRequestArgument("launch", "mainClass")
+		
+		connectJsonLoggingBackend(args)
 		
 		val config = LaunchConfiguration(
 			findClassPath(listOf(projectRoot)),
@@ -179,10 +183,29 @@ class KotlinDebugAdapter(
 		val timeout = (args["timeout"] as? Int)
 			?: throw missingRequestArgument("attach", "timeout")
 		
+		connectJsonLoggingBackend(args)
+		
 		debuggee = launcher.attach(
 			AttachConfiguration(projectRoot, hostName, port, timeout),
 			context
 		).also(::setupDebuggeeListeners)
+	}
+	
+	private fun connectJsonLoggingBackend(args: Map<String, Any>) {
+		val enableJsonLogging = (args["enableJsonLogging"] as? Boolean) ?: false
+		
+		if (enableJsonLogging) {
+			val jsonLogFile = (args["jsonLogFile"] as? String)?.let(::File)
+				?: throw missingRequestArgument("launch/attach", "jsonLogFile")
+			val newline = System.lineSeparator()
+			
+			if (!jsonLogFile.exists()) {
+				jsonLogFile.createNewFile()
+			}
+			
+			JSON_LOG.connectOutputBackend { msg -> jsonLogFile.appendText("[${msg.level}] ${msg.message}$newline") }
+			JSON_LOG.connectErrorBackend { msg -> jsonLogFile.appendText("Error: [${msg.level}] ${msg.message}$newline") }
+		}
 	}
 	
 	override fun restart(args: RestartArguments): CompletableFuture<Void> = notImplementedDAPMethod()

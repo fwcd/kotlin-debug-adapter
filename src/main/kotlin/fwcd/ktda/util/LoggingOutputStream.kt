@@ -1,7 +1,7 @@
 package fwcd.ktda.util
 
 import java.io.OutputStream
-import fwcd.ktda.LOG
+import fwcd.ktda.JSON_LOG
 
 class LoggingOutputStream(
 	private val downstream: OutputStream,
@@ -14,10 +14,10 @@ class LoggingOutputStream(
 		if (bufferLines) {
 			buffer.append(it)
 			if (it.contains(newline)) {
-				LOG.info("OUT << {}", buffer)
+				JSON_LOG.info("OUT << {}", buffer)
 				buffer.setLength(0)
 			}
-		} else LOG.info("OUT << {}", it)
+		} else JSON_LOG.info("OUT << {}", it)
 	}
 	
 	override fun write(b: Int) {
