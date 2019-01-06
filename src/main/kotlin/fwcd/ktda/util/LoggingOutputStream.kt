@@ -3,6 +3,8 @@ package fwcd.ktda.util
 import java.io.OutputStream
 import fwcd.ktda.JSON_LOG
 
+private val MESSAGE_FLUSH_MIN_LENGTH = 20
+
 class LoggingOutputStream(
 	private val downstream: OutputStream,
 	private val logEnabled: Boolean,

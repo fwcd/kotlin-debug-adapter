@@ -3,6 +3,8 @@ package fwcd.ktda.util
 import java.io.InputStream
 import fwcd.ktda.JSON_LOG
 
+private val MESSAGE_FLUSH_MIN_LENGTH = 20
+
 class LoggingInputStream(
 	private val upstream: InputStream,
 	private val logEnabled: Boolean,
@@ -13,7 +15,7 @@ class LoggingInputStream(
 	private val printStream = DelegatePrintStream {
 		if (bufferLines) {
 			buffer.append(it)
-			if (it.contains(newline)) {
+			if (it.contains(newline) || it.length > MESSAGE_FLUSH_MIN_LENGTH) {
 				JSON_LOG.info("IN >> {}", buffer)
 				buffer.setLength(0)
 			}

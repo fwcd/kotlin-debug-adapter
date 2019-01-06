@@ -13,11 +13,11 @@ import org.eclipse.lsp4j.debug.TerminatedEventArguments
 
 /** Enable logging of raw input JSON messages (if it is enabled in the user's debug configuration). */
 private const val JSON_IN_LOGGING = true
-private const val JSON_IN_LOGGING_BUFFER_LINES = false
+private const val JSON_IN_LOGGING_BUFFER_LINES = true
 
 /** Enable logging of raw output JSON messages (if it is enabled in the user's debug configuration). */
-private const val JSON_OUT_LOGGING = false
-private const val JSON_OUT_LOGGING_BUFFER_LINES = false
+private const val JSON_OUT_LOGGING = true
+private const val JSON_OUT_LOGGING_BUFFER_LINES = true
 
 fun main(args: Array<String>) {
 	LOG.connectJULFrontend()
