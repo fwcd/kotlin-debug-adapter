@@ -5,7 +5,7 @@ import { isOSUnixoid } from "./osUtils";
 import { correctScriptName } from "./pathUtils";
 
 function launchDebugAdapter() {
-	let startScriptPath = path.resolve(__dirname, "..", "build", "install", "KotlinDebugAdapter", "bin", correctScriptName("KotlinDebugAdapter"));
+	let startScriptPath = path.resolve(__dirname, "..", "resources", "install", "bin", correctScriptName("kotlin-debug-adapter"));
 	let args = [];
 	
 	// Ensure that start script can be executed

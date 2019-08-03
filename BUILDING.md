@@ -1,28 +1,33 @@
 # Building
-Contains the commands required to build this project. Note that you might need to use `gradlew` instead of `./gradlew` when running on `cmd.exe`.
+Describes how to build and run the debug adapter and the editor extensions.
 
-## Setting up the development environment
-* Java should be installed
+## Setup
+* Java 8+ should be installed and located under `JAVA_HOME` or `PATH`
+* Note that you might need to use `gradlew` instead of `./gradlew` for the commands on Windows
 
-### For debug adapter development
-* `./gradlew build`
+## Debug Adapter
 
-### For extension development
-* VSCode is required
-* `npm install`
-* `npm install -g vsce`
+### Building
+If you just want to build the debug adapter and use its binaries in your client of choice, run:
 
-## Building the Debug Adapter
-* `./gradlew installDist`
-* Start scripts for the debug adapter are located under `build/install/KotlinDebugAdapter/bin/`
+>`./gradlew :adapter:installDist`
 
-## Testing the Debug Adapter
-* `./gradlew test`
+The debug adapter executable is now located under `adapter/build/install/adapter/bin/kotlin-debug-adapter`. (Depending on your debug client, you might want to add it to your `PATH`)
 
-## Running the VSCode extension
-* `npm run compile` (or `npm run watch` for incremental compilation)
-* Launch the `Extension` configuration
+Note that there are external dependent libraries, so if you want to put the server somewhere else, you have to move the entire `install`-directory.
 
-## Packaging the VSCode extension
-* `vsce package -o build.vsix`
-* The extension is located as `build.vsix` in the repository folder
+## VSCode extension
+
+### Development/Running
+First run `npm run watch` from the `editors/vscode` directory in a background shell. The extension will then incrementally build in the background.
+
+Every time you want to run the extension with the language server:
+* Prepare the extension using `./gradlew :editors:vscode:prepare` (this automatically build and copies the language server's binaries into the extension folder)
+* Open the debug tab in VSCode
+* Run the `Extension` launch configuration
+
+### Debugging
+>TODO
+
+### Packaging
+Run `./gradlew :editors:vscode:packageExtension` from the repository's top-level-directory. The extension will then be located under the name `kotlindebug-[version].vsix` in `editors/vscode`.

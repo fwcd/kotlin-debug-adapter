@@ -1,0 +1,4 @@
+# Ignore 'resources' folder which will
+# contain the debug adapter binaries,
+# which are provided by Gradle
+resources

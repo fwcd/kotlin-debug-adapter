@@ -7,7 +7,7 @@
 			"es6"
 		],
 		"sourceMap": true,
-		"rootDir": "vscode-extension-src",
+		"rootDir": "src",
 		"noUnusedLocals": true
 	},
 	"exclude": [

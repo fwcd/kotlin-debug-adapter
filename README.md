@@ -1,5 +1,5 @@
 # KotlinDebugAdapter
-A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that provides IDE-independent debugging support for Kotlin/JVM and a VSCode extension that uses the debug adapter.
+A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that provides IDE-independent debugging support for Kotlin/JVM.
 
 [![Version](https://vsmarketplacebadge.apphb.com/version-short/fwcd.kotlindebug.svg)](https://marketplace.visualstudio.com/items?itemName=fwcd.kotlindebug)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/fwcd.kotlindebug.svg)](https://marketplace.visualstudio.com/items?itemName=fwcd.kotlindebug)
@@ -7,8 +7,11 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that prov
 
 ![Icon](Icon128.png)
 
+Any editor conforming to DAP is supported, including [VSCode](https://code.visualstudio.com) for which a client extension is provided by this repository.
+
 ## Getting Started
 * See [BUILDING.md](BUILDING.md) for build instructions
+* See [Editor Integration](editors/README.md) for editor-specific instructions
 * See [KotlinQuickStart](https://github.com/fwcd/KotlinQuickStart) for a sample project
 * See [KotlinLanguageServer](https://github.com/fwcd/KotlinLanguageServer) for smart code completion, diagnostics and more
 
@@ -20,17 +23,6 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that prov
 * Launch:
     * `./gradlew build` your project (before every launch)
 	* Click the `Run` button in the `Debug` tab or press `F5`
-
-### with any editor (JSON-RPC)
-* Setup:
-    * Install a [Debug Adapter Protocol client](https://microsoft.github.io/debug-adapter-protocol/implementors/tools/) for your tool
-* Launch:
-    * `./gradlew build` your project (before every launch)
-    * Invoke the debug adapter through JSON-RPC with a `launch` request after the initialization procedure [as sketched here](https://microsoft.github.io/debug-adapter-protocol/img/init-launch.png)
-        * The `projectRoot` and `mainClass` arguments must be specified
-        * The `projectRoot` argument should contain the absolute path to a Maven or a Gradle project folder with
-		    * a buildfile (`pom.xml` or `build.gradle`)
-		    * compiled output classes (located in `build/classes/kotlin/main` or `target/classes/kotlin/main`)
 
 ## Architecture
 `DAP client` <= JSON => `KotlinDebugAdapter` <=> `Core abstractions` <=> `Java Debug Interface`

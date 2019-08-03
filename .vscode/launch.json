@@ -7,10 +7,10 @@
 			"name": "Extension",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+				"--extensionDevelopmentPath=${workspaceFolder}/editors/vscode"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/editors/vscode/out/**/*.js"
 			]
 		},
 		{
@@ -24,7 +24,7 @@
 			"type": "kotlin",
 			"request": "launch",
 			"name": "Debug KotlinDebugAdapter",
-			"projectRoot": "${workspaceFolder}",
+			"projectRoot": "${workspaceFolder}/adapter",
 			"mainClass": "fwcd.ktda.KDAMainKt"
 		}
 	]

@@ -10,12 +10,13 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"postinstall": "node ./node_modules/vscode/bin/install",
+		"packageextension": "vsce package",
 		"watch": "tsc -w",
 		"compile": "tsc"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/fwcd/KotlinDebugAdapter"
+		"url": "https://github.com/fwcd/KotlinDebugAdapter.git"
 	},
 	"keywords": [
 		"kotlin",
@@ -24,7 +25,7 @@
 	"categories": [
 		"Debuggers"
 	],
-	"icon": "Icon128.png",
+	"icon": "resources/Icon128.png",
 	"author": "fwcd",
 	"publisher": "fwcd",
 	"license": "MIT",

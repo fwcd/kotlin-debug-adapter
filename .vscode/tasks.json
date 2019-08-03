@@ -4,7 +4,7 @@
 		{
 			"label": "Compile Debug Adapter",
 			"type": "shell",
-			"command": "gradle installDist",
+			"command": "gradle :adapter:installDist",
 			"group": {
 				"kind": "build",
 				"isDefault": true

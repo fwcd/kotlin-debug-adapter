@@ -1,1 +1,3 @@
 rootProject.name = 'KotlinDebugAdapter'
+
+include 'adapter', 'editors:vscode'
