@@ -1,3 +1,10 @@
 rootProject.name = 'kotlin-debug-adapter'
 
 include 'adapter'
+
+sourceControl {
+	gitRepository('https://github.com/fwcd/KotlinLanguageServer.git') {
+		rootDir = "shared"
+		producesModule('fwcd.kotlin-language-server:shared')
+	}
+}
