@@ -1,3 +1,3 @@
-rootProject.name = 'KotlinDebugAdapter'
+rootProject.name = 'kotlin-debug-adapter'
 
 include 'adapter', 'editors:vscode'
