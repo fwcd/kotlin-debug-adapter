@@ -1,5 +1,5 @@
 package fwcd.ktda.core.event
 
-class BreakpointPauseEvent(
+class StepStopEvent(
 	val threadID: Long
 )

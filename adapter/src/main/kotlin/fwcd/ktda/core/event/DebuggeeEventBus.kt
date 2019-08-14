@@ -3,8 +3,8 @@ package fwcd.ktda.core.event
 import fwcd.ktda.util.ListenerList
 
 interface DebuggeeEventBus {
-	val exitListeners: ListenerList<StopEvent>
-	val breakpointListeners: ListenerList<BreakpointPauseEvent>
-	val stepListeners: ListenerList<StepPauseEvent>
-	var exceptionListeners: ListenerList<ExceptionPauseEvent>
+	val exitListeners: ListenerList<ExitEvent>
+	val breakpointListeners: ListenerList<BreakpointStopEvent>
+	val stepListeners: ListenerList<StepStopEvent>
+	var exceptionListeners: ListenerList<ExceptionStopEvent>
 }

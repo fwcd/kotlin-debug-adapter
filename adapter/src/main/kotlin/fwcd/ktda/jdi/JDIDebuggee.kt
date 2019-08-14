@@ -120,8 +120,8 @@ class JDIDebuggee(
 		return request != null
 	}
 	
-	override fun stop() {
-		LOG.info("Stopping JDI session")
+	override fun exit() {
+		LOG.info("Exiting JDI session")
 		try {
 			if (vm.process()?.isAlive() ?: false) {
 				vm.exit(0)

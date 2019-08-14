@@ -4,10 +4,10 @@ import fwcd.ktda.LOG
 import fwcd.ktda.util.ListenerList
 import fwcd.ktda.util.Subscription
 import fwcd.ktda.core.event.DebuggeeEventBus
-import fwcd.ktda.core.event.StopEvent
-import fwcd.ktda.core.event.BreakpointPauseEvent
-import fwcd.ktda.core.event.ExceptionPauseEvent
-import fwcd.ktda.core.event.StepPauseEvent
+import fwcd.ktda.core.event.ExitEvent
+import fwcd.ktda.core.event.BreakpointStopEvent
+import fwcd.ktda.core.event.ExceptionStopEvent
+import fwcd.ktda.core.event.StepStopEvent
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
 import com.sun.jdi.event.VMDeathEvent
@@ -25,10 +25,10 @@ import kotlin.reflect.KClass
 class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	private var exited = false
 	private val eventListeners = mutableMapOf<KClass<out JDIEvent>, ListenerList<VMEvent<JDIEvent>>>()
-	override val exitListeners = ListenerList<StopEvent>()
-	override val breakpointListeners = ListenerList<BreakpointPauseEvent>()
-	override val stepListeners = ListenerList<StepPauseEvent>()
-	override var exceptionListeners = ListenerList<ExceptionPauseEvent>()
+	override val exitListeners = ListenerList<ExitEvent>()
+	override val breakpointListeners = ListenerList<BreakpointStopEvent>()
+	override val stepListeners = ListenerList<StepStopEvent>()
+	override var exceptionListeners = ListenerList<ExceptionStopEvent>()
 	
 	init {
 		startAsyncPoller()
@@ -63,26 +63,26 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 			} catch (e: VMDisconnectedException) {
 				LOG.info("VMEventBus event poller terminated by disconnect: {}", e.message)
 			}
-			exitListeners.fire(StopEvent())
+			exitListeners.fire(ExitEvent())
 		}, "VMEventBus").start()
 	}
 	
 	private fun hookListeners() {
 		subscribe(com.sun.jdi.event.BreakpointEvent::class) {
-			breakpointListeners.fire(BreakpointPauseEvent(
+			breakpointListeners.fire(BreakpointStopEvent(
 				threadID = toThreadID(it.jdiEvent)
 			))
 			it.resumeThreads = false
 		}
 		subscribe(JDIStepEvent::class) {
-			stepListeners.fire(StepPauseEvent(
+			stepListeners.fire(StepStopEvent(
 				threadID = toThreadID(it.jdiEvent)
 			))
 			it.resumeThreads = false
 		}
 		subscribe(JDIExceptionEvent::class) {
 			val exception = it.jdiEvent.exception()
-			exceptionListeners.fire(ExceptionPauseEvent(
+			exceptionListeners.fire(ExceptionStopEvent(
 				threadID = toThreadID(it.jdiEvent),
 				exceptionName = exception.referenceType().name()
 			))

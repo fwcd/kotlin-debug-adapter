@@ -1,6 +1,6 @@
 package fwcd.ktda.core.event
 
-class ExceptionPauseEvent(
+class ExceptionStopEvent(
 	val threadID: Long,
 	val exceptionName: String
 )

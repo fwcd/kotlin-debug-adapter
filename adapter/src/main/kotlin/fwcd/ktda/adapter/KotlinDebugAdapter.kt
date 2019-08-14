@@ -21,8 +21,8 @@ import fwcd.ktda.util.waitUntil
 import fwcd.ktda.core.Debuggee
 import fwcd.ktda.core.DebugContext
 import fwcd.ktda.core.event.DebuggeeEventBus
-import fwcd.ktda.core.event.BreakpointPauseEvent
-import fwcd.ktda.core.event.StepPauseEvent
+import fwcd.ktda.core.event.BreakpointStopEvent
+import fwcd.ktda.core.event.StepStopEvent
 import fwcd.ktda.core.stack.StackFrame
 import fwcd.ktda.core.launch.DebugLauncher
 import fwcd.ktda.core.launch.LaunchConfiguration
@@ -30,7 +30,6 @@ import fwcd.ktda.core.launch.AttachConfiguration
 import fwcd.ktda.core.breakpoint.ExceptionBreakpoint
 import fwcd.ktda.classpath.findClassPath
 import fwcd.ktda.classpath.findValidKtFilePath
-import fwcd.ktda.jdi.event.VMEventBus
 
 /** The debug server interface conforming to the Debug Adapter Protocol */
 class KotlinDebugAdapter(
@@ -222,7 +221,7 @@ class KotlinDebugAdapter(
 	override fun restart(args: RestartArguments): CompletableFuture<Void> = notImplementedDAPMethod()
 	
 	override fun disconnect(args: DisconnectArguments) = async.run {
-		debuggee?.stop()
+		debuggee?.exit()
 	}
 	
 	override fun setBreakpoints(args: SetBreakpointsArguments) = async.compute {

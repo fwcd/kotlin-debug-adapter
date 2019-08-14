@@ -16,7 +16,7 @@ interface Debuggee {
 	val stderr: InputStream?
 		get() = null
 	
-	fun stop()
+	fun exit()
 	
 	fun threadByID(id: Long): DebuggeeThread? = threads
 		.asSequence()
