@@ -121,7 +121,7 @@ class KotlinDebugAdapter(
 	
 	private fun setupDebuggeeListeners(debuggee: Debuggee) {
 		val eventBus = debuggee.eventBus
-		eventBus.stopListeners.add {
+		eventBus.exitListeners.add {
 			// TODO: Use actual exitCode instead
 			sendExitEvent(0L)
 		}
@@ -166,6 +166,7 @@ class KotlinDebugAdapter(
 		client!!.exited(ExitedEventArguments().also {
 			it.exitCode = exitCode
 		})
+		client!!.terminated(TerminatedEventArguments())
 		LOG.info("Sent exit event")
 	}
 	
