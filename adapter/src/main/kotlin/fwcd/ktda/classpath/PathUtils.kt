@@ -22,7 +22,7 @@ fun toJVMClassNames(filePath: String): List<String> {
 	// See https://github.com/JetBrains/kotlin-netbeans/blob/c3360e8c89c1d4dac1e6f18267052ff740705079/src/main/java/org/jetbrains/kotlin/debugger/KotlinDebugUtils.java#L166-L194
 	
 	val rawClassName = filePath.split(fileSeparator) // TODO: Use Project.sourcesRoot instead
-		.takeLastWhile { it != "kotlin" || it != "java" } // Assuming .../src/main/kotlin/... directory structure
+		.takeLastWhile { it != "kotlin" && it != "java" } // Assuming .../src/main/kotlin/... directory structure
 		.joinToString(separator = ".")
 	val className = sourceFileExtensions
 		.asSequence()
@@ -40,7 +40,6 @@ fun toJVMClassNames(filePath: String): List<String> {
 fun findValidKtFilePath(filePathToClass: Path, sourceName: String?) =
 	filePathToClass.resolveSibling(sourceName).ifExists()
 	?: filePathToClass.withExtension(".kt").ifExists()
-	?: filePathToClass
 
 private fun Path.ifExists() = if (Files.exists(this)) this else null
 

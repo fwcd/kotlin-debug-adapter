@@ -26,12 +26,20 @@ fun findClassPath(projectRoots: Collection<Path>): Set<Path> {
             .toSet()
     ).ifEmpty(::backupClassPath) +
         projectRoots
-            .flatMap { listOf(
-                resolveIfExists(it, "build", "classes", "kotlin", "main"),
-                resolveIfExists(it, "target", "classes", "kotlin", "main")
-            ) }
+            .flatMap { findCompiledClassFolders(it) }
             .filterNotNull()
 }
+
+private val buildDirs = setOf("build", "target")
+
+private fun findCompiledClassFolders(projectRoot: Path): Collection<Path> = Files.list(projectRoot)
+    .filter { it.fileName.toString() in buildDirs }
+    .flatMap(Files::list)
+    .filter { it.fileName.toString() == "classes" }
+    .flatMap(Files::list) // kotlin, java
+    .flatMap(Files::list) // main, test
+    .filter { Files.isDirectory(it) }
+    .collect(Collectors.toList())
 
 private fun resolveIfExists(root: Path, vararg segments: String): Path? {
     var result = root

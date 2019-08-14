@@ -15,9 +15,11 @@ import com.sun.jdi.connect.LaunchingConnector
 import com.sun.jdi.connect.AttachingConnector
 import java.io.File
 import java.nio.file.Path
+import java.nio.file.Files
 import java.net.URLEncoder
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.util.stream.Collectors
 
 class JDILauncher(
 	private val attachTimeout: Int = 50,
@@ -33,7 +35,7 @@ class JDILauncher(
 		LOG.info("Starting JVM debug session with main class {}", config.mainClass)
 		return JDIDebuggee(
 			connector.launch(createLaunchArgs(config, connector)) ?: throw KotlinDAException("Could not launch a new VM"),
-			sourcesRootOf(config.projectRoot),
+			sourcesRootsOf(config.projectRoot),
 			context
 		)
 	}
@@ -43,7 +45,7 @@ class JDILauncher(
 		LOG.info("Attaching JVM debug session on {}:{}", config.hostName, config.port)
 		return JDIDebuggee(
 			connector.attach(createAttachArgs(config, connector)) ?: throw KotlinDAException("Could not attach the VM"),
-			sourcesRootOf(config.projectRoot),
+			sourcesRootsOf(config.projectRoot),
 			context
 		)
 	}
@@ -72,7 +74,11 @@ class JDILauncher(
 		.firstOrNull() // TODO: Investigate whether this connector works fine on JDK 10+
 		?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
 	
-	private fun sourcesRootOf(projectRoot: Path) = projectRoot.resolve("src").resolve("main").resolve("kotlin")
+	private fun sourcesRootsOf(projectRoot: Path): Set<Path> = projectRoot.resolve("src")
+		.let(Files::list) // main, test
+		.flatMap(Files::list) // kotlin, java
+		.filter { Files.isDirectory(it) }
+		.collect(Collectors.toSet())
 	
 	private fun formatOptions(config: LaunchConfiguration): String {
 		var options = ""

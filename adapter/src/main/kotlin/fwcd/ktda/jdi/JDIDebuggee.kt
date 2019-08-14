@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets
 
 class JDIDebuggee(
 	private val vm: VirtualMachine,
-	private val sourcesRoot: Path,
+	private val sourcesRoots: Set<Path>,
 	private val context: DebugContext
 ) : Debuggee, JDISessionContext {
 	override val threads = ObservableList<DebuggeeThread>()
@@ -134,9 +134,12 @@ class JDIDebuggee(
 		val sourcePath = location.sourcePath()
 		val sourceName = location.sourceName()
 		
-		return sourcePath
-			?.let(sourcesRoot::resolve)
-			?.let { findValidKtFilePath(it, sourceName) }
+		return sourcesRoots
+			.asSequence()
+			.map { it.resolve(sourcePath) }
+			.orEmpty()
+			.mapNotNull { findValidKtFilePath(it, sourceName) }
+			.firstOrNull()
 			?.let { Source(
 				name = sourceName ?: it.fileName.toString(),
 				filePath = it
