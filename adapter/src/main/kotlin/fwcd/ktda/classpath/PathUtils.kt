@@ -7,6 +7,7 @@ import java.nio.file.Paths
 import java.nio.file.Path
 
 private val fileSeparator by lazy { "[/\\\\]".toRegex() }
+private val sourceFileExtensions = setOf(".kt", ".kts", ".java")
 
 /**
  * Converts a file path to multiple possible JVM class names.
@@ -21,13 +22,13 @@ fun toJVMClassNames(filePath: String): List<String> {
 	// See https://github.com/JetBrains/kotlin-netbeans/blob/c3360e8c89c1d4dac1e6f18267052ff740705079/src/main/java/org/jetbrains/kotlin/debugger/KotlinDebugUtils.java#L166-L194
 	
 	val rawClassName = filePath.split(fileSeparator) // TODO: Use Project.sourcesRoot instead
-		.takeLastWhile { it != "kotlin" } // Assuming .../src/main/kotlin/... directory structure
+		.takeLastWhile { it != "kotlin" || it != "java" } // Assuming .../src/main/kotlin/... directory structure
 		.joinToString(separator = ".")
-	val className = if (filePath.endsWith(".kt")) {
-			rawClassName.dropLast(3)
-		} else if (filePath.endsWith(".kts")) {
-			rawClassName.dropLast(4)
-		} else throw IllegalArgumentException("Can't convert non-Kotlin source file '" + filePath + "' to JVM class name")
+	val className = sourceFileExtensions
+		.asSequence()
+		.find { filePath.endsWith(it) }
+		?.let { rawClassName.dropLast(it.length) }
+		?: throw IllegalArgumentException("Can't convert unrecognized source file '" + filePath + "' to JVM class name")
 	val ktClassName = className
 		.capitalizeCharAt(className.lastIndexOf(".") + 1) + "Kt" // Class name to PascalCase
 	
@@ -36,10 +37,10 @@ fun toJVMClassNames(filePath: String): List<String> {
 
 // TODO: Better path resolution, especially when dealing with
 // *.class files inside JARs
-fun findValidKtFilePath(filePathToClass: Path) = firstNonNull(
-	{ filePathToClass.ifExists() },
-	{ filePathToClass.withExtension(".kt").ifExists() }
-) ?: filePathToClass
+fun findValidKtFilePath(filePathToClass: Path, sourceName: String?) =
+	filePathToClass.resolveSibling(sourceName).ifExists()
+	?: filePathToClass.withExtension(".kt").ifExists()
+	?: filePathToClass
 
 private fun Path.ifExists() = if (Files.exists(this)) this else null
 

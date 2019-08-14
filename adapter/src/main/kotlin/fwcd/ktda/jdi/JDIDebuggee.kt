@@ -130,11 +130,16 @@ class JDIDebuggee(
 	override fun positionOf(location: Location): Position? = sourceOf(location)
 		?.let { Position(it, location.lineNumber().toLong()) }
 	
-	private fun sourceOf(location: Location): Source? = location.sourcePath()
-		?.let(sourcesRoot::resolve)
-		?.let(::findValidKtFilePath)
-		?.let { Source(
-			name = location.sourceName() ?: it.fileName.toString(),
-			filePath = it
-		) }
+	private fun sourceOf(location: Location): Source? {
+		val sourcePath = location.sourcePath()
+		val sourceName = location.sourceName()
+		
+		return sourcePath
+			?.let(sourcesRoot::resolve)
+			?.let { findValidKtFilePath(it, sourceName) }
+			?.let { Source(
+				name = sourceName ?: it.fileName.toString(),
+				filePath = it
+			) }
+	}
 }
