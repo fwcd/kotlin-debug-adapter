@@ -2,18 +2,6 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"type": "extensionHost",
-			"request": "launch",
-			"name": "Extension",
-			"runtimeExecutable": "${execPath}",
-			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}/editors/vscode"
-			],
-			"outFiles": [
-				"${workspaceFolder}/editors/vscode/out/**/*.js"
-			]
-		},
-		{
 			"type": "java",
 			"name": "Java Debug (Attach)",
 			"request": "attach",

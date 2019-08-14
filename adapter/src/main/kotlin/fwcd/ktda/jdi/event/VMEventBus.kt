@@ -44,7 +44,7 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 					var resumeThreads = true
 					
 					for (event in eventSet) {
-						// LOG.info("VM Event: {}", event::class.simpleName) // DEBUG
+						LOG.debug("VM Event: {}", event)
 						if (event is VMDeathEvent) {
 							exited = true
 							resumeThreads = false
@@ -64,7 +64,7 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 				LOG.info("VMEventBus event poller terminated by disconnect: {}", e.message)
 			}
 			exitListeners.fire(ExitEvent())
-		}, "VMEventBus").start()
+		}, "eventBus").start()
 	}
 	
 	private fun hookListeners() {
