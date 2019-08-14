@@ -127,10 +127,10 @@ class JDIDebuggee(
 		}
 	}
 	
-	override fun positionOf(location: Location): Position? = extractSource(location)
+	override fun positionOf(location: Location): Position? = sourceOf(location)
 		?.let { Position(it, location.lineNumber().toLong()) }
 	
-	private fun extractSource(location: Location): Source? = location.sourcePath()
+	private fun sourceOf(location: Location): Source? = location.sourcePath()
 		?.let(sourcesRoot::resolve)
 		?.let(::findValidKtFilePath)
 		?.let { Source(
