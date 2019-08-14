@@ -30,6 +30,13 @@ dependencies {
 	testImplementation 'junit:junit:4.12'
 }
 
+task fixFilePermissions(type: Exec) {
+	// When running on macOS or Linux the start script
+	// needs executable permissions to run.
+	onlyIf { !System.getProperty('os.name').toLowerCase().contains('windows') }
+	commandLine 'chmod', '+x', "${installDist.destinationDir}/bin/kotlin-debug-adapter"
+}
+
 test {
 	testLogging {
 		events 'failed'
@@ -41,11 +48,8 @@ run {
 	standardInput = System.in
 }
 
-task fixFilePermissions(type: Exec) {
-	// When running on macOS or Linux the start script
-	// needs executable permissions to run.
-	onlyIf { !System.getProperty('os.name').toLowerCase().contains('windows') }
-	commandLine 'chmod', '+x', "${installDist.destinationDir}/bin/kotlin-debug-adapter"
+distZip {
+	archiveName = "${project.name}.zip"
 }
 
 installDist.finalizedBy fixFilePermissions
