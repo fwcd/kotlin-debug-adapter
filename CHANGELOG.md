@@ -1,5 +1,8 @@
 # Change Log
-All notable changes to the KotlinDebugAdapter will be documented in this file.
+All notable changes to the debug adapter will be documented in this file.
+
+## [0.2.2]
+- Move VSCode extension into external repository
 
 ## [0.2.1]
 - Bugfixes to the variable list
