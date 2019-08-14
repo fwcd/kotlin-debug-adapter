@@ -13,7 +13,6 @@ import com.sun.jdi.VirtualMachineManager
 import com.sun.jdi.connect.Connector
 import com.sun.jdi.connect.LaunchingConnector
 import com.sun.jdi.connect.AttachingConnector
-import com.sun.tools.jdi.SunCommandLineLauncher
 import java.io.File
 import java.nio.file.Path
 import java.net.URLEncoder
@@ -70,11 +69,8 @@ class JDILauncher(
 		?: throw KotlinDAException("Could not find an attaching connector (for a new debuggee VM)")
 	
 	private fun createLaunchConnector(): LaunchingConnector = vmManager.launchingConnectors()
-		.let { connectors ->
-			connectors.find { it is SunCommandLineLauncher }
-				?: connectors.firstOrNull()
-				?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
-		}
+		.firstOrNull() // TODO: Investigate whether this connector works fine on JDK 10+
+		?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
 	
 	private fun sourcesRootOf(projectRoot: Path) = projectRoot.resolve("src").resolve("main").resolve("kotlin")
 	
