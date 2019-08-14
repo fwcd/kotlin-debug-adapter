@@ -122,8 +122,12 @@ class JDIDebuggee(
 	
 	override fun stop() {
 		LOG.info("Stopping JDI session")
-		if (vm.process()?.isAlive() ?: true) {
-			vm.exit(0)
+		try {
+			if (vm.process()?.isAlive() ?: false) {
+				vm.exit(0)
+			}
+		} catch (e: VMDisconnectedException) {
+			// Ignore since we wanted to stop the VM anyway
 		}
 	}
 	
