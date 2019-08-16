@@ -25,5 +25,5 @@ private fun resolveIfExists(root: Path, vararg segments: String): Path? {
     for (segment in segments) {
         result = result.resolve(segment)
     }
-    return if (Files.exists(result)) result else null
+    return result.takeIf { Files.exists(it) }
 }
