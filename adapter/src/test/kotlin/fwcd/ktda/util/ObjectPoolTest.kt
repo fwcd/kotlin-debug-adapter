@@ -1,4 +1,4 @@
-package fwcd.ktda.util
+package org.javacs.ktda.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

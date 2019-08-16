@@ -6,7 +6,7 @@ plugins {
 
 version = projectVersion
 
-mainClassName = 'fwcd.ktda.KDAMainKt'
+mainClassName = 'org.javacs.ktda.KDAMainKt'
 description = 'Debug Adapter for Kotlin'
 
 sourceCompatibility = 1.8

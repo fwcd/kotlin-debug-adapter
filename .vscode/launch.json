@@ -13,7 +13,7 @@
 			"request": "launch",
 			"name": "Debug KotlinDebugAdapter",
 			"projectRoot": "${workspaceFolder}/adapter",
-			"mainClass": "fwcd.ktda.KDAMainKt"
+			"mainClass": "org.javacs.ktda.KDAMainKt"
 		}
 	]
 }
