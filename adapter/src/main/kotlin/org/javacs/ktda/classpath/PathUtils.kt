@@ -1,6 +1,6 @@
 package org.javacs.ktda.classpath
 
-import org.javacs.ktda.LOG
+import org.javacs.kt.LOG
 import org.javacs.ktda.util.firstNonNull
 import java.nio.file.Files
 import java.nio.file.Paths

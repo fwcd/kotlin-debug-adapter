@@ -1,6 +1,6 @@
 package org.javacs.ktda.jdi.event
 
-import org.javacs.ktda.LOG
+import org.javacs.kt.LOG
 import org.javacs.ktda.util.ListenerList
 import org.javacs.ktda.util.Subscription
 import org.javacs.ktda.core.event.DebuggeeEventBus

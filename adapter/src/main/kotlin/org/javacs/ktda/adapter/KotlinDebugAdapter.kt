@@ -11,12 +11,12 @@ import org.eclipse.lsp4j.debug.*
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
-import org.javacs.ktda.LOG
-import org.javacs.ktda.JSON_LOG
-import org.javacs.ktda.LogLevel
-import org.javacs.ktda.LogMessage
+import org.javacs.kt.LOG
+import org.javacs.kt.LogLevel
+import org.javacs.kt.LogMessage
+import org.javacs.kt.util.AsyncExecutor
+import org.javacs.ktda.util.JSON_LOG
 import org.javacs.ktda.util.KotlinDAException
-import org.javacs.ktda.util.AsyncExecutor
 import org.javacs.ktda.util.waitUntil
 import org.javacs.ktda.core.Debuggee
 import org.javacs.ktda.core.DebugContext

@@ -1,6 +1,6 @@
 package org.javacs.ktda.util
 
-import org.javacs.ktda.LOG
+import org.javacs.kt.LOG
 import java.nio.file.Path
 import java.nio.file.Paths
 

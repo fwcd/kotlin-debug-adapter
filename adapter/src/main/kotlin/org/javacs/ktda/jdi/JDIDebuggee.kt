@@ -9,7 +9,7 @@ import org.javacs.ktda.core.launch.LaunchConfiguration
 import org.javacs.ktda.core.event.DebuggeeEventBus
 import org.javacs.ktda.core.breakpoint.Breakpoint
 import org.javacs.ktda.core.breakpoint.ExceptionBreakpoint
-import org.javacs.ktda.LOG
+import org.javacs.kt.LOG
 import org.javacs.ktda.util.ObservableList
 import org.javacs.ktda.classpath.findValidKtFilePath
 import org.javacs.ktda.classpath.toJVMClassNames

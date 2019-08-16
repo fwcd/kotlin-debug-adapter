@@ -1,7 +1,7 @@
 package org.javacs.ktda.util
 
 import java.io.OutputStream
-import org.javacs.ktda.JSON_LOG
+import org.javacs.kt.util.DelegatePrintStream
 
 private val MESSAGE_FLUSH_MIN_LENGTH = 20
 

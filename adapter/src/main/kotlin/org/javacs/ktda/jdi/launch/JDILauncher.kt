@@ -1,6 +1,6 @@
 package org.javacs.ktda.jdi.launch
 
-import org.javacs.ktda.LOG
+import org.javacs.kt.LOG
 import org.javacs.ktda.core.launch.DebugLauncher
 import org.javacs.ktda.core.launch.LaunchConfiguration
 import org.javacs.ktda.core.launch.AttachConfiguration

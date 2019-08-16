@@ -2,7 +2,7 @@ package org.javacs.ktda.classpath
 
 import java.util.logging.Level
 import org.javacs.kt.SourceExclusions
-import org.javacs.ktda.LOG
+import org.javacs.kt.LOG
 import org.javacs.ktda.util.winCompatiblePathOf
 import org.javacs.ktda.util.tryResolving
 import org.javacs.ktda.util.firstNonNull
