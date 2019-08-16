@@ -28,7 +28,7 @@ import org.javacs.ktda.core.launch.DebugLauncher
 import org.javacs.ktda.core.launch.LaunchConfiguration
 import org.javacs.ktda.core.launch.AttachConfiguration
 import org.javacs.ktda.core.breakpoint.ExceptionBreakpoint
-import org.javacs.ktda.classpath.findClassPath
+import org.javacs.ktda.classpath.debugClassPathResolver
 import org.javacs.ktda.classpath.findValidKtFilePath
 
 /** The debug server interface conforming to the Debug Adapter Protocol */
@@ -92,7 +92,7 @@ class KotlinDebugAdapter(
 		setupCommonInitializationParams(args)
 		
 		val config = LaunchConfiguration(
-			findClassPath(listOf(projectRoot)),
+			debugClassPathResolver(listOf(projectRoot)).classpathOrEmpty,
 			mainClass,
 			projectRoot
 		)
