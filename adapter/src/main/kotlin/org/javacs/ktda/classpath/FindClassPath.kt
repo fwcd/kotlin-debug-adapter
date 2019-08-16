@@ -1,6 +1,7 @@
 package org.javacs.ktda.classpath
 
 import java.util.logging.Level
+import org.javacs.kt.SourceExclusions
 import org.javacs.ktda.LOG
 import org.javacs.ktda.util.winCompatiblePathOf
 import org.javacs.ktda.util.tryResolving
@@ -61,10 +62,10 @@ private fun backupClassPath() =
     listOfNotNull(findKotlinStdlib()).toSet()
 
 private fun projectFiles(workspaceRoot: Path): Set<Path> {
-    val exclusions = setOf("bin", "build") // TODO: Use SourceExclusions from kotlin-language-server's shared module
+    val exclusions = SourceExclusions(workspaceRoot)
     return workspaceRoot.toFile()
             .walk()
-            .onEnter { it.name !in exclusions }
+            .onEnter { exclusions.isIncluded(it.toPath()) }
             .map { it.toPath() }
             .filter { isMavenBuildFile(it) || isGradleBuildFile(it) }
             .toSet()
