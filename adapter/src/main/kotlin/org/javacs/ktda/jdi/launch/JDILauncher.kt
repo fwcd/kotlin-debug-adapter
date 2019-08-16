@@ -33,11 +33,14 @@ class JDILauncher(
 	override fun launch(config: LaunchConfiguration, context: DebugContext): JDIDebuggee {
 		val connector = createLaunchConnector()
 		LOG.info("Starting JVM debug session with main class {}", config.mainClass)
-		return JDIDebuggee(
-			connector.launch(createLaunchArgs(config, connector)) ?: throw KotlinDAException("Could not launch a new VM"),
-			sourcesRootsOf(config.projectRoot),
-			context
-		)
+		
+		LOG.debug("Launching VM")
+		val vm = connector.launch(createLaunchArgs(config, connector)) ?: throw KotlinDAException("Could not launch a new VM")
+		
+		LOG.debug("Finding sourcesRoots")
+		val sourcesRoots = sourcesRootsOf(config.projectRoot)
+		
+		return JDIDebuggee(vm, sourcesRoots, context)
 	}
 	
 	override fun attach(config: AttachConfiguration, context: DebugContext): JDIDebuggee {

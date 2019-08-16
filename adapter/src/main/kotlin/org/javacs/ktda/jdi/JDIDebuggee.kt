@@ -46,7 +46,10 @@ class JDIDebuggee(
 		stdout = process?.inputStream
 		stderr = process?.errorStream
 		
+		LOG.trace("Updating threads")
 		updateThreads()
+		
+		LOG.trace("Updating breakpoints")
 		hookBreakpoints()
 	}
 	

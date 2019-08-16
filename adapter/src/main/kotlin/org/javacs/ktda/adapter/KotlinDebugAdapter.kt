@@ -100,6 +100,7 @@ class KotlinDebugAdapter(
 			config,
 			context
 		).also(::setupDebuggeeListeners)
+		LOG.trace("Instantiated debuggee")
 	}
 	
 	private fun missingRequestArgument(requestName: String, argumentName: String) =
@@ -133,12 +134,13 @@ class KotlinDebugAdapter(
 		eventBus.exceptionListeners.add {
 			sendStopEvent(it.threadID, StoppedEventArgumentsReason.EXCEPTION)
 		}
-		stdoutAsync.run {
+		stdoutAsync.execute {
 			debuggee.stdout?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDOUT) }
 		}
-		stderrAsync.run {
+		stderrAsync.execute {
 			debuggee.stderr?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDERR) }
 		}
+		LOG.trace("Configured debuggee listeners")
 	}
 	
 	private fun pipeStreamToOutput(stream: InputStream, outputCategory: String) {
