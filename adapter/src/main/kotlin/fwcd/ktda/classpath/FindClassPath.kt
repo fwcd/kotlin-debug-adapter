@@ -61,9 +61,13 @@ private fun backupClassPath() =
     listOfNotNull(findKotlinStdlib()).toSet()
 
 private fun projectFiles(workspaceRoot: Path): Set<Path> {
-    return Files.walk(workspaceRoot)
+    val exclusions = setOf("bin", "build") // TODO: Use SourceExclusions from kotlin-language-server's shared module
+    return workspaceRoot.toFile()
+            .walk()
+            .onEnter { it.name !in exclusions }
+            .map { it.toPath() }
             .filter { isMavenBuildFile(it) || isGradleBuildFile(it) }
-            .collect(Collectors.toSet())
+            .toSet()
 }
 
 private fun readLaunchConfigurationFile(file: Path): Set<Path> {
