@@ -17,7 +17,7 @@ import org.javacs.kt.LogMessage
 import org.javacs.kt.util.AsyncExecutor
 import org.javacs.ktda.util.JSON_LOG
 import org.javacs.ktda.util.KotlinDAException
-import org.javacs.ktda.util.waitUntil
+import org.javacs.ktda.util.waitFor
 import org.javacs.ktda.core.Debuggee
 import org.javacs.ktda.core.DebugContext
 import org.javacs.ktda.core.event.DebuggeeEventBus
@@ -114,7 +114,7 @@ class KotlinDebugAdapter(
 		// (LSP4J does currently not provide a mechanism to hook into the request/response machinery)
 		
 		LOG.trace("Waiting for configurationDoneResponse")
-		waitUntil { (configurationDoneResponse?.numberOfDependents ?: 0) != 0 }
+		waitFor("configuration done response") { (configurationDoneResponse?.numberOfDependents ?: 0) != 0 }
 		LOG.trace("Done waiting for configurationDoneResponse")
 	}
 	
@@ -373,7 +373,7 @@ class KotlinDebugAdapter(
 	}
 	
 	private inline fun <T> onceDebuggeeIsPresent(body: (Debuggee) -> T): T {
-		waitUntil { debuggee != null }
+		waitFor("debuggee") { debuggee != null }
 		return body(debuggee!!)
 	}
 	

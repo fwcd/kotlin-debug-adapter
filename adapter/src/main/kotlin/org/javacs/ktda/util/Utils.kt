@@ -50,9 +50,19 @@ fun <T> nonNull(item: T?, errorMsgIfNull: String): T =
  * Blocks the current thread until the condition becomes true.
  * Checks are performed in 80 ms intervals.
  */
-inline fun waitUntil(condition: () -> Boolean) {
+inline fun waitFor(what: String, condition: () -> Boolean) {
+    val delayUntilNotificationMs = 10_000
+    val startTime = System.currentTimeMillis()
+    var lastTime = startTime
+    
     while (!condition()) {
         Thread.sleep(80)
+        
+        val now = System.currentTimeMillis()
+        if ((now - lastTime) > delayUntilNotificationMs) {
+            LOG.info("Waiting for {} for {} seconds...", what, (now - startTime) / 1000)
+            lastTime = now
+        }
     }
 }
 
