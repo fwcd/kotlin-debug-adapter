@@ -80,7 +80,7 @@ class KotlinDebugAdapter(
 		return response
 	}
 	
-	override fun launch(args: Map<String, Any>) = launcherAsync.run {
+	override fun launch(args: Map<String, Any>) = launcherAsync.execute {
 		performInitialization()
 		
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
@@ -169,7 +169,7 @@ class KotlinDebugAdapter(
 		LOG.info("Sent exit event")
 	}
 	
-	override fun attach(args: Map<String, Any>) = async.run {
+	override fun attach(args: Map<String, Any>) = async.execute {
 		performInitialization()
 		
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
@@ -220,7 +220,7 @@ class KotlinDebugAdapter(
 	
 	override fun restart(args: RestartArguments): CompletableFuture<Void> = notImplementedDAPMethod()
 	
-	override fun disconnect(args: DisconnectArguments) = async.run {
+	override fun disconnect(args: DisconnectArguments) = async.execute {
 		debuggee?.exit()
 	}
 	
@@ -245,7 +245,7 @@ class KotlinDebugAdapter(
 	
 	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> = notImplementedDAPMethod()
 	
-	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments) = async.run {
+	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments) = async.execute {
 		args.filters
 			.map(converter::toInternalExceptionBreakpoint)
 			.toSet()
@@ -263,15 +263,15 @@ class KotlinDebugAdapter(
 		}
 	}
 	
-	override fun next(args: NextArguments) = async.run {
+	override fun next(args: NextArguments) = async.execute {
 		debuggee!!.threadByID(args.threadId)?.stepOver()
 	}
 	
-	override fun stepIn(args: StepInArguments) = async.run {
+	override fun stepIn(args: StepInArguments) = async.execute {
 		debuggee!!.threadByID(args.threadId)?.stepInto()
 	}
 	
-	override fun stepOut(args: StepOutArguments) = async.run {
+	override fun stepOut(args: StepOutArguments) = async.execute {
 		debuggee!!.threadByID(args.threadId)?.stepOut()
 	}
 	
@@ -283,7 +283,7 @@ class KotlinDebugAdapter(
 	
 	override fun goto_(args: GotoArguments): CompletableFuture<Void> = notImplementedDAPMethod()
 	
-	override fun pause(args: PauseArguments) = async.run {
+	override fun pause(args: PauseArguments) = async.execute {
 		val threadId = args.threadId
 		val success = debuggee!!.threadByID(threadId)?.pause()
 		if (success ?: false) {
