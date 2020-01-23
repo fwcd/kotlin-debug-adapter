@@ -79,6 +79,7 @@ class JDILauncher(
 	
 	private fun sourcesRootsOf(projectRoot: Path): Set<Path> = projectRoot.resolve("src")
 		.let(Files::list) // main, test
+		.filter { Files.isDirectory(it) }
 		.flatMap(Files::list) // kotlin, java
 		.filter { Files.isDirectory(it) }
 		.collect(Collectors.toSet())
