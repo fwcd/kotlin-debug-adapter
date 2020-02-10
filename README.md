@@ -7,7 +7,7 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that prov
 
 ![Icon](Icon128.png)
 
-Any editor conforming to DAP is supported, including [VSCode](https://github.com/fwcd/vscode-kotlin-ide).
+Any editor conforming to DAP is supported, including [VSCode](https://github.com/fwcd/vscode-kotlin).
 
 ## Getting Started
 * See [BUILDING.md](BUILDING.md) for build instructions
