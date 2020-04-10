@@ -4,7 +4,7 @@ A [debug adapter](https://microsoft.github.io/debug-adapter-protocol/) that prov
 [![Release](https://img.shields.io/github/release/fwcd/kotlin-debug-adapter)](https://github.com/fwcd/kotlin-debug-adapter/releases)
 [![Build Status](https://travis-ci.org/fwcd/kotlin-debug-adapter.svg?branch=master)](https://travis-ci.org/fwcd/kotlin-debug-adapter)
 [![Downloads](https://img.shields.io/github/downloads/fwcd/kotlin-debug-adapter/total)](https://github.com/fwcd/kotlin-debug-adapter/releases)
-[![Chat](https://img.shields.io/badge/chat-on%20discord-7289da)](https://discord.gg/fDGMeJ)
+[![Chat](https://img.shields.io/badge/chat-on%20discord-7289da)](https://discord.gg/cNtppzN)
 
 ![Icon](Icon128.png)
 
