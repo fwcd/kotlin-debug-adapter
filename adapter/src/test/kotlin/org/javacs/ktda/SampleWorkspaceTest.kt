@@ -22,6 +22,7 @@ import java.util.concurrent.Semaphore
  */
 class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt") {
     private val semaphore = Semaphore(0)
+    private var asyncException: Throwable? = null
 
     @Test fun testBreakpointsAndVariables() {
         debugAdapter.setBreakpoints(SetBreakpointsArguments().apply {
@@ -40,8 +41,10 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
                 line = 8
             })
         }).join()
+
         launch()
         semaphore.acquire() // Wait for the end
+        asyncException?.let { throw it }
     }
 
     override fun stopped(args: StoppedEventArguments) {
@@ -70,6 +73,8 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
             }).join()
 
             assertThat(members.variables.map { Pair(it.name, it.value) }, contains(Pair("member", "test")))
+        } catch (e: Throwable) {
+            asyncException = e
         } finally {
             semaphore.release()
         }
