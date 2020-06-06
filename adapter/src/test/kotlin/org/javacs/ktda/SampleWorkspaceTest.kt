@@ -10,8 +10,9 @@ import org.eclipse.lsp4j.debug.StoppedEventArguments
 import org.eclipse.lsp4j.debug.VariablesArguments
 import org.junit.Assert.assertThat
 import org.junit.Test
-import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.nullValue
 import org.hamcrest.Matchers.not
 import java.util.concurrent.Semaphore
@@ -55,24 +56,25 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
             val stackTrace = debugAdapter.stackTrace(StackTraceArguments().apply {
                 threadId = args.threadId
             }).join()
-            val topFrame = stackTrace.stackFrames.first()
-            val scopes = debugAdapter.scopes(ScopesArguments().apply {
-                frameId = topFrame.id
-            }).join()
-            val scope = scopes.scopes.first()
-            val variables = debugAdapter.variables(VariablesArguments().apply {
-                variablesReference = scope.variablesReference
-            }).join()
-            val receiver = variables.variables.find { it.name == "this" }
+            val locals = stackTrace.stackFrames.asSequence().flatMap {
+                debugAdapter.scopes(ScopesArguments().apply {
+                    frameId = it.id
+                }).join().scopes.asSequence().flatMap {
+                    debugAdapter.variables(VariablesArguments().apply {
+                        variablesReference = it.variablesReference
+                    }).join().variables.asSequence()
+                }
+            }.toList()
+            val receiver = locals.find { it.name == "this" }
             
-            assertThat(variables.variables.map { Pair(it.name, it.value) }, contains(Pair("local", "123")))
+            assertThat(locals.map { Pair(it.name, it.value) }, hasItem(Pair("local", "123")))
             assertThat(receiver, not(nullValue()))
 
             val members = debugAdapter.variables(VariablesArguments().apply {
                 variablesReference = receiver!!.variablesReference
-            }).join()
+            }).join().variables
 
-            assertThat(members.variables.map { Pair(it.name, it.value) }, contains(Pair("member", "test")))
+            assertThat(members.map { Pair(it.name, it.value) }, containsInAnyOrder(Pair("member", "\"test\"")))
         } catch (e: Throwable) {
             asyncException = e
         } finally {

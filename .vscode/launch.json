@@ -14,6 +14,13 @@
 			"name": "Debug KotlinDebugAdapter",
 			"projectRoot": "${workspaceFolder}/adapter",
 			"mainClass": "org.javacs.ktda.KDAMainKt"
+		},
+		{
+			"type": "kotlin",
+			"request": "launch",
+			"name": "Debug Sample Workspace",
+			"projectRoot": "${workspaceFolder}/adapter/src/test/resources/sample-workspace",
+			"mainClass": "sample.workspace.AppKt"
 		}
 	]
 }
