@@ -1,0 +1,1 @@
+Anchor for finding the test/resources directory.

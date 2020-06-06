@@ -15,7 +15,7 @@ abstract class DebugAdapterTestFixture(
     relativeWorkspaceRoot: String,
     private val mainClass: String
 ) : IDebugProtocolClient {
-    val absoluteWorkspaceRoot: Path = Paths.get(DebugAdapterTestFixture::class.java.getResource("/").toURI()).resolve(relativeWorkspaceRoot)
+    val absoluteWorkspaceRoot: Path = Paths.get(DebugAdapterTestFixture::class.java.getResource("/Anchor.txt").toURI()).parent.resolve(relativeWorkspaceRoot)
     val debugAdapter: KotlinDebugAdapter = JDILauncher()
         .let(::KotlinDebugAdapter)
         .also {
