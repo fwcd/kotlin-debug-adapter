@@ -74,7 +74,8 @@ class JDILauncher(
 		?: throw KotlinDAException("Could not find an attaching connector (for a new debuggee VM)")
 	
 	private fun createLaunchConnector(): LaunchingConnector = vmManager.launchingConnectors()
-		.firstOrNull() // TODO: Investigate whether this connector works fine on JDK 10+
+		// Workaround for JDK 11+ where the first launcher (RawCommandLineLauncher) does not properly support args
+		.let { it.find { it.javaClass.name == "com.sun.tools.jdi.SunCommandLineLauncher" } ?: it.firstOrNull() }
 		?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
 	
 	private fun sourcesRootsOf(projectRoot: Path): Set<Path> = projectRoot.resolve("src")
