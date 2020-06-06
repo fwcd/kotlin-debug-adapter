@@ -24,6 +24,7 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
     @Test fun testBreakpointsAndVariables() {
         debugAdapter.setBreakpoints(SetBreakpointsArguments().apply {
             source = Source().apply {
+                name = "App.kt"
                 path = absoluteWorkspaceRoot
                     .resolve("src")
                     .resolve("main")
@@ -36,7 +37,7 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
             breakpoints = arrayOf(SourceBreakpoint().apply {
                 line = 8
             })
-        })
+        }).join()
         launch()
         semaphore.acquire() // Wait for the end
     }
