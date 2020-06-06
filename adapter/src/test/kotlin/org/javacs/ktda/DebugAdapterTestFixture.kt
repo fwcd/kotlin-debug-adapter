@@ -8,7 +8,7 @@ import org.javacs.ktda.jdi.launch.JDILauncher
 import org.junit.AfterClass
 
 abstract class DebugAdapterTestFixture(relativeWorkspaceRoot: String) {
-    private val absoluteWorkspaceRoot: Path = Paths.get(DebugAdapterTestFixture::class.java.getResource("/$relativeWorkspaceRoot").toURI())
+    val absoluteWorkspaceRoot: Path = Paths.get(DebugAdapterTestFixture::class.java.getResource("/").toURI()).resolve(relativeWorkspaceRoot)
     val debugAdapter: KotlinDebugAdapter = JDILauncher()
         .let(::KotlinDebugAdapter)
         .also { it.launch(mapOf(
