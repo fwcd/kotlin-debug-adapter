@@ -1,7 +1,6 @@
 plugins {
 	id 'org.jetbrains.kotlin.jvm'
 	id 'application'
-	id 'maven'
 }
 
 version = projectVersion
@@ -51,7 +50,7 @@ run {
 }
 
 distZip {
-	archiveName = "${project.name}.zip"
+	archiveFileName = "${project.name}.zip"
 }
 
 installDist.finalizedBy fixFilePermissions
