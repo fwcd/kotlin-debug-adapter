@@ -12,6 +12,8 @@ import org.junit.Assert.assertThat
 import org.junit.Test
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.nullValue
+import org.hamcrest.Matchers.not
 import java.util.concurrent.Semaphore
 
 /**
@@ -43,25 +45,33 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
     }
 
     override fun stopped(args: StoppedEventArguments) {
-        assertThat(args.reason, equalTo("breakpoint"))
+        try {
+            assertThat(args.reason, equalTo("breakpoint"))
 
-        // Query information about the debuggee's current state
-        val stackTrace = debugAdapter.stackTrace(StackTraceArguments().apply {
-            threadId = args.threadId
-        }).join()
-        val topFrame = stackTrace.stackFrames.first()
-        val scopes = debugAdapter.scopes(ScopesArguments().apply {
-            frameId = topFrame.id
-        }).join()
-        val scope = scopes.scopes.first()
-        val variables = debugAdapter.variables(VariablesArguments().apply {
-            variablesReference = scope.variablesReference
-        }).join()
-        
-        assertThat(variables.variables.map { Pair(it.name, it.value) }, contains(
-            Pair("member", "\"test\""),
-            Pair("local", "123")
-        ))
-        semaphore.release()
+            // Query information about the debuggee's current state
+            val stackTrace = debugAdapter.stackTrace(StackTraceArguments().apply {
+                threadId = args.threadId
+            }).join()
+            val topFrame = stackTrace.stackFrames.first()
+            val scopes = debugAdapter.scopes(ScopesArguments().apply {
+                frameId = topFrame.id
+            }).join()
+            val scope = scopes.scopes.first()
+            val variables = debugAdapter.variables(VariablesArguments().apply {
+                variablesReference = scope.variablesReference
+            }).join()
+            val receiver = variables.variables.find { it.name == "this" }
+            
+            assertThat(variables.variables.map { Pair(it.name, it.value) }, contains(Pair("local", "123")))
+            assertThat(receiver, not(nullValue()))
+
+            val members = debugAdapter.variables(VariablesArguments().apply {
+                variablesReference = receiver!!.variablesReference
+            }).join()
+
+            assertThat(members.variables.map { Pair(it.name, it.value) }, contains(Pair("member", "test")))
+        } finally {
+            semaphore.release()
+        }
     }
 }
