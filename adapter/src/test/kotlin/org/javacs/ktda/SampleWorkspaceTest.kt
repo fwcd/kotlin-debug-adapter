@@ -15,14 +15,14 @@ import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.nullValue
 import org.hamcrest.Matchers.not
-import java.util.concurrent.Semaphore
+import java.util.concurrent.CountDownLatch
 
 /**
  * Tests a very basic debugging scenario
  * using a sample application.
  */
 class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt") {
-    private val semaphore = Semaphore(0)
+    private val latch = CountDownLatch(1)
     private var asyncException: Throwable? = null
 
     @Test fun testBreakpointsAndVariables() {
@@ -44,7 +44,7 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
         }).join()
 
         launch()
-        semaphore.acquire() // Wait for the end
+        latch.await() // Wait for the breakpoint event to finish
         asyncException?.let { throw it }
     }
 
@@ -78,7 +78,7 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
         } catch (e: Throwable) {
             asyncException = e
         } finally {
-            semaphore.release()
+            latch.countDown()
         }
     }
 }
