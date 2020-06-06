@@ -1,6 +1,7 @@
 plugins {
 	id 'org.jetbrains.kotlin.jvm'
 	id 'application'
+	id 'com.jaredsburrows.license' version '0.8.42'
 }
 
 version = projectVersion
