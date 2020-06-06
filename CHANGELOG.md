@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to the debug adapter will be documented in this file.
 
+## [0.2.7]
+- Add JDK 11+ support
+
 ## [0.2.6]
 - Support for stepping into Java classes
 - Automatic termination of the debugger once the VM exits
