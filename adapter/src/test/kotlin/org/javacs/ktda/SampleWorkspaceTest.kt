@@ -13,13 +13,16 @@ import org.junit.Assert.assertThat
 import org.junit.Test
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
+import java.util.concurrent.Semaphore
 
 /**
  * Tests a very basic debugging scenario
  * using a sample application.
  */
-class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace") {
-    @Test private fun testBreakpointsAndVariables() {
+class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt") {
+    @Test fun testBreakpointsAndVariables() {
+        val semaphore = Semaphore(0)
+
         debugAdapter.connect(object : IDebugProtocolClient {
             override fun stopped(args: StoppedEventArguments) {
                 assertThat(args.reason, equalTo("breakpoint"))
@@ -41,6 +44,7 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace") {
                     Pair("member", "\"test\""),
                     Pair("local", "123")
                 ))
+                semaphore.release()
             }
         })
         debugAdapter.setBreakpoints(SetBreakpointsArguments().apply {
@@ -58,5 +62,7 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace") {
                 line = 8
             })
         })
+        launch()
+        semaphore.acquire() // Wait for the end
     }
 }

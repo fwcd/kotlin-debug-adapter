@@ -5,18 +5,21 @@ import java.nio.file.Paths
 import org.eclipse.lsp4j.debug.DisconnectArguments
 import org.javacs.ktda.adapter.KotlinDebugAdapter
 import org.javacs.ktda.jdi.launch.JDILauncher
-import org.junit.AfterClass
+import org.junit.After
 
-abstract class DebugAdapterTestFixture(relativeWorkspaceRoot: String) {
+abstract class DebugAdapterTestFixture(relativeWorkspaceRoot: String, mainClass: String) {
     val absoluteWorkspaceRoot: Path = Paths.get(DebugAdapterTestFixture::class.java.getResource("/").toURI()).resolve(relativeWorkspaceRoot)
     val debugAdapter: KotlinDebugAdapter = JDILauncher()
         .let(::KotlinDebugAdapter)
-        .also { it.launch(mapOf(
+    
+    fun launch() {
+        debugAdapter.launch(mapOf(
             "projectRoot" to absoluteWorkspaceRoot.toString(),
             "mainClass" to "sample.workspace.AppKt"
-        )) }
+        ))
+    }
 
-    @AfterClass private fun closeDebugAdapter() {
+    @After fun closeDebugAdapter() {
         debugAdapter.disconnect(DisconnectArguments()).join()
     }
 }
