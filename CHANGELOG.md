@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the debug adapter will be documented in this file.
 
+## [0.3.0]
+- Support evaluation of expressions
+- Provide completions
+- Display exception information
+
 ## [0.2.7]
 - Add JDK 11+ support
 
