@@ -47,9 +47,10 @@ abstract class DebugAdapterTestFixture(
                 Thread {
                     configDone.join()
                 }.start()
-                // Add a small delay to ensure that the thread has
-                // started and is blocked on the future.
-                Thread.sleep(500)
+                // Wait until the thread has blocked on the future
+                while (configDone.numberOfDependents == 0) {
+                    Thread.sleep(100)
+                }
             }
     }
     
