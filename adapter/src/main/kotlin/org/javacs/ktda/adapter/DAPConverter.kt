@@ -15,11 +15,15 @@ private typealias DAPScope = org.eclipse.lsp4j.debug.Scope
 private typealias DAPVariable = org.eclipse.lsp4j.debug.Variable
 private typealias DAPThread = org.eclipse.lsp4j.debug.Thread
 private typealias DAPExceptionBreakpointsFilter = org.eclipse.lsp4j.debug.ExceptionBreakpointsFilter
+private typealias DAPCompletionItem = org.eclipse.lsp4j.debug.CompletionItem
+private typealias DAPCompletionItemType = org.eclipse.lsp4j.debug.CompletionItemType
 private typealias InternalSource = org.javacs.ktda.core.Source
 private typealias InternalSourceBreakpoint = org.javacs.ktda.core.breakpoint.SourceBreakpoint
 private typealias InternalExceptionBreakpoint = org.javacs.ktda.core.breakpoint.ExceptionBreakpoint
 private typealias InternalBreakpoint = org.javacs.ktda.core.breakpoint.Breakpoint
 private typealias InternalStackFrame = org.javacs.ktda.core.stack.StackFrame
+private typealias InternalCompletionItem = org.javacs.ktda.core.completion.CompletionItem
+private typealias InternalCompletionItemType = org.javacs.ktda.core.completion.CompletionItemType
 
 /**
  * Handles conversions between debug adapter types
@@ -94,5 +98,32 @@ class DAPConverter(
 	fun toDAPThread(internalThread: DebuggeeThread) = DAPThread().apply {
 		name = internalThread.name
 		id = internalThread.id
+	}
+
+	fun toDAPCompletionItem(internalItem: InternalCompletionItem) = DAPCompletionItem().apply {
+		label = internalItem.label
+		type = toDAPCompletionItemType(internalItem.type)
+	}
+	
+	fun toDAPCompletionItemType(internalType: InternalCompletionItemType) = when (internalType) {
+		InternalCompletionItemType.METHOD -> DAPCompletionItemType.METHOD
+		InternalCompletionItemType.FUNCTION -> DAPCompletionItemType.FUNCTION
+		InternalCompletionItemType.CONSTRUCTOR -> DAPCompletionItemType.CONSTRUCTOR
+		InternalCompletionItemType.FIELD -> DAPCompletionItemType.FIELD
+		InternalCompletionItemType.VARIABLE -> DAPCompletionItemType.VARIABLE
+		InternalCompletionItemType.CLASS -> DAPCompletionItemType.CLASS
+		InternalCompletionItemType.INTERFACE -> DAPCompletionItemType.INTERFACE
+		InternalCompletionItemType.MODULE -> DAPCompletionItemType.MODULE
+		InternalCompletionItemType.PROPERTY -> DAPCompletionItemType.PROPERTY
+		InternalCompletionItemType.UNIT -> DAPCompletionItemType.UNIT
+		InternalCompletionItemType.VALUE -> DAPCompletionItemType.VALUE
+		InternalCompletionItemType.ENUM -> DAPCompletionItemType.ENUM
+		InternalCompletionItemType.KEYWORD -> DAPCompletionItemType.KEYWORD
+		InternalCompletionItemType.SNIPPET -> DAPCompletionItemType.SNIPPET
+		InternalCompletionItemType.TEXT -> DAPCompletionItemType.TEXT
+		InternalCompletionItemType.COLOR -> DAPCompletionItemType.COLOR
+		InternalCompletionItemType.FILE -> DAPCompletionItemType.FILE
+		InternalCompletionItemType.REFERENCE -> DAPCompletionItemType.REFERENCE
+		InternalCompletionItemType.CUSTOMCOLOR -> DAPCompletionItemType.CUSTOMCOLOR
 	}
 }

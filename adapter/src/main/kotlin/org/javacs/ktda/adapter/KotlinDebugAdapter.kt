@@ -56,6 +56,7 @@ class KotlinDebugAdapter(
 		
 		val capabilities = Capabilities()
 		capabilities.supportsConfigurationDoneRequest = true
+		capabilities.supportsCompletionsRequest = true
 		capabilities.exceptionBreakpointFilters = ExceptionBreakpoint.values()
 			.map(converter::toDAPExceptionBreakpointsFilter)
 			.toTypedArray()
@@ -371,7 +372,16 @@ class KotlinDebugAdapter(
 	
 	override fun gotoTargets(args: GotoTargetsArguments): CompletableFuture<GotoTargetsResponse> = notImplementedDAPMethod()
 	
-	override fun completions(args: CompletionsArguments): CompletableFuture<CompletionsResponse> = notImplementedDAPMethod()
+	override fun completions(args: CompletionsArguments): CompletableFuture<CompletionsResponse> = async.compute {
+		CompletionsResponse().apply {
+			targets = (args.frameId
+				.let(converter::toInternalStackFrame)
+					?: throw KotlinDAException("Could not find stack frame with ID ${args.frameId}"))
+				.completions(args.text)
+				.map(converter::toDAPCompletionItem)
+				.toTypedArray()
+		}
+	}
 	
 	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> = notImplementedDAPMethod()
 	

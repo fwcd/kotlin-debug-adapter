@@ -1,6 +1,8 @@
 package org.javacs.ktda.jdi.stack
 
 import org.javacs.ktda.core.Position
+import org.javacs.ktda.core.completion.CompletionItem
+import org.javacs.ktda.core.completion.CompletionItemType
 import org.javacs.ktda.core.scope.VariableTreeNode
 import org.javacs.ktda.core.stack.StackFrame
 import org.javacs.ktda.jdi.JDISessionContext
@@ -17,17 +19,34 @@ class JDIStackFrame(
 		JDILocalScope(frame)
 	) }
 
+	private val variables by lazy { scopes.flatMap { it.childs ?: emptyList() } }
+
 	// TODO: Scope "Fields"
 	// TODO: Argument values?
 
-	private fun evaluateQualified(qualName: List<String>, variables: List<VariableTreeNode> = scopes.flatMap { it.childs ?: emptyList() }): VariableTreeNode? =
+	private fun evaluateQualified(qualName: List<String>, scopeVariables: List<VariableTreeNode> = variables): VariableTreeNode? =
 		qualName.firstOrNull().let { qual ->
 			val rest = qualName.drop(1)
-			variables
+			scopeVariables
 				.filter { it.name == qual }
 				.mapNotNull { if (rest.isEmpty()) it else evaluateQualified(rest, it.childs ?: emptyList()) }
 				.firstOrNull()
 		}
+
+	private fun completeQualified(qualName: List<String>, scopeVariables: List<VariableTreeNode> = variables): List<CompletionItem> =
+		qualName.firstOrNull()?.let { qual ->
+			val rest = qualName.drop(1)
+			scopeVariables
+				.filter { it.name == qual }
+				.flatMap { completeQualified(rest, it.childs ?: emptyList()) }
+				.takeIf { it.isNotEmpty() }
+				?: scopeVariables
+					.takeIf { rest.isEmpty() }
+					?.filter { it.name.startsWith(qual) }
+					?.map { CompletionItem(it.name, CompletionItemType.VARIABLE) }
+		} ?: emptyList()
+
+	private fun parseQualified(expression: String): List<String> = expression.split(".")
 
 	override fun evaluate(expression: String): VariableTreeNode? {
 		// TODO: Implement proper expression parsing
@@ -43,8 +62,13 @@ class JDIStackFrame(
 		// Creating JDI values from primitives and strings is possible though,
 		// using VirtualMachine.mirrorOf.
 
-		val qualified = expression.split(".")
+		val qualified = parseQualified(expression)
 		return evaluateQualified(qualified)
 			?: evaluateQualified(listOf("this") + qualified)
+	}
+
+	override fun completions(expression: String): List<CompletionItem> {
+		val qualified = parseQualified(expression)
+		return completeQualified(qualified) + completeQualified(listOf("this") + qualified)
 	}
 }
