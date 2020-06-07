@@ -1,5 +1,6 @@
 package org.javacs.ktda.jdi.stack
 
+import org.javacs.kt.LOG
 import org.javacs.ktda.core.Position
 import org.javacs.ktda.core.completion.CompletionItem
 import org.javacs.ktda.core.completion.CompletionItemType
@@ -7,6 +8,7 @@ import org.javacs.ktda.core.scope.VariableTreeNode
 import org.javacs.ktda.core.stack.StackFrame
 import org.javacs.ktda.jdi.JDISessionContext
 import org.javacs.ktda.jdi.scope.JDILocalScope
+import com.sun.jdi.InvalidStackFrameException
 
 class JDIStackFrame(
 	frame: com.sun.jdi.StackFrame,
@@ -15,9 +17,14 @@ class JDIStackFrame(
 	private val location = frame.location()
 	override val name: String = location.method()?.name() ?: "Unknown"
 	override val position: Position? = context.positionOf(location)
-	override val scopes: List<VariableTreeNode> by lazy { listOf(
-		JDILocalScope(frame)
-	) }
+	override val scopes: List<VariableTreeNode> by lazy {
+		try {
+			listOf(JDILocalScope(frame))
+		} catch (e: InvalidStackFrameException) {
+			LOG.warn("Could not fetch scopes, invalid stack frame: {}", e.message)
+			emptyList<VariableTreeNode>()
+		}
+	}
 
 	private val variables by lazy { scopes.flatMap { it.childs ?: emptyList() } }
 
