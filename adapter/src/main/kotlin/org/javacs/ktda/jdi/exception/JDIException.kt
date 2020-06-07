@@ -25,6 +25,12 @@ class JDIException(
             ?.let { exception.invokeMethod(thread, it, emptyList(), 0) }
             ?.toString()
     }
+    override val innerException: JDIException? by lazy {
+        type.methodsByName("getCause")
+            .firstOrNull()
+            ?.let { exception.invokeMethod(thread, it, emptyList(), 0)?.let { it as? ObjectReference } }
+            ?.let { JDIException(it, thread) }
+    }
 
-    // TODO: Stack frames, inner exception
+    // TODO: Stack frames
 }
