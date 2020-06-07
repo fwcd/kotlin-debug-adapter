@@ -17,6 +17,7 @@ private typealias DAPThread = org.eclipse.lsp4j.debug.Thread
 private typealias DAPExceptionBreakpointsFilter = org.eclipse.lsp4j.debug.ExceptionBreakpointsFilter
 private typealias DAPCompletionItem = org.eclipse.lsp4j.debug.CompletionItem
 private typealias DAPCompletionItemType = org.eclipse.lsp4j.debug.CompletionItemType
+private typealias DAPExceptionDetails = org.eclipse.lsp4j.debug.ExceptionDetails
 private typealias InternalSource = org.javacs.ktda.core.Source
 private typealias InternalSourceBreakpoint = org.javacs.ktda.core.breakpoint.SourceBreakpoint
 private typealias InternalExceptionBreakpoint = org.javacs.ktda.core.breakpoint.ExceptionBreakpoint
@@ -24,6 +25,7 @@ private typealias InternalBreakpoint = org.javacs.ktda.core.breakpoint.Breakpoin
 private typealias InternalStackFrame = org.javacs.ktda.core.stack.StackFrame
 private typealias InternalCompletionItem = org.javacs.ktda.core.completion.CompletionItem
 private typealias InternalCompletionItemType = org.javacs.ktda.core.completion.CompletionItemType
+private typealias InternalException = org.javacs.ktda.core.exception.DebuggeeException
 
 /**
  * Handles conversions between debug adapter types
@@ -125,5 +127,13 @@ class DAPConverter(
 		InternalCompletionItemType.FILE -> DAPCompletionItemType.FILE
 		InternalCompletionItemType.REFERENCE -> DAPCompletionItemType.REFERENCE
 		InternalCompletionItemType.CUSTOMCOLOR -> DAPCompletionItemType.CUSTOMCOLOR
+	}
+
+	fun toDAPExceptionDetails(internalException: InternalException): DAPExceptionDetails = DAPExceptionDetails().apply {
+		message = internalException.message
+		typeName = internalException.typeName
+		fullTypeName = internalException.fullTypeName
+		stackTrace = internalException.stackTrace
+		innerException = internalException.innerException?.let(::toDAPExceptionDetails)?.let { arrayOf(it) }
 	}
 }

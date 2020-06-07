@@ -62,6 +62,11 @@ class ObjectPool<O, V> {
 	}
 	
 	fun getByID(id: Long) = mappingsByID[id]?.value
+
+	fun getIDsOwnedBy(owner: O): Set<Long> = mappingsByOwner[owner]
+		?.map { it.key.id }
+		?.toSet()
+		.orEmpty()
 	
 	fun getOwnedBy(owner: O): Set<V> = mappingsByOwner[owner]
 		?.map { it.value }

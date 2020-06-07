@@ -4,10 +4,12 @@ import org.javacs.kt.LOG
 import org.javacs.ktda.util.ListenerList
 import org.javacs.ktda.util.Subscription
 import org.javacs.ktda.core.event.DebuggeeEventBus
+import org.javacs.ktda.core.exception.DebuggeeException
 import org.javacs.ktda.core.event.ExitEvent
 import org.javacs.ktda.core.event.BreakpointStopEvent
 import org.javacs.ktda.core.event.ExceptionStopEvent
 import org.javacs.ktda.core.event.StepStopEvent
+import org.javacs.ktda.jdi.exception.JDIException
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
 import com.sun.jdi.event.VMDeathEvent
@@ -81,10 +83,9 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 			it.resumeThreads = false
 		}
 		subscribe(JDIExceptionEvent::class) {
-			val exception = it.jdiEvent.exception()
 			exceptionListeners.fire(ExceptionStopEvent(
 				threadID = toThreadID(it.jdiEvent),
-				exceptionName = exception.referenceType().name()
+				exception = JDIException(it.jdiEvent.exception(), it.jdiEvent.thread())
 			))
 		}
 	}

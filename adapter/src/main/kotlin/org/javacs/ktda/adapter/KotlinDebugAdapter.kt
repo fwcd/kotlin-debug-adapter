@@ -17,9 +17,11 @@ import org.javacs.kt.LogMessage
 import org.javacs.kt.util.AsyncExecutor
 import org.javacs.ktda.util.JSON_LOG
 import org.javacs.ktda.util.KotlinDAException
+import org.javacs.ktda.util.ObjectPool
 import org.javacs.ktda.util.waitFor
 import org.javacs.ktda.core.Debuggee
 import org.javacs.ktda.core.DebugContext
+import org.javacs.ktda.core.exception.DebuggeeException
 import org.javacs.ktda.core.event.DebuggeeEventBus
 import org.javacs.ktda.core.event.BreakpointStopEvent
 import org.javacs.ktda.core.event.StepStopEvent
@@ -44,6 +46,8 @@ class KotlinDebugAdapter(
 	private var client: IDebugProtocolClient? = null
 	private var converter = DAPConverter()
 	private val context = DebugContext()
+
+	private val exceptionsPool = ObjectPool<Long, DebuggeeException>() // Contains exceptions thrown by the debuggee owned by thread ids
 	
 	// TODO: This is a workaround for https://github.com/eclipse/lsp4j/issues/229
 	// For more information, see launch() method
@@ -57,6 +61,7 @@ class KotlinDebugAdapter(
 		val capabilities = Capabilities()
 		capabilities.supportsConfigurationDoneRequest = true
 		capabilities.supportsCompletionsRequest = true
+		capabilities.supportsExceptionInfoRequest = true
 		capabilities.exceptionBreakpointFilters = ExceptionBreakpoint.values()
 			.map(converter::toDAPExceptionBreakpointsFilter)
 			.toTypedArray()
@@ -133,6 +138,7 @@ class KotlinDebugAdapter(
 			sendStopEvent(it.threadID, StoppedEventArgumentsReason.STEP)
 		}
 		eventBus.exceptionListeners.add {
+			exceptionsPool.store(it.threadID, it.exception)
 			sendStopEvent(it.threadID, StoppedEventArgumentsReason.EXCEPTION)
 		}
 		stdoutAsync.execute {
@@ -171,7 +177,7 @@ class KotlinDebugAdapter(
 		client!!.terminated(TerminatedEventArguments())
 		LOG.info("Sent exit event")
 	}
-	
+
 	override fun attach(args: Map<String, Any>) = async.execute {
 		performInitialization()
 		
@@ -258,6 +264,7 @@ class KotlinDebugAdapter(
 	override fun continue_(args: ContinueArguments) = async.compute {
 		val success = debuggee!!.threadByID(args.threadId)?.resume()
 		if (success ?: false) {
+			exceptionsPool.clear()
 			converter.variablesPool.clear()
 			converter.stackFramePool.removeAllOwnedBy(args.threadId)
 		}
@@ -333,7 +340,7 @@ class KotlinDebugAdapter(
 				.childs
 				?.map(converter::toDAPVariable)
 				?.toTypedArray()
-				?: emptyArray()
+				.orEmpty()
 		}
 	)
 	
@@ -383,7 +390,14 @@ class KotlinDebugAdapter(
 		}
 	}
 	
-	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> = notImplementedDAPMethod()
+	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> = async.compute {
+		val id = exceptionsPool.getIDsOwnedBy(args.threadId).firstOrNull()
+		val exception = id?.let { exceptionsPool.getByID(it) }
+		ExceptionInfoResponse().apply {
+			exceptionId = id?.toString() ?: ""
+			details = exception?.let(converter::toDAPExceptionDetails)
+		}
+	}
 	
 	private fun connectLoggingBackend(client: IDebugProtocolClient) {
 		val backend: (LogMessage) -> Unit = {

@@ -44,7 +44,7 @@ class JDIStackFrame(
 					.takeIf { rest.isEmpty() }
 					?.filter { it.name.startsWith(qual) }
 					?.map { CompletionItem(it.name, CompletionItemType.VARIABLE) }
-		} ?: emptyList()
+		}.orEmpty()
 
 	private fun parseQualified(expression: String): List<String> = expression.split(".")
 
