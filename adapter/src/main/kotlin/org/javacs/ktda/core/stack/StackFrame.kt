@@ -7,4 +7,6 @@ interface StackFrame {
 	val name: String
 	val position: Position?
 	val scopes: List<VariableTreeNode>
+
+	fun evaluate(expression: String): VariableTreeNode?
 }
