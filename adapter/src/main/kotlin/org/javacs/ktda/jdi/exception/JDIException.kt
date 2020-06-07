@@ -12,6 +12,13 @@ class JDIException(
 
     override val fullTypeName: String by lazy { type.name() }
     override val typeName: String? by lazy { fullTypeName.split(".").last() }
+    override val description: String by lazy {
+        type.methodsByName("toString")
+            .firstOrNull()
+            ?.let { exception.invokeMethod(thread, it, emptyList(), 0) }
+            ?.toString()
+            ?: fullTypeName
+    }
     override val message: String? by lazy {
         type.methodsByName("getMessage")
             .firstOrNull()

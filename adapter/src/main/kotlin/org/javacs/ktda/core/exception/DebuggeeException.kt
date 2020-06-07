@@ -1,6 +1,7 @@
 package org.javacs.ktda.core.exception
 
 interface DebuggeeException {
+    val description: String
     val message: String?
         get() = null
     val typeName: String?

@@ -33,7 +33,8 @@ private typealias InternalException = org.javacs.ktda.core.exception.DebuggeeExc
  * using ObjectPools and ids.
  */
 class DAPConverter(
-	var lineConverter: LineNumberConverter = LineNumberConverter()
+	var lineConverter: LineNumberConverter = LineNumberConverter(),
+	var columnConverter: LineNumberConverter = LineNumberConverter()
 ) {
 	val stackFramePool = ObjectPool<Long, InternalStackFrame>() // Contains stack frames owned by thread ids
 	val variablesPool = ObjectPool<Unit, VariableTreeNode>() // Contains unowned variable trees (the ids are used as 'variables references')
@@ -78,7 +79,7 @@ class DAPConverter(
 		id = stackFramePool.store(threadId, internalFrame)
 		name = internalFrame.name
 		line = internalFrame.position?.lineNumber?.let(lineConverter::toExternalLine) ?: 0L
-		column = 0L
+		column = (internalFrame.position?.columnNumber ?: 1).let(columnConverter::toExternalLine)
 		source = internalFrame.position?.source?.let(::toDAPSource)
 	}
 	

@@ -57,6 +57,9 @@ class KotlinDebugAdapter(
 		converter.lineConverter = LineNumberConverter(
 			externalLineOffset = if (args.linesStartAt1) 0L else -1L
 		)
+		converter.columnConverter = LineNumberConverter(
+			externalLineOffset = if (args.columnsStartAt1) 0L else -1L
+		)
 		
 		val capabilities = Capabilities()
 		capabilities.supportsConfigurationDoneRequest = true
@@ -395,6 +398,8 @@ class KotlinDebugAdapter(
 		val exception = id?.let { exceptionsPool.getByID(it) }
 		ExceptionInfoResponse().apply {
 			exceptionId = id?.toString() ?: ""
+			description = exception?.description ?: "Unknown exception"
+			breakMode = ExceptionBreakMode.ALWAYS
 			details = exception?.let(converter::toDAPExceptionDetails)
 		}
 	}
