@@ -87,6 +87,7 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 				threadID = toThreadID(it.jdiEvent),
 				exception = JDIException(it.jdiEvent.exception(), it.jdiEvent.thread())
 			))
+			it.resumeThreads = false
 		}
 	}
 	

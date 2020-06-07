@@ -74,13 +74,18 @@ class JDIDebuggee(
 	
 	private fun setExceptionBreakpoints(breakpoints: Set<ExceptionBreakpoint>) = vm
 		.eventRequestManager()
-		.createExceptionRequest(
+		.also { it.deleteEventRequests(it.exceptionRequests()) }
+		.takeIf { breakpoints.isNotEmpty() }
+		// Workaround: JDI will otherwise not enable the request correctly
+		?.also { vm.allThreads() }
+		?.createExceptionRequest(
 			null,
 			breakpoints.contains(ExceptionBreakpoint.CAUGHT),
 			breakpoints.contains(ExceptionBreakpoint.UNCAUGHT)
 		)
-		.apply { setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD) }
-		.enable()
+		?.apply { setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD) }
+		?.enable()
+		?: Unit
 	
 	/** Tries to set a breakpoint */
 	private fun setBreakpoint(filePath: String, lineNumber: Long) {
