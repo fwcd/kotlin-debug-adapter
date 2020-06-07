@@ -330,8 +330,9 @@ class KotlinDebugAdapter(
 				.let(converter::toVariableTree)
 					?: throw KotlinDAException("Could not find variablesReference with ID ${args.variablesReference}"))
 				.childs
-				.map(converter::toDAPVariable)
-				.toTypedArray()
+				?.map(converter::toDAPVariable)
+				?.toTypedArray()
+				?: emptyArray()
 		}
 	)
 	

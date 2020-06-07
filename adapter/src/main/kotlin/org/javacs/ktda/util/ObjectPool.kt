@@ -10,7 +10,7 @@ private data class ObjectMapping<O, V> (
 	val value: V
 )
 
-private var currentID = 0L
+private var currentID = 1L
 
 /**
  * Maps objects of owners to multiple owned values.

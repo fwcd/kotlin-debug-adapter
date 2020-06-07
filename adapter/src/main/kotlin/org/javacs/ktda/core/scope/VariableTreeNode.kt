@@ -10,8 +10,8 @@ interface VariableTreeNode {
 		get() = null
 	val type: String?
 		get() = null
-	val childs: List<VariableTreeNode>
-		get() = emptyList()
+	val childs: List<VariableTreeNode>?
+		get() = null
 	
 	// TODO: Setters for values?
 }

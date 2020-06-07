@@ -88,7 +88,7 @@ class DAPConverter(
 		name = variableTree.name
 		value = variableTree.value
 		type = variableTree.type
-		variablesReference = variablesPool.store(Unit, variableTree)
+		variablesReference = variableTree.childs?.takeIf { it.isNotEmpty() }?.let { variablesPool.store(Unit, variableTree) } ?: 0
 	}
 	
 	fun toDAPThread(internalThread: DebuggeeThread) = DAPThread().apply {
