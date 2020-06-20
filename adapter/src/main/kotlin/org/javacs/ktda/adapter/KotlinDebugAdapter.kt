@@ -182,7 +182,8 @@ class KotlinDebugAdapter(
 	}
 
 	override fun attach(args: Map<String, Any>) = async.execute {
-		performInitialization()
+		// Fix a deadlock problem by commenting the following line.
+		//performInitialization()
 		
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
 			?: throw missingRequestArgument("launch", "projectRoot")
@@ -190,10 +191,10 @@ class KotlinDebugAdapter(
 		val hostName = (args["hostName"] as? String)
 			?: throw missingRequestArgument("attach", "hostName")
 		
-		val port = (args["port"] as? Int)
+		val port = (args["port"] as? Double)?.toInt()
 			?: throw missingRequestArgument("attach", "port")
 		
-		val timeout = (args["timeout"] as? Int)
+		val timeout = (args["timeout"] as? Double)?.toInt()
 			?: throw missingRequestArgument("attach", "timeout")
 		
 		setupCommonInitializationParams(args)
