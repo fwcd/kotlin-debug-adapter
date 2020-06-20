@@ -190,7 +190,7 @@ class KotlinDebugAdapter(
 		val hostName = (args["hostName"] as? String)
 			?: throw missingRequestArgument("attach", "hostName")
 		
-		val port = (args["port"] as? Int)
+		val port = (args["port"] as? String)?.toInt()
 			?: throw missingRequestArgument("attach", "port")
 		
 		val timeout = (args["timeout"] as? Double)?.toInt()
