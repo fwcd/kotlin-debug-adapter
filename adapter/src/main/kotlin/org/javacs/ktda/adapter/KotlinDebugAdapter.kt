@@ -181,9 +181,8 @@ class KotlinDebugAdapter(
 		LOG.info("Sent exit event")
 	}
 
-	override fun attach(args: Map<String, Any>) = async.execute {
-		// Fix a deadlock problem by commenting the following line.
-		//performInitialization()
+	override fun attach(args: Map<String, Any>) = launcherAsync.execute {
+		performInitialization()
 		
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
 			?: throw missingRequestArgument("launch", "projectRoot")
