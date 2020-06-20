@@ -13,12 +13,7 @@ class ObservableMap<K, V>(
 	fun remove(key: K) = entries.remove(key).also { fire() }
 	
 	operator fun set(key: K, value: V) {
-		try {
-			val sameKey = entries.keys.first { it == key }
-			entries[sameKey] = value
-		} catch(error: NoSuchElementException) {
-			entries[key] = value
-		}
+		entries[key] = value
 		fire()
 	}
 	
