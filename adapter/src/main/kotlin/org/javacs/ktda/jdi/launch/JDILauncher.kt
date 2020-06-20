@@ -70,7 +70,7 @@ class JDILauncher(
 		}
 	
 	private fun createAttachConnector(): AttachingConnector = vmManager.attachingConnectors()
-		.first { it.name().equals("com.sun.jdi.SocketAttach") }
+		.let { it.find { it.name().equals("com.sun.jdi.SocketAttach") } ?: it.firstOrNull() }
 		?: throw KotlinDAException("Could not find an attaching connector (for a new debuggee VM)")
 	
 	private fun createLaunchConnector(): LaunchingConnector = vmManager.launchingConnectors()
