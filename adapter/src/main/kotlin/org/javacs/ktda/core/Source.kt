@@ -6,4 +6,8 @@ import java.nio.file.Path
 class Source(
 	val name: String,
 	val filePath: Path
-)
+) {
+	override fun equals(other: Any?): Boolean {
+		return (other is Source) && (name == other.name) && (filePath == other.filePath)
+	}
+}
