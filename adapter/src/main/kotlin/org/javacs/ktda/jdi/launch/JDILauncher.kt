@@ -24,8 +24,7 @@ import java.util.stream.Collectors
 class JDILauncher(
 	private val attachTimeout: Int = 50,
 	private val vmArguments: String? = null,
-	private val modulePaths: String? = null,
-	private val environmentVariables: Collection<String>? = null
+	private val modulePaths: String? = null
 ) : DebugLauncher {
 	private val vmManager: VirtualMachineManager
 		get() = Bootstrap.virtualMachineManager()
@@ -58,8 +57,6 @@ class JDILauncher(
 			args["suspend"]!!.setValue("true")
 			args["options"]!!.setValue(formatOptions(config))
 			args["main"]!!.setValue(formatMainClass(config))
-			args["cwd"]?.setValue(config.projectRoot.toAbsolutePath().toString())
-			args["env"]?.setValue(urlEncode(environmentVariables) ?: "")
 		}
 	
 	private fun createAttachArgs(config: AttachConfiguration, connector: Connector): Map<String, Connector.Argument> = connector.defaultArguments()
