@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to the debug adapter will be documented in this file.
 
+## [0.3.1]
+- Fix `attach`
+
 ## [0.3.0]
 - Support evaluation of expressions
 - Provide completions
