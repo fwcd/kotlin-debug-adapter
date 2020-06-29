@@ -20,6 +20,7 @@ import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
 import com.sun.jdi.event.ClassPrepareEvent
 import com.sun.jdi.request.EventRequest
+import com.sun.jdi.AbsentInformationException
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -117,18 +118,23 @@ class JDIDebuggee(
 	
 	/** Tries to set a breakpoint - Will return whether this was successful */
 	private fun setBreakpointAtType(refType: ReferenceType, lineNumber: Long): Boolean {
-		val location = refType
-			.locationsOfLine(lineNumber.toInt())
-			?.firstOrNull() ?: return false
-		val request = vm.eventRequestManager()
-			.createBreakpointRequest(location)
-		request?.let {
-			it.enable()
+		try {
+			val location = refType
+					.locationsOfLine(lineNumber.toInt())
+					?.firstOrNull() ?: return false
+			val request = vm.eventRequestManager()
+					.createBreakpointRequest(location)
+			request?.let {
+				it.enable()
+			}
+			return request != null
+		} catch (e: AbsentInformationException) {
+			// Ignore exception.
+			return true
 		}
-		return request != null
 	}
 
-	open fun resumeVm() {
+	fun resumeVm() {
 		vm.resume()
 	}
 	
