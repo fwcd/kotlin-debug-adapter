@@ -127,6 +127,10 @@ class JDIDebuggee(
 		}
 		return request != null
 	}
+
+	open fun resumeVm() {
+		vm.resume()
+	}
 	
 	override fun exit() {
 		LOG.info("Exiting JDI session")
