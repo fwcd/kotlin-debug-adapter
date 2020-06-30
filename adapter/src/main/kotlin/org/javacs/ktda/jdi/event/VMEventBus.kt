@@ -10,6 +10,7 @@ import org.javacs.ktda.core.event.BreakpointStopEvent
 import org.javacs.ktda.core.event.ExceptionStopEvent
 import org.javacs.ktda.core.event.StepStopEvent
 import org.javacs.ktda.core.event.ThreadEvent
+import org.javacs.ktda.core.event.ThreadEventReason
 import org.javacs.ktda.jdi.exception.JDIException
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
@@ -71,7 +72,7 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 			} catch (e: VMDisconnectedException) {
 				LOG.info("VMEventBus event poller terminated by disconnect: {}", e.message)
 			}
-			exitListeners.fire(ExitEvent())
+			exitListeners.fire(ExitEvent)
 		}, "eventBus").start()
 	}
 	
@@ -96,10 +97,16 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 			it.resumeThreads = false
 		}
 		subscribe(JDIThreadStartEvent::class) {
-			threadListeners.fire(ThreadEvent)
+			threadListeners.fire(ThreadEvent(
+				threadID = it.jdiEvent.thread().uniqueID(),
+				reason = ThreadEventReason.STARTED
+			))
 		}
 		subscribe(JDIThreadDeathEvent::class) {
-			threadListeners.fire(ThreadEvent)
+			threadListeners.fire(ThreadEvent(
+				threadID = it.jdiEvent.thread().uniqueID(),
+				reason = ThreadEventReason.STOPPED
+			))
 		}
 	}
 	

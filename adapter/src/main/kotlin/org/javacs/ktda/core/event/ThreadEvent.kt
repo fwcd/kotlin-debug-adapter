@@ -1,3 +1,6 @@
 package org.javacs.ktda.core.event
 
-object ThreadEvent
+class ThreadEvent(
+    val threadID: Long,
+    val reason: ThreadEventReason
+)

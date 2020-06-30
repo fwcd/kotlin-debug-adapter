@@ -147,6 +147,9 @@ class KotlinDebugAdapter(
 			exceptionsPool.store(it.threadID, it.exception)
 			sendStopEvent(it.threadID, StoppedEventArgumentsReason.EXCEPTION)
 		}
+		eventBus.threadListeners.add {
+			
+		}
 		stdoutAsync.execute {
 			debuggee.stdout?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDOUT) }
 		}
