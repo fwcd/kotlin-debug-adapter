@@ -18,6 +18,7 @@ import com.sun.jdi.event.LocatableEvent as JDILocatableEvent
 import com.sun.jdi.event.EventSet as JDIEventSet
 import com.sun.jdi.event.StepEvent as JDIStepEvent
 import com.sun.jdi.event.ExceptionEvent as JDIExceptionEvent
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 /**
@@ -26,7 +27,7 @@ import kotlin.reflect.KClass
  */
 class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	private var exited = false
-	private val eventListeners = mutableMapOf<KClass<out JDIEvent>, ListenerList<VMEvent<JDIEvent>>>()
+	private val eventListeners = ConcurrentHashMap<KClass<out JDIEvent>, ListenerList<VMEvent<JDIEvent>>>()
 	override val exitListeners = ListenerList<ExitEvent>()
 	override val breakpointListeners = ListenerList<BreakpointStopEvent>()
 	override val stepListeners = ListenerList<StepStopEvent>()
