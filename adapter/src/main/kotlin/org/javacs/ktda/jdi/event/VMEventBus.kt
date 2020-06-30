@@ -9,6 +9,7 @@ import org.javacs.ktda.core.event.ExitEvent
 import org.javacs.ktda.core.event.BreakpointStopEvent
 import org.javacs.ktda.core.event.ExceptionStopEvent
 import org.javacs.ktda.core.event.StepStopEvent
+import org.javacs.ktda.core.event.ThreadEvent
 import org.javacs.ktda.jdi.exception.JDIException
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.VMDisconnectedException
@@ -16,8 +17,11 @@ import com.sun.jdi.event.VMDeathEvent
 import com.sun.jdi.event.Event as JDIEvent
 import com.sun.jdi.event.LocatableEvent as JDILocatableEvent
 import com.sun.jdi.event.EventSet as JDIEventSet
+import com.sun.jdi.event.BreakpointEvent as JDIBreakpointEvent
 import com.sun.jdi.event.StepEvent as JDIStepEvent
 import com.sun.jdi.event.ExceptionEvent as JDIExceptionEvent
+import com.sun.jdi.event.ThreadStartEvent as JDIThreadStartEvent
+import com.sun.jdi.event.ThreadDeathEvent as JDIThreadDeathEvent
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
@@ -31,7 +35,8 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	override val exitListeners = ListenerList<ExitEvent>()
 	override val breakpointListeners = ListenerList<BreakpointStopEvent>()
 	override val stepListeners = ListenerList<StepStopEvent>()
-	override var exceptionListeners = ListenerList<ExceptionStopEvent>()
+	override val exceptionListeners = ListenerList<ExceptionStopEvent>()
+	override val threadListeners = ListenerList<ThreadEvent>()
 	
 	init {
 		startAsyncPoller()
@@ -71,7 +76,7 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	}
 	
 	private fun hookListeners() {
-		subscribe(com.sun.jdi.event.BreakpointEvent::class) {
+		subscribe(JDIBreakpointEvent::class) {
 			breakpointListeners.fire(BreakpointStopEvent(
 				threadID = toThreadID(it.jdiEvent)
 			))
@@ -89,6 +94,12 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 				exception = JDIException(it.jdiEvent.exception(), it.jdiEvent.thread())
 			))
 			it.resumeThreads = false
+		}
+		subscribe(JDIThreadStartEvent::class) {
+			threadListeners.fire(ThreadEvent)
+		}
+		subscribe(JDIThreadDeathEvent::class) {
+			threadListeners.fire(ThreadEvent)
 		}
 	}
 	

@@ -6,5 +6,6 @@ interface DebuggeeEventBus {
 	val exitListeners: ListenerList<ExitEvent>
 	val breakpointListeners: ListenerList<BreakpointStopEvent>
 	val stepListeners: ListenerList<StepStopEvent>
-	var exceptionListeners: ListenerList<ExceptionStopEvent>
+	val exceptionListeners: ListenerList<ExceptionStopEvent>
+	val threadListeners: ListenerList<ThreadEvent>
 }
