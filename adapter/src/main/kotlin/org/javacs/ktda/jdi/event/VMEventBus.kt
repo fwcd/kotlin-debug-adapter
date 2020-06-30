@@ -132,21 +132,6 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 			}
 		}
 	}
-
-	/** Subscribes to a JDI event type and lets the listener decide whether to stop subscribing. */
-	fun <E: JDIEvent> listen(eventClass: KClass<E>, listener: (VMEvent<E>) -> Boolean) {
-		var box = Box<((VMEvent<E>) -> Unit)?>(null)
-		box.value = {
-			val continueSubscribing = listener(it)
-
-			if (!continueSubscribing) {
-				// See method above for rationale
-				@Suppress("UNCHECKED_CAST")
-				eventListeners[eventClass]?.remove(box.value as (VMEvent<JDIEvent>) -> Unit)
-			}
-		}
-		subscribe(eventClass, box.value!!)
-	}
 	
 	private fun dispatchEvent(event: JDIEvent, eventSet: JDIEventSet): Boolean {
 		val VMEvent = VMEvent(event, eventSet)
