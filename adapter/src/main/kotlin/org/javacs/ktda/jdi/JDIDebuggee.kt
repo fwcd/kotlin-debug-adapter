@@ -97,30 +97,36 @@ class JDIDebuggee(
 	/** Tries to set a breakpoint */
 	private fun setBreakpoint(filePath: String, lineNumber: Long) {
 		val eventRequestManager = vm.eventRequestManager()
+
 		toJVMClassNames(filePath)
-			.flatMap { listOf(it, "$it$*") } // For local types
 			.forEach { className ->
 				// Try setting breakpoint using a ClassPrepareRequest
 
-				val request = eventRequestManager
-					.createClassPrepareRequest()
-					.apply { addClassFilter(className) }
+				for (name in listOf(className, "$className$*")) { // For local types
+					val request = eventRequestManager
+						.createClassPrepareRequest()
+						.apply { addClassFilter(className) }
 
-				breakpointSubscriptions.add(eventBus.subscribe(ClassPrepareEvent::class) {
-					if (it.jdiEvent.request() == request) {
-						LOG.info("Setting breakpoint at prepared type {}", it.jdiEvent.referenceType().name())
-						setBreakpointAtType(it.jdiEvent.referenceType(), lineNumber)
-					}
-				})
-				
-				request.enable()
+					breakpointSubscriptions.add(eventBus.subscribe(ClassPrepareEvent::class) {
+						if (it.jdiEvent.request() == request) {
+							val referenceType = it.jdiEvent.referenceType()
+							LOG.trace("Setting breakpoint at prepared type {}", referenceType.name())
+							setBreakpointAtType(referenceType, lineNumber)
+						}
+					})
+					
+					request.enable()
+				}
 				
 				// Try setting breakpoint using loaded VM classes
 				
-				vm.classesByName(className).forEach {
-					LOG.info("Setting breakpoint at known type {}", it.name())
-					setBreakpointAtType(it, lineNumber)
-				}
+				val classPattern = "^${Regex.escape(className)}(?:\\$.*)?".toRegex()
+				vm.allClasses()
+					.filter { classPattern.matches(it.name()) }
+					.forEach {
+						LOG.trace("Setting breakpoint at known type {}", it.name())
+						setBreakpointAtType(it, lineNumber)
+					}
 			}
 	}
 	
