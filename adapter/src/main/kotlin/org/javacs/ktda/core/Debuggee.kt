@@ -17,7 +17,11 @@ interface Debuggee {
 		get() = null
 	
 	fun exit()
-	
+
+	fun resumeVm()
+
+	fun updateThreads()
+
 	fun threadByID(id: Long): DebuggeeThread? = threads
 		.asSequence()
 		.filter { it.id == id }

@@ -271,7 +271,8 @@ class KotlinDebugAdapter(
 			exceptionsPool.clear()
 			converter.variablesPool.clear()
 			converter.stackFramePool.removeAllOwnedBy(args.threadId)
-			(debuggee as JDIDebuggee).resumeVm()
+			// See the issue: https://github.com/fwcd/kotlin-debug-adapter/pull/40
+			debuggee?.resumeVm()
 		}
 		ContinueResponse().apply {
 			allThreadsContinued = false
@@ -354,6 +355,7 @@ class KotlinDebugAdapter(
 	override fun source(args: SourceArguments): CompletableFuture<SourceResponse> = notImplementedDAPMethod()
 	
 	override fun threads() = async.compute { onceDebuggeeIsPresent { debuggee ->
+		debuggee.updateThreads()
 		ThreadsResponse().apply {
 			threads = debuggee.threads
 				.asSequence()

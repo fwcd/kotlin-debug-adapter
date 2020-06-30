@@ -54,7 +54,7 @@ class JDIDebuggee(
 		hookBreakpoints()
 	}
 	
-	private fun updateThreads() = threads.setAll(vm.allThreads().map { JDIThread(it, this) })
+	override fun updateThreads() = threads.setAll(vm.allThreads().map { JDIThread(it, this) })
 	
 	private fun hookBreakpoints() {
 		context.breakpointManager.also { manager ->
@@ -134,7 +134,7 @@ class JDIDebuggee(
 		}
 	}
 
-	fun resumeVm() {
+	override fun resumeVm() {
 		vm.resume()
 	}
 	
