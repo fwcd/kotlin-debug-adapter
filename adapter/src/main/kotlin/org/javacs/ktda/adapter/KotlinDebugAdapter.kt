@@ -215,6 +215,12 @@ class KotlinDebugAdapter(
 			AttachConfiguration(projectRoot, hostName, port, timeout),
 			context
 		).also(::setupDebuggeeListeners)
+
+		// Since we are attaching to a running VM, we have to send custom
+		// 'start' events for all executing threads
+		for (thread in debuggee!!.threads) {
+			sendThreadEvent(thread.id, ThreadEventArgumentsReason.STARTED)
+		}
 	}
 	
 	private fun setupCommonInitializationParams(args: Map<String, Any>) {

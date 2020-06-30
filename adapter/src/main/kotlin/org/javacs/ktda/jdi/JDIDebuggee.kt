@@ -7,7 +7,6 @@ import org.javacs.ktda.core.Position
 import org.javacs.ktda.core.Source
 import org.javacs.ktda.core.launch.LaunchConfiguration
 import org.javacs.ktda.core.event.DebuggeeEventBus
-import org.javacs.ktda.core.event.ThreadEvent
 import org.javacs.ktda.core.breakpoint.Breakpoint
 import org.javacs.ktda.core.breakpoint.ExceptionBreakpoint
 import org.javacs.kt.LOG
