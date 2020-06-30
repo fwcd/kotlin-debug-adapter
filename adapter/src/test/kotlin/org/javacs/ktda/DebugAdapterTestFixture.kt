@@ -16,7 +16,8 @@ import org.hamcrest.Matchers.equalTo
 
 abstract class DebugAdapterTestFixture(
     relativeWorkspaceRoot: String,
-    private val mainClass: String
+    private val mainClass: String,
+    private val vmArguments: String = ""
 ) : IDebugProtocolClient {
     val absoluteWorkspaceRoot: Path = Paths.get(DebugAdapterTestFixture::class.java.getResource("/Anchor.txt").toURI()).parent.resolve(relativeWorkspaceRoot)
     lateinit var debugAdapter: KotlinDebugAdapter
@@ -58,7 +59,8 @@ abstract class DebugAdapterTestFixture(
         println("Launching...")
         debugAdapter.launch(mapOf(
             "projectRoot" to absoluteWorkspaceRoot.toString(),
-            "mainClass" to mainClass
+            "mainClass" to mainClass,
+            "vmArguments" to vmArguments
         )).join()
         println("Launched")
     }

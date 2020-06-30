@@ -88,22 +88,25 @@ class KotlinDebugAdapter(
 		configurationDoneResponse = response
 		return response
 	}
-	
+
 	override fun launch(args: Map<String, Any>) = launcherAsync.execute {
 		performInitialization()
-		
+
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
 			?: throw missingRequestArgument("launch", "projectRoot")
-		
+
 		val mainClass = (args["mainClass"] as? String)
 			?: throw missingRequestArgument("launch", "mainClass")
-		
+
+		val vmArguments:String? = (args["vmArguments"] as? String)
+
 		setupCommonInitializationParams(args)
-		
+
 		val config = LaunchConfiguration(
 			debugClassPathResolver(listOf(projectRoot)).classpathOrEmpty,
 			mainClass,
-			projectRoot
+			projectRoot,
+			vmArguments ?: ""
 		)
 		debuggee = launcher.launch(
 			config,
@@ -185,7 +188,7 @@ class KotlinDebugAdapter(
 		performInitialization()
 		
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
-			?: throw missingRequestArgument("launch", "projectRoot")
+			?: throw missingRequestArgument("attach", "projectRoot")
 		
 		val hostName = (args["hostName"] as? String)
 			?: throw missingRequestArgument("attach", "hostName")
