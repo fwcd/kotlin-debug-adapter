@@ -18,6 +18,7 @@ private typealias DAPExceptionBreakpointsFilter = org.eclipse.lsp4j.debug.Except
 private typealias DAPCompletionItem = org.eclipse.lsp4j.debug.CompletionItem
 private typealias DAPCompletionItemType = org.eclipse.lsp4j.debug.CompletionItemType
 private typealias DAPExceptionDetails = org.eclipse.lsp4j.debug.ExceptionDetails
+private typealias DAPThreadEventReason = org.eclipse.lsp4j.debug.ThreadEventArgumentsReason
 private typealias InternalSource = org.javacs.ktda.core.Source
 private typealias InternalSourceBreakpoint = org.javacs.ktda.core.breakpoint.SourceBreakpoint
 private typealias InternalExceptionBreakpoint = org.javacs.ktda.core.breakpoint.ExceptionBreakpoint
@@ -26,6 +27,7 @@ private typealias InternalStackFrame = org.javacs.ktda.core.stack.StackFrame
 private typealias InternalCompletionItem = org.javacs.ktda.core.completion.CompletionItem
 private typealias InternalCompletionItemType = org.javacs.ktda.core.completion.CompletionItemType
 private typealias InternalException = org.javacs.ktda.core.exception.DebuggeeException
+private typealias InternalThreadEventReason = org.javacs.ktda.core.event.ThreadEventReason
 
 /**
  * Handles conversions between debug adapter types
@@ -136,5 +138,10 @@ class DAPConverter(
 		fullTypeName = internalException.fullTypeName
 		stackTrace = internalException.stackTrace
 		innerException = internalException.innerException?.let(::toDAPExceptionDetails)?.let { arrayOf(it) }
+	}
+
+	fun toDAPThreadEventReason(reason: InternalThreadEventReason): String = when (reason) {
+		InternalThreadEventReason.STARTED -> DAPThreadEventReason.STARTED
+		InternalThreadEventReason.STOPPED -> DAPThreadEventReason.EXITED
 	}
 }

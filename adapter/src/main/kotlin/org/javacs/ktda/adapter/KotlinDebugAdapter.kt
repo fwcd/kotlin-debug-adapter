@@ -148,7 +148,7 @@ class KotlinDebugAdapter(
 			sendStopEvent(it.threadID, StoppedEventArgumentsReason.EXCEPTION)
 		}
 		eventBus.threadListeners.add {
-			
+			sendThreadEvent(it.threadID, converter.toDAPThreadEventReason(it.reason))
 		}
 		stdoutAsync.execute {
 			debuggee.stdout?.let { pipeStreamToOutput(it, OutputEventArgumentsCategory.STDOUT) }
@@ -170,6 +170,13 @@ class KotlinDebugAdapter(
 				line = it.readLine()
 			}
 		}
+	}
+
+	private fun sendThreadEvent(threadId: Long, reason: String) {
+		client!!.thread(ThreadEventArguments().also {
+			it.reason = reason
+			it.threadId = threadId
+		})
 	}
 	
 	private fun sendStopEvent(threadId: Long, reason: String) {
