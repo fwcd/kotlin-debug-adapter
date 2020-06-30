@@ -1,5 +1,6 @@
 package org.javacs.ktda.adapter
 
+import com.sun.tools.jdi.KDACommandLineLauncher
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.io.InputStream
@@ -100,13 +101,19 @@ class KotlinDebugAdapter(
 
 		val vmArguments = (args["vmArguments"] as? String) ?: ""
 
+		var cwd = (args["cwd"] as? String).let { if(it.isNullOrBlank()) projectRoot else Paths.get(it) }
+
+		var envs = args["envs"] as? List<String>
+
 		setupCommonInitializationParams(args)
 
 		val config = LaunchConfiguration(
 			debugClassPathResolver(listOf(projectRoot)).classpathOrEmpty,
 			mainClass,
 			projectRoot,
-			vmArguments
+			vmArguments,
+			cwd,
+			envs
 		)
 		debuggee = launcher.launch(
 			config,
