@@ -18,7 +18,7 @@ interface Debuggee {
 	
 	fun exit()
 
-	fun resumeVm()
+	fun resume()
 
 	fun updateThreads()
 

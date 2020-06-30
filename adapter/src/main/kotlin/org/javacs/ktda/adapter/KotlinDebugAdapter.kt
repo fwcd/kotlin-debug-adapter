@@ -32,7 +32,6 @@ import org.javacs.ktda.core.launch.AttachConfiguration
 import org.javacs.ktda.core.breakpoint.ExceptionBreakpoint
 import org.javacs.ktda.classpath.debugClassPathResolver
 import org.javacs.ktda.classpath.findValidKtFilePath
-import org.javacs.ktda.jdi.JDIDebuggee
 
 /** The debug server interface conforming to the Debug Adapter Protocol */
 class KotlinDebugAdapter(
@@ -272,7 +271,7 @@ class KotlinDebugAdapter(
 			converter.variablesPool.clear()
 			converter.stackFramePool.removeAllOwnedBy(args.threadId)
 			// See the issue: https://github.com/fwcd/kotlin-debug-adapter/pull/40
-			debuggee?.resumeVm()
+			debuggee?.resume()
 		}
 		ContinueResponse().apply {
 			allThreadsContinued = false

@@ -133,7 +133,7 @@ class JDIDebuggee(
 		}
 	}
 
-	override fun resumeVm() {
+	override fun resume() {
 		vm.resume()
 	}
 	
