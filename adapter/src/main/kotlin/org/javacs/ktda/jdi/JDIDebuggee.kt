@@ -129,8 +129,7 @@ class JDIDebuggee(
 			}
 			return request != null
 		} catch (e: AbsentInformationException) {
-			// Ignore exception.
-			return true
+			return false
 		}
 	}
 
