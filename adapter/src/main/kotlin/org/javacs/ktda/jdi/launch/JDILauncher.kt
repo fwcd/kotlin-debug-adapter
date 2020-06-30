@@ -84,7 +84,7 @@ class JDILauncher(
 	
 	private fun formatOptions(config: LaunchConfiguration): String {
 		var options = ""
-		vmArguments?.let { options += it }
+		options += config.vmArguments
 		modulePaths?.let { options += " --module-path \"$modulePaths\"" }
 		options += " -classpath \"${formatClasspath(config)}\""
 		return options

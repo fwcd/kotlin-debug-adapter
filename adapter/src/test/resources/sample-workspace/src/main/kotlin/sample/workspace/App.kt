@@ -1,7 +1,7 @@
 package sample.workspace
 
 class App {
-    private val member: String = "test"
+    private val member: String = System.getProperty("test")
     val greeting: String
         get() {
             val local: Int = 123

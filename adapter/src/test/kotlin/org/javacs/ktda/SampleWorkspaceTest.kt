@@ -21,7 +21,7 @@ import java.util.concurrent.CountDownLatch
  * Tests a very basic debugging scenario
  * using a sample application.
  */
-class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt") {
+class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt", "-Dtest=testVmArgs") {
     private val latch = CountDownLatch(1)
     private var asyncException: Throwable? = null
 
@@ -74,7 +74,7 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
                 variablesReference = receiver!!.variablesReference
             }).join().variables
 
-            assertThat(members.map { Pair(it.name, it.value) }, containsInAnyOrder(Pair("member", "\"test\"")))
+            assertThat(members.map { Pair(it.name, it.value) }, containsInAnyOrder(Pair("member", "\"testVmArgs\"")))
         } catch (e: Throwable) {
             asyncException = e
         } finally {
