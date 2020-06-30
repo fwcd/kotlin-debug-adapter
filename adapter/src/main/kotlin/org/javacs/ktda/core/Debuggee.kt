@@ -1,13 +1,12 @@
 package org.javacs.ktda.core
 
 import org.javacs.ktda.core.event.DebuggeeEventBus
-import org.javacs.ktda.util.ObservableList
 import java.io.InputStream
 import java.io.OutputStream
 
 /** A debuggee that is launched upon construction */
 interface Debuggee {
-	val threads: ObservableList<DebuggeeThread>
+	val threads: List<DebuggeeThread>
 	val eventBus: DebuggeeEventBus
 	val stdin: OutputStream?
 		get() = null

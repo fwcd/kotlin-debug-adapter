@@ -33,7 +33,7 @@ class JDIDebuggee(
 	private val sourcesRoots: Set<Path>,
 	private val context: DebugContext
 ) : Debuggee, JDISessionContext {
-	override val threads = ObservableList<DebuggeeThread>()
+	override var threads = emptyList<DebuggeeThread>()
 	override val eventBus: VMEventBus
 	override val pendingStepRequestThreadIds = mutableSetOf<Long>()
 	override val stdin: OutputStream?
@@ -55,7 +55,9 @@ class JDIDebuggee(
 		hookBreakpoints()
 	}
 	
-	override fun updateThreads() = threads.setAll(vm.allThreads().map { JDIThread(it, this) })
+	override fun updateThreads() {
+		threads = vm.allThreads().map { JDIThread(it, this) }
+	}
 	
 	private fun hookBreakpoints() {
 		context.breakpointManager.also { manager ->
