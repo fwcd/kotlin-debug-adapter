@@ -40,12 +40,8 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	override val threadListeners = ListenerList<ThreadEvent>()
 	
 	init {
-		val eventRequestManager = vm.eventRequestManager()
-		eventRequestManager.createThreadStartRequest().enable()
-		eventRequestManager.createThreadDeathRequest().enable()
-
-		startAsyncPoller()
 		hookListeners()
+		startAsyncPoller()
 	}
 	
 	private fun startAsyncPoller() {
@@ -81,6 +77,11 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	}
 	
 	private fun hookListeners() {
+		val eventRequestManager = vm.eventRequestManager()
+		eventRequestManager.createThreadStartRequest().enable()
+		eventRequestManager.createThreadDeathRequest().enable()
+		eventRequestManager.createVMDeathRequest().enable()
+
 		subscribe(JDIBreakpointEvent::class) {
 			breakpointListeners.fire(BreakpointStopEvent(
 				threadID = toThreadID(it.jdiEvent)
