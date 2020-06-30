@@ -19,6 +19,8 @@ startScripts {
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
+	maven { url 'https://repo.eclipse.org/content/groups/releases/' }
+
 }
 
 dependencies {
@@ -29,6 +31,17 @@ dependencies {
 	implementation 'com.github.fwcd.kotlin-language-server:shared:229c762a4d75304d21eba6d8e1231ed949247629'
 	// The Java Debug Interface classes (com.sun.jdi.*)
 	implementation files("${System.properties['java.home']}/../lib/tools.jar")
+	// The Implementation of jdi by eclipse
+	// implementation group: 'org.eclipse.jdt', name: 'org.eclipse.jdt.debug', version: '3.15.100'
+	// Failed to use the one above because jdi.jar and jdimodel.jar are sub jars included in org.eclipse.jdt.debug-3.15.100.jar,
+	// and cannot be recognized correctly.
+	// TODO: a fix for this
+    implementation files('lib/org.eclipse.jdt.debug-3.15.100.jdi.jar')
+    implementation files('lib/org.eclipse.jdt.debug-3.15.100.jdimodel.jar')
+	// For org.eclipse.osgi.util.NLS used in eclipse.jdt.debug
+	implementation group: 'org.eclipse.platform', name: 'org.eclipse.osgi', version: '3.15.200'
+	// For com.ibm.icu.text.DateFormat used in eclipse.jdt.debug
+	implementation group: 'at.bestsolution.eclipse', name: 'com.ibm.icu.base', version: '54.1.1'
 	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.hamcrest:hamcrest-all:1.3'
 }

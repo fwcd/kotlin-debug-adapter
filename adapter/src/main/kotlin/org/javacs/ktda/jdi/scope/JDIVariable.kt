@@ -30,8 +30,10 @@ class JDIVariable(
 		}
 	}
 	
-	private fun arrayElementsOf(jdiValue: ArrayReference): List<VariableTreeNode> = jdiValue.values
-		.mapIndexed { i, it -> JDIVariable(i.toString(), it) }
+	private fun arrayElementsOf(jdiValue: ArrayReference): List<VariableTreeNode> =
+			// org.eclipse.jdi.internal.ArrayReferenceImpl.getValues() throws Exception when length == 0
+			if (jdiValue.length() == 0) listOf()
+			else jdiValue.values.mapIndexed { i, it -> JDIVariable(i.toString(), it) }
 		
 	private fun fieldsOf(jdiValue: ObjectReference, jdiType: ReferenceType) = jdiType.allFields()
 		.map { JDIVariable(it.name(), jdiValue.getValue(it), jdiType) }
