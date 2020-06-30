@@ -40,6 +40,10 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	override val threadListeners = ListenerList<ThreadEvent>()
 	
 	init {
+		val eventRequestManager = vm.eventRequestManager()
+		eventRequestManager.createThreadStartRequest().enable()
+		eventRequestManager.createThreadDeathRequest().enable()
+
 		startAsyncPoller()
 		hookListeners()
 	}
