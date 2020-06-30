@@ -98,7 +98,7 @@ class KotlinDebugAdapter(
 		val mainClass = (args["mainClass"] as? String)
 			?: throw missingRequestArgument("launch", "mainClass")
 
-		val vmArguments:String? = (args["vmArguments"] as? String)
+		val vmArguments = (args["vmArguments"] as? String) ?: ""
 
 		setupCommonInitializationParams(args)
 
@@ -106,7 +106,7 @@ class KotlinDebugAdapter(
 			debugClassPathResolver(listOf(projectRoot)).classpathOrEmpty,
 			mainClass,
 			projectRoot,
-			vmArguments ?: ""
+			vmArguments
 		)
 		debuggee = launcher.launch(
 			config,
