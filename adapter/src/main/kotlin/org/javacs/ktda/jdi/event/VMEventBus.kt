@@ -1,6 +1,7 @@
 package org.javacs.ktda.jdi.event
 
 import org.javacs.kt.LOG
+import org.javacs.ktda.util.Box
 import org.javacs.ktda.util.ListenerList
 import org.javacs.ktda.util.Subscription
 import org.javacs.ktda.core.event.DebuggeeEventBus
@@ -117,6 +118,7 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 	
 	private fun toThreadID(event: JDILocatableEvent) = event.thread().uniqueID()
 	
+	/** Subscribes to a JDI event type and lets the caller decide when to stop subscribing. */
 	@Suppress("UNCHECKED_CAST")
 	fun <E: JDIEvent> subscribe(eventClass: KClass<E>, listener: (VMEvent<E>) -> Unit): Subscription {
 		eventListeners.putIfAbsent(eventClass, ListenerList())
@@ -129,6 +131,21 @@ class VMEventBus(private val vm: VirtualMachine): DebuggeeEventBus {
 				eventListeners[eventClass]?.remove(listener as (VMEvent<JDIEvent>) -> Unit)
 			}
 		}
+	}
+
+	/** Subscribes to a JDI event type and lets the listener decide whether to stop subscribing. */
+	fun <E: JDIEvent> listen(eventClass: KClass<E>, listener: (VMEvent<E>) -> Boolean) {
+		var box = Box<((VMEvent<E>) -> Unit)?>(null)
+		box.value = {
+			val continueSubscribing = listener(it)
+
+			if (!continueSubscribing) {
+				// See method above for rationale
+				@Suppress("UNCHECKED_CAST")
+				eventListeners[eventClass]?.remove(box.value as (VMEvent<JDIEvent>) -> Unit)
+			}
+		}
+		subscribe(eventClass, box.value!!)
 	}
 	
 	private fun dispatchEvent(event: JDIEvent, eventSet: JDIEventSet): Boolean {

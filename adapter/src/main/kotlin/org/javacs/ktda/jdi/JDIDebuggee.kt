@@ -11,6 +11,7 @@ import org.javacs.ktda.core.breakpoint.Breakpoint
 import org.javacs.ktda.core.breakpoint.ExceptionBreakpoint
 import org.javacs.kt.LOG
 import org.javacs.ktda.util.ObservableList
+import org.javacs.ktda.util.SubscriptionBag
 import org.javacs.ktda.classpath.findValidKtFilePath
 import org.javacs.ktda.classpath.toJVMClassNames
 import org.javacs.ktda.jdi.event.VMEventBus
@@ -38,6 +39,8 @@ class JDIDebuggee(
 	override val stdin: OutputStream?
 	override val stdout: InputStream?
 	override val stderr: InputStream?
+
+	private var breakpointSubscriptions = SubscriptionBag()
 	
 	init {
 		eventBus = VMEventBus(vm)
@@ -66,6 +69,7 @@ class JDIDebuggee(
 	}
 	
 	private fun setAllBreakpoints(breakpoints: List<Breakpoint>) {
+		breakpointSubscriptions.unsubscribe()
 		vm.eventRequestManager().deleteAllBreakpoints()
 		breakpoints.forEach { bp ->
 			bp.position.let { setBreakpoint(
@@ -94,25 +98,27 @@ class JDIDebuggee(
 	private fun setBreakpoint(filePath: String, lineNumber: Long) {
 		val eventRequestManager = vm.eventRequestManager()
 		toJVMClassNames(filePath)
+			.flatMap { listOf(it, "$it$*") } // For local types
 			.forEach { className ->
 				// Try setting breakpoint using a ClassPrepareRequest
-				
-				eventRequestManager
+
+				val request = eventRequestManager
 					.createClassPrepareRequest()
-					.apply { addClassFilter(className) } // For global types
-					.enable()
-				eventRequestManager
-					.createClassPrepareRequest()
-					.apply { addClassFilter(className + "$*") } // For local types
-					.enable()
+					.apply { addClassFilter(className) }
+
+				breakpointSubscriptions.add(eventBus.subscribe(ClassPrepareEvent::class) {
+					if (it.jdiEvent.request() == request) {
+						LOG.info("Setting breakpoint at prepared type {}", it.jdiEvent.referenceType().name())
+						setBreakpointAtType(it.jdiEvent.referenceType(), lineNumber)
+					}
+				})
 				
-				eventBus.subscribe(ClassPrepareEvent::class) {
-					setBreakpointAtType(it.jdiEvent.referenceType(), lineNumber)
-				}
+				request.enable()
 				
 				// Try setting breakpoint using loaded VM classes
 				
 				vm.classesByName(className).forEach {
+					LOG.info("Setting breakpoint at known type {}", it.name())
 					setBreakpointAtType(it, lineNumber)
 				}
 			}
@@ -122,13 +128,11 @@ class JDIDebuggee(
 	private fun setBreakpointAtType(refType: ReferenceType, lineNumber: Long): Boolean {
 		try {
 			val location = refType
-					.locationsOfLine(lineNumber.toInt())
-					?.firstOrNull() ?: return false
+				.locationsOfLine(lineNumber.toInt())
+				?.firstOrNull() ?: return false
 			val request = vm.eventRequestManager()
-					.createBreakpointRequest(location)
-			request?.let {
-				it.enable()
-			}
+				.createBreakpointRequest(location)
+			request?.enable()
 			return request != null
 		} catch (e: AbsentInformationException) {
 			return false
