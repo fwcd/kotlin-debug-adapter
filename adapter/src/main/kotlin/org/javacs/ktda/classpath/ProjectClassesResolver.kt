@@ -15,7 +15,9 @@ internal class ProjectClassesResolver(private val projectRoot: Path) : ClassPath
 			}
 		},
 		// Maven
-		sequenceOf(resolveIfExists(projectRoot, "target", "classes"))
+		sequenceOf(resolveIfExists(projectRoot, "target", "classes")),
+		// Spring Boot application.properties and templates.
+		sequenceOf(resolveIfExists(projectRoot, "build", "resources", "main"))
 	).flatten().filterNotNull().toSet()
 }
 
