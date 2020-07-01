@@ -19,8 +19,6 @@ startScripts {
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
-	maven { url 'https://repo.eclipse.org/content/groups/releases/' }
-
 }
 
 dependencies {
