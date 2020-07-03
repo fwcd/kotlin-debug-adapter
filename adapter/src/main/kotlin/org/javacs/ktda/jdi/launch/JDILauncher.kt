@@ -68,9 +68,9 @@ class JDILauncher(
 		.let { it.find { it.name() == "com.sun.jdi.SocketAttach" } ?: it.firstOrNull() }
 		?: throw KotlinDAException("Could not find an attaching connector (for a new debuggee VM)")
 	
-	private fun createLaunchConnector(): LaunchingConnector = vmManager.launchingConnectors()
+	private fun createLaunchConnector(): LaunchingConnector = vmManager.launchingConnectors().also { LOG.info("connectors: $it") }
 		// Using our own connector to support cwd and envs
-		.let { it.find { it.name().equals(KDACommandLineLauncher::class.java.name) } ?: it.firstOrNull() }
+		.let { it.find { it.name() == KDACommandLineLauncher::class.java.name } ?: it.firstOrNull() }
 		?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
 	
 	private fun sourcesRootsOf(projectRoot: Path): Set<Path> = projectRoot.resolve("src")

@@ -1,12 +1,8 @@
 package org.javacs.ktda.jdi.launch
 
-import com.sun.jdi.connect.Connector
 import org.hamcrest.Matchers.*
-import org.javacs.ktda.DebugAdapterTestFixture
 import org.junit.Assert.assertThat
 import org.junit.Test
-import java.nio.file.Path
-import java.nio.file.Paths
 
 class KDACommandLineLauncherTest {
 

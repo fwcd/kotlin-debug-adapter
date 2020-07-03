@@ -2,14 +2,9 @@ package org.javacs.ktda.jdi.launch
 
 import com.sun.jdi.Bootstrap
 import com.sun.jdi.VirtualMachine
-import com.sun.jdi.connect.Connector
-import com.sun.jdi.connect.IllegalConnectorArgumentsException
-import com.sun.jdi.connect.Transport
-import com.sun.jdi.connect.VMStartException
+import com.sun.jdi.connect.*
 import com.sun.jdi.connect.spi.Connection
 import com.sun.jdi.connect.spi.TransportService
-import com.sun.tools.jdi.SocketTransportService
-import com.sun.tools.jdi.SunCommandLineLauncher
 import org.codehaus.plexus.util.cli.CommandLineUtils
 import org.javacs.kt.LOG
 import java.io.File
@@ -19,6 +14,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -35,15 +31,15 @@ internal const val ARG_ENVS = "envs"
 /**
  * A custom LaunchingConnector that supports cwd and env variables
  */
-open class KDACommandLineLauncher : SunCommandLineLauncher {
+open class KDACommandLineLauncher : LaunchingConnector {
 
     protected val defaultArguments = mutableMapOf<String, Connector.Argument>()
 
     /**
      * We only support SocketTransportService
      */
-    protected val transportService = SocketTransportService()
-    protected val transport = Transport { "dt_socket" }
+    protected var transportService : TransportService? = null
+    protected var transport = Transport { "dt_socket" }
 
     companion object {
 
@@ -60,15 +56,29 @@ open class KDACommandLineLauncher : SunCommandLineLauncher {
 
     constructor() : super() {
 
-        defaultArguments.putAll(super.defaultArguments())
+        defaultArguments[ARG_HOME] = StringArgument(ARG_HOME, description = "Java home", value = System.getProperty("java.home"))
 
-        defaultArguments[ARG_CWD] = StringArgument(
-                name = ARG_CWD,
-                description = "Current working directory")
+        defaultArguments[ARG_OPTIONS] = StringArgument(ARG_OPTIONS, description = "Jvm arguments")
 
-        defaultArguments[ARG_ENVS] = StringArgument(
-                name = ARG_ENVS,
-                description = "Environment variables")
+        defaultArguments[ARG_MAIN] = StringArgument(ARG_MAIN, description = "Main class name and parameters", mustSpecify = true)
+
+        defaultArguments[ARG_SUSPEND] = StringArgument(ARG_SUSPEND, description = "Whether launch the debugee in suspend mode", value = "true")
+
+        defaultArguments[ARG_QUOTE] = StringArgument(ARG_QUOTE, description = "Quote char", value = "\"")
+
+        defaultArguments[ARG_VM_EXEC] = StringArgument(ARG_VM_EXEC, description = "The java exec", value = "java")
+
+        defaultArguments[ARG_CWD] = StringArgument(ARG_CWD, description = "Current working directory")
+
+        defaultArguments[ARG_ENVS] = StringArgument(ARG_ENVS, description = "Environment variables")
+
+        // Load TransportService 's implementation
+        transportService = Class.forName("com.sun.tools.jdi.SocketTransportService").getDeclaredConstructor().newInstance() as TransportService
+
+        if(transportService == null){
+            throw IllegalStateException("Failed to load com.sun.tools.jdi.SocketTransportService")
+        }
+
     }
 
     override fun name(): String {
@@ -85,6 +95,10 @@ open class KDACommandLineLauncher : SunCommandLineLauncher {
 
     override fun toString(): String {
         return name()
+    }
+
+    override fun transport(): Transport {
+        return transport
     }
 
     protected fun getOrDefault(arguments: Map<String, Connector.Argument>, argName: String): String {
@@ -111,7 +125,7 @@ open class KDACommandLineLauncher : SunCommandLineLauncher {
         check(!options.contains("-Djava.compiler=") ||
                 options.toLowerCase().contains("-djava.compiler=none")) { "Cannot debug with a JIT compiler. $ARG_OPTIONS: $options"}
 
-        val listenKey = transportService.startListening()
+        val listenKey = transportService?.startListening() ?: throw IllegalStateException("Failed to do transportService.startListening()")
         val address = listenKey.address()
 
         try {
@@ -130,11 +144,11 @@ open class KDACommandLineLauncher : SunCommandLineLauncher {
             LOG.debug("command before tokenize: $command")
 
             vm = launch(commandArray = CommandLineUtils.translateCommandline(command.toString()), listenKey = listenKey,
-                    ts = transportService, cwd = cwd, envs = envs
+                    ts = transportService!!, cwd = cwd, envs = envs
             )
 
         } finally {
-            transportService.stopListening(listenKey)
+            transportService?.stopListening(listenKey)
         }
         return vm
     }
