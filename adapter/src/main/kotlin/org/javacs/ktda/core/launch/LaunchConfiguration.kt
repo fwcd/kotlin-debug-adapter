@@ -8,5 +8,5 @@ class LaunchConfiguration(
 	val projectRoot: Path,
 	val vmArguments: String = "",
 	val cwd: Path = projectRoot,
-	val envs: Collection<String>? = null
+	val envs: Map<String, String> = mapOf()
 )

@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch
  */
 class SampleWorkspaceWithCustomConfigTest : DebugAdapterTestFixture(
         "sample-workspace", "sample.workspace.AppKt",
-        vmArguments = "-Dfoo=bar", cwd = "/tmp", envs = listOf("MSG=hello")) {
+        vmArguments = "-Dfoo=bar", cwd = "/tmp", envs = mapOf("MSG" to "hello")) {
     private val latch = CountDownLatch(1)
     private var asyncException: Throwable? = null
 

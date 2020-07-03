@@ -54,7 +54,7 @@ class JDILauncher(
 			args["options"]!!.setValue(formatOptions(config))
 			args["main"]!!.setValue(formatMainClass(config))
 			args["cwd"]!!.setValue(config.cwd.toAbsolutePath().toString())
-			args["envs"]!!.setValue(KDACommandLineLauncher.urlEncode(config.envs) ?: "")
+			args["envs"]!!.setValue(KDACommandLineLauncher.urlEncode(config.envs.map { "${it.key}=${it.value}" }) ?: "")
 		}
 	
 	private fun createAttachArgs(config: AttachConfiguration, connector: Connector): Map<String, Connector.Argument> = connector.defaultArguments()
@@ -68,7 +68,7 @@ class JDILauncher(
 		.let { it.find { it.name() == "com.sun.jdi.SocketAttach" } ?: it.firstOrNull() }
 		?: throw KotlinDAException("Could not find an attaching connector (for a new debuggee VM)")
 	
-	private fun createLaunchConnector(): LaunchingConnector = vmManager.launchingConnectors().also { LOG.info("connectors: $it") }
+	private fun createLaunchConnector(): LaunchingConnector = vmManager.launchingConnectors().also { LOG.debug("connectors: $it") }
 		// Using our own connector to support cwd and envs
 		.let { it.find { it.name() == KDACommandLineLauncher::class.java.name } ?: it.firstOrNull() }
 		?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
