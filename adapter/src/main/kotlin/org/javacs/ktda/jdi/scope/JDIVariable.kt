@@ -17,6 +17,7 @@ class JDIVariable(
 	override val value: String = jdiValue?.toString() ?: "null" // TODO: Better string representation
 	override val type: String = (jdiType?.name() ?: jdiValue?.type()?.name()) ?: "Unknown type"
 	override val childs: List<VariableTreeNode>? by lazy { jdiValue?.let(::childrenOf) }
+	override val id: Long? = (jdiValue as? ObjectReference)?.uniqueID() ?: (jdiValue as? ArrayReference)?.uniqueID()
 	
 	private fun childrenOf(jdiValue: Value): List<VariableTreeNode> {
 		val jdiType = jdiValue.type()
@@ -35,8 +36,4 @@ class JDIVariable(
 		
 	private fun fieldsOf(jdiValue: ObjectReference, jdiType: ReferenceType) = jdiType.allFields()
 		.map { JDIVariable(it.name(), jdiValue.getValue(it), jdiType) }
-
-	override fun hashCode(): Int = (jdiValue?.hashCode() ?: 0) xor name.hashCode()
-
-	override fun equals(other: Any?): Boolean = other is JDIVariable && name == other.name && jdiValue == other.jdiValue
 }

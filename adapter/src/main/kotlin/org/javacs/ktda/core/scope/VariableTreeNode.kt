@@ -12,6 +12,8 @@ interface VariableTreeNode {
 		get() = null
 	val childs: List<VariableTreeNode>?
 		get() = null
+	val id: Long?
+		get() = null
 	
 	// TODO: Setters for values?
 }
