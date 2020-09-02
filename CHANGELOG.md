@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the debug adapter will be documented in this file.
 
+## [0.4.2]
+- Improve handling of cyclic references
+- Ignore breakpoints from other languages
+- Fix suspension policy on user breakpoints
+
 ## [0.4.1]
 - Emit threads in attached VM correctly
 - Fix breakpoint placements in local classes
