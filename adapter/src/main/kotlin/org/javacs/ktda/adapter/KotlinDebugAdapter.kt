@@ -284,14 +284,23 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun continue_(args: ContinueArguments) = async.compute {
-		val success = debuggee!!.threadByID(args.threadId)?.resume()
-		if (success ?: false) {
+		var success = debuggee!!.threadByID(args.threadId)?.resume() ?: false
+		var allThreads = false
+
+		if (!success) {
+			debuggee!!.resume()
+			success = true
+			allThreads = true
+		}
+
+		if (success) {
 			exceptionsPool.clear()
 			converter.variablesPool.clear()
 			converter.stackFramePool.removeAllOwnedBy(args.threadId)
 		}
+
 		ContinueResponse().apply {
-			allThreadsContinued = false
+			allThreadsContinued = allThreads
 		}
 	}
 	
