@@ -26,6 +26,7 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
 
 class JDIDebuggee(
@@ -99,7 +100,7 @@ class JDIDebuggee(
 		val eventRequestManager = vm.eventRequestManager()
 
 		toJVMClassNames(filePath)
-			.forEach { className ->
+			?.forEach { className ->
 				// Try setting breakpoint using a ClassPrepareRequest
 
 				for (name in listOf(className, "$className$*")) { // For local types
@@ -127,7 +128,7 @@ class JDIDebuggee(
 						LOG.trace("Setting breakpoint at known type {}", it.name())
 						setBreakpointAtType(it, lineNumber)
 					}
-			}
+			} ?: LOG.warn("Not adding breakpoint in unrecognized source file {}", Paths.get(filePath).fileName)
 	}
 	
 	/** Tries to set a breakpoint - Will return whether this was successful */

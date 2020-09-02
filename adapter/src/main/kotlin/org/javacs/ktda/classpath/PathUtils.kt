@@ -17,7 +17,7 @@ private val sourceFileExtensions = setOf(".kt", ".kts", ".java")
  * ".../src/main/kotlin/com/abc/MyClass.kt" will be converted to
  * [com.abc.MyClass, com.abc.MyClassKt]
  */
-fun toJVMClassNames(filePath: String): List<String> {
+fun toJVMClassNames(filePath: String): List<String>? {
 	// TODO: Implement this using the Kotlin compiler API instead
 	// See https://github.com/JetBrains/kotlin-netbeans/blob/c3360e8c89c1d4dac1e6f18267052ff740705079/src/main/java/org/jetbrains/kotlin/debugger/KotlinDebugUtils.java#L166-L194
 	
@@ -28,7 +28,7 @@ fun toJVMClassNames(filePath: String): List<String> {
 		.asSequence()
 		.find { filePath.endsWith(it) }
 		?.let { rawClassName.dropLast(it.length) }
-		?: throw IllegalArgumentException("Can't convert unrecognized source file '" + filePath + "' to JVM class name")
+		?: return null
 	val ktClassName = className
 		.capitalizeCharAt(className.lastIndexOf(".") + 1) + "Kt" // Class name to PascalCase
 	
