@@ -11,12 +11,13 @@ import com.sun.jdi.Type
 
 class JDIVariable(
 	override val name: String,
-	jdiValue: Value?,
+	private val jdiValue: Value?,
 	jdiType: Type? = null
 ) : VariableTreeNode {
 	override val value: String = jdiValue?.toString() ?: "null" // TODO: Better string representation
 	override val type: String = (jdiType?.name() ?: jdiValue?.type()?.name()) ?: "Unknown type"
 	override val childs: List<VariableTreeNode>? by lazy { jdiValue?.let(::childrenOf) }
+	override val id: Long? = (jdiValue as? ObjectReference)?.uniqueID() ?: (jdiValue as? ArrayReference)?.uniqueID()
 	
 	private fun childrenOf(jdiValue: Value): List<VariableTreeNode> {
 		val jdiType = jdiValue.type()

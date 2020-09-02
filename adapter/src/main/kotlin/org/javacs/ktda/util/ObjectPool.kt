@@ -1,5 +1,7 @@
 package org.javacs.ktda.util
 
+import org.javacs.ktda.util.Identifiable
+
 private data class ObjectKey<O>(
 	val id: Long,
 	val owner: O
@@ -32,15 +34,13 @@ class ObjectPool<O, V> {
 	
 	/** Stores an object and returns its (unique) id */
 	fun store(owner: O, value: V): Long {
-		val id = currentID
+		val id = (value as? Identifiable)?.id ?: nextID()
 		val key = ObjectKey(id, owner)
 		val mapping = ObjectMapping(key, value)
 		
 		mappingsByID[id] = mapping
 		mappingsByOwner.putIfAbsent(owner, mutableSetOf())
 		mappingsByOwner[owner]!!.add(mapping)
-		
-		currentID += 1
 		
 		return id
 	}
@@ -74,4 +74,14 @@ class ObjectPool<O, V> {
 		.orEmpty()
 	
 	fun containsID(id: Long) = mappingsByID.contains(id)
+
+	private fun nextID(): Long {
+		var id = currentID
+
+		while (containsID(id)) {
+			id += 1
+		}
+
+		return id
+	}
 }
