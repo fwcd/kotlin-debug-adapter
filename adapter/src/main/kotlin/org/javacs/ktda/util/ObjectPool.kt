@@ -32,6 +32,13 @@ class ObjectPool<O, V> {
 	
 	/** Stores an object and returns its (unique) id */
 	fun store(owner: O, value: V): Long {
+		// TODO: Perform this check more efficiently than in O(n),
+		//       perhaps add another mappings table?
+		val existingIDs = getIDsFor(owner, value)
+		if (existingIDs.isNotEmpty()) {
+			return existingIDs.first()
+		}
+
 		val id = currentID
 		val key = ObjectKey(id, owner)
 		val mapping = ObjectMapping(key, value)
@@ -74,4 +81,8 @@ class ObjectPool<O, V> {
 		.orEmpty()
 	
 	fun containsID(id: Long) = mappingsByID.contains(id)
+
+	private fun getIDsFor(owner: O, value: V): List<Long> = mappingsByID
+		.filter { it.value.key.owner == owner && it.value.value == value }
+		.map { it.key }
 }
