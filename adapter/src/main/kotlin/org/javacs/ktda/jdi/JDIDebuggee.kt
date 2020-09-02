@@ -139,7 +139,10 @@ class JDIDebuggee(
 				?.firstOrNull() ?: return false
 			val request = vm.eventRequestManager()
 				.createBreakpointRequest(location)
-			request?.enable()
+				?.apply {
+					setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD)
+					enable()
+				}
 			return request != null
 		} catch (e: AbsentInformationException) {
 			return false
