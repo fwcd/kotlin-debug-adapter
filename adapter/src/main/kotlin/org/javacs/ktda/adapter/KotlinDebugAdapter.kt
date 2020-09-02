@@ -289,8 +289,6 @@ class KotlinDebugAdapter(
 			exceptionsPool.clear()
 			converter.variablesPool.clear()
 			converter.stackFramePool.removeAllOwnedBy(args.threadId)
-			// See the issue: https://github.com/fwcd/kotlin-debug-adapter/pull/40
-			debuggee?.resume()
 		}
 		ContinueResponse().apply {
 			allThreadsContinued = false
