@@ -12,8 +12,6 @@ private data class ObjectMapping<O, V> (
 	val value: V
 )
 
-private var currentID = 1L
-
 /**
  * Maps objects of owners to multiple owned values.
  * To store and retrieve objects, unique ids are used.
@@ -21,6 +19,8 @@ private var currentID = 1L
 class ObjectPool<O, V> {
 	private val mappingsByID = mutableMapOf<Long, ObjectMapping<O, V>>()
 	private val mappingsByOwner = mutableMapOf<O, MutableSet<ObjectMapping<O, V>>>()
+
+	private var currentID = 1L
 	
 	val empty: Boolean
 		get() = mappingsByID.isEmpty()
@@ -76,12 +76,10 @@ class ObjectPool<O, V> {
 	fun containsID(id: Long) = mappingsByID.contains(id)
 
 	private fun nextID(): Long {
-		var id = currentID
+		do {
+			currentID++
+		} while (containsID(currentID));
 
-		while (containsID(id)) {
-			id += 1
-		}
-
-		return id
+		return currentID
 	}
 }
