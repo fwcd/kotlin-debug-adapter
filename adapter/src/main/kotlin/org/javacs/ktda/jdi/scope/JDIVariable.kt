@@ -11,7 +11,7 @@ import com.sun.jdi.Type
 
 class JDIVariable(
 	override val name: String,
-	jdiValue: Value?,
+	private val jdiValue: Value?,
 	jdiType: Type? = null
 ) : VariableTreeNode {
 	override val value: String = jdiValue?.toString() ?: "null" // TODO: Better string representation
@@ -35,4 +35,8 @@ class JDIVariable(
 		
 	private fun fieldsOf(jdiValue: ObjectReference, jdiType: ReferenceType) = jdiType.allFields()
 		.map { JDIVariable(it.name(), jdiValue.getValue(it), jdiType) }
+
+	override fun hashCode(): Int = (jdiValue?.hashCode() ?: 0) xor name.hashCode()
+
+	override fun equals(other: Any?): Boolean = other is JDIVariable && name == other.name && jdiValue == other.jdiValue
 }
