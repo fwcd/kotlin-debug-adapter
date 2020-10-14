@@ -12,6 +12,8 @@ internal class ProjectClassesResolver(private val projectRoot: Path) : ClassPath
 		sequenceOf("kotlin", "java").flatMap { language ->
 			sequenceOf("main", "test").map { sourceSet ->
 				resolveIfExists(projectRoot, "build", "classes", language, sourceSet)
+				// kotlin multiplatform project jvm build path
+				resolveIfExists(projectRoot, "build", "classes", language, "jvm", sourceSet)
 			}
 		},
 		// Maven
