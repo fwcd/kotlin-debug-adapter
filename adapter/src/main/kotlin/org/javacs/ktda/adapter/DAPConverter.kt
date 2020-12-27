@@ -72,23 +72,23 @@ class DAPConverter(
 	fun toDAPBreakpoint(internalBreakpoint: InternalBreakpoint) = DAPBreakpoint().apply {
 		source = toDAPSource(internalBreakpoint.position.source)
 		line = lineConverter.toExternalLine(internalBreakpoint.position.lineNumber)
-		verified = true
+		isVerified = true
 	}
 	
 	fun toInternalStackFrame(frameId: Long) = stackFramePool.getByID(frameId)
 	
 	fun toDAPStackFrame(internalFrame: InternalStackFrame, threadId: Long) = DAPStackFrame().apply {
-		id = stackFramePool.store(threadId, internalFrame)
+		id = stackFramePool.store(threadId, internalFrame).toInt()
 		name = internalFrame.name
-		line = internalFrame.position?.lineNumber?.let(lineConverter::toExternalLine) ?: 0L
+		line = internalFrame.position?.lineNumber?.let(lineConverter::toExternalLine) ?: 0
 		column = (internalFrame.position?.columnNumber ?: 1).let(columnConverter::toExternalLine)
 		source = internalFrame.position?.source?.let(::toDAPSource)
 	}
 	
 	fun toDAPScope(variableTree: VariableTreeNode) = DAPScope().apply {
 		name = variableTree.name
-		variablesReference = variablesPool.store(Unit, variableTree)
-		expensive = false
+		variablesReference = variablesPool.store(Unit, variableTree).toInt()
+		isExpensive = false
 	}
 	
 	fun toVariableTree(variablesReference: Long) = variablesPool.getByID(variablesReference)
@@ -97,12 +97,12 @@ class DAPConverter(
 		name = variableTree.name
 		value = variableTree.value
 		type = variableTree.type
-		variablesReference = variableTree.childs?.takeIf { it.isNotEmpty() }?.let { variablesPool.store(Unit, variableTree) } ?: 0
+		variablesReference = (variableTree.childs?.takeIf { it.isNotEmpty() }?.let { variablesPool.store(Unit, variableTree) } ?: 0).toInt()
 	}
 	
 	fun toDAPThread(internalThread: DebuggeeThread) = DAPThread().apply {
 		name = internalThread.name
-		id = internalThread.id
+		id = internalThread.id.toInt()
 	}
 
 	fun toDAPCompletionItem(internalItem: InternalCompletionItem) = DAPCompletionItem().apply {

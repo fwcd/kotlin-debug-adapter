@@ -75,7 +75,7 @@ class JDIDebuggee(
 		breakpoints.forEach { bp ->
 			bp.position.let { setBreakpoint(
 				it.source.filePath.toAbsolutePath().toString(),
-				it.lineNumber
+				it.lineNumber.toLong()
 			) }
 		}
 	}
@@ -165,7 +165,7 @@ class JDIDebuggee(
 	}
 	
 	override fun positionOf(location: Location): Position? = sourceOf(location)
-		?.let { Position(it, location.lineNumber().toLong()) }
+		?.let { Position(it, location.lineNumber()) }
 	
 	private fun sourceOf(location: Location): Source? {
 		val sourcePath = location.sourcePath()

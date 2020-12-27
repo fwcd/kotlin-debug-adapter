@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
 	// The JSON-RPC and Debug Adapter Protocol implementations
-	implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.6.0'
+	implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.10.0'
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'com.github.fwcd.kotlin-language-server:shared:fb2c4f58aec6738ee2b66afb583ab51e2c424ebb'
