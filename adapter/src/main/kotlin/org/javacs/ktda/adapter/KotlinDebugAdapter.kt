@@ -55,10 +55,10 @@ class KotlinDebugAdapter(
 	
 	override fun initialize(args: InitializeRequestArguments): CompletableFuture<Capabilities> = async.compute {
 		converter.lineConverter = LineNumberConverter(
-			externalLineOffset = if (args.linesStartAt1) 0L else -1L
+			externalLineOffset = if (args.linesStartAt1) 0 else -1
 		)
 		converter.columnConverter = LineNumberConverter(
-			externalLineOffset = if (args.columnsStartAt1) 0L else -1L
+			externalLineOffset = if (args.columnsStartAt1) 0 else -1
 		)
 		
 		val capabilities = Capabilities()
@@ -135,7 +135,7 @@ class KotlinDebugAdapter(
 		val eventBus = debuggee.eventBus
 		eventBus.exitListeners.add {
 			// TODO: Use actual exitCode instead
-			sendExitEvent(0L)
+			sendExitEvent(0)
 		}
 		eventBus.breakpointListeners.add {
 			sendStopEvent(it.threadID, StoppedEventArgumentsReason.BREAKPOINT)
@@ -175,20 +175,20 @@ class KotlinDebugAdapter(
 	private fun sendThreadEvent(threadId: Long, reason: String) {
 		client!!.thread(ThreadEventArguments().also {
 			it.reason = reason
-			it.threadId = threadId
+			it.threadId = threadId.toInt()
 		})
 	}
 	
 	private fun sendStopEvent(threadId: Long, reason: String) {
 		client!!.stopped(StoppedEventArguments().also {
 			it.reason = reason
-			it.threadId = threadId
+			it.threadId = threadId.toInt()
 		})
 	}
 	
 	private fun sendExitEvent(exitCode: Long) {
 		client!!.exited(ExitedEventArguments().also {
-			it.exitCode = exitCode
+			it.exitCode = exitCode.toInt()
 		})
 		client!!.terminated(TerminatedEventArguments())
 		LOG.info("Sent exit event")
@@ -284,7 +284,7 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun continue_(args: ContinueArguments) = async.compute {
-		var success = debuggee!!.threadByID(args.threadId)?.resume() ?: false
+		var success = debuggee!!.threadByID(args.threadId.toLong())?.resume() ?: false
 		var allThreads = false
 
 		if (!success) {
@@ -296,7 +296,7 @@ class KotlinDebugAdapter(
 		if (success) {
 			exceptionsPool.clear()
 			converter.variablesPool.clear()
-			converter.stackFramePool.removeAllOwnedBy(args.threadId)
+			converter.stackFramePool.removeAllOwnedBy(args.threadId.toLong())
 		}
 
 		ContinueResponse().apply {
@@ -305,15 +305,15 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun next(args: NextArguments) = async.execute {
-		debuggee!!.threadByID(args.threadId)?.stepOver()
+		debuggee!!.threadByID(args.threadId.toLong())?.stepOver()
 	}
 	
 	override fun stepIn(args: StepInArguments) = async.execute {
-		debuggee!!.threadByID(args.threadId)?.stepInto()
+		debuggee!!.threadByID(args.threadId.toLong())?.stepInto()
 	}
 	
 	override fun stepOut(args: StepOutArguments) = async.execute {
-		debuggee!!.threadByID(args.threadId)?.stepOut()
+		debuggee!!.threadByID(args.threadId.toLong())?.stepOut()
 	}
 	
 	override fun stepBack(args: StepBackArguments): CompletableFuture<Void> = notImplementedDAPMethod()
@@ -326,10 +326,10 @@ class KotlinDebugAdapter(
 	
 	override fun pause(args: PauseArguments) = async.execute {
 		val threadId = args.threadId
-		val success = debuggee!!.threadByID(threadId)?.pause()
+		val success = debuggee!!.threadByID(threadId.toLong())?.pause()
 		if (success ?: false) {
 			// If successful
-			sendStopEvent(threadId,
+			sendStopEvent(threadId.toLong(),
 				StoppedEventArgumentsReason.PAUSE
 			)
 		}
@@ -344,10 +344,10 @@ class KotlinDebugAdapter(
 		val threadId = args.threadId
 		return completedFuture(StackTraceResponse().apply {
 			stackFrames = debuggee!!
-				.threadByID(threadId)
+				.threadByID(threadId.toLong())
 				?.stackTrace()
 				?.frames
-				?.map { converter.toDAPStackFrame(it, threadId) }
+				?.map { converter.toDAPStackFrame(it, threadId.toLong()) }
 				?.toTypedArray()
 				.orEmpty()
 		})
@@ -355,7 +355,7 @@ class KotlinDebugAdapter(
 	
 	override fun scopes(args: ScopesArguments) = completedFuture(
 		ScopesResponse().apply {
-			scopes = (converter.toInternalStackFrame(args.frameId)
+			scopes = (converter.toInternalStackFrame(args.frameId.toLong())
 					?: throw KotlinDAException("Could not find stackTrace with ID ${args.frameId}"))
 				.scopes
 				.map(converter::toDAPScope)
@@ -366,6 +366,7 @@ class KotlinDebugAdapter(
 	override fun variables(args: VariablesArguments) = completedFuture(
 		VariablesResponse().apply {
 			variables = (args.variablesReference
+				.toLong()
 				.let(converter::toVariableTree)
 					?: throw KotlinDAException("Could not find variablesReference with ID ${args.variablesReference}"))
 				.childs
@@ -396,6 +397,7 @@ class KotlinDebugAdapter(
 	
 	override fun evaluate(args: EvaluateArguments): CompletableFuture<EvaluateResponse> = async.compute {
 		val variable = (args.frameId
+			.toLong()
 			.let(converter::toInternalStackFrame)
 				?: throw KotlinDAException("Could not find stack frame with ID ${args.frameId}"))
 			.evaluate(args.expression)
@@ -414,6 +416,7 @@ class KotlinDebugAdapter(
 	override fun completions(args: CompletionsArguments): CompletableFuture<CompletionsResponse> = async.compute {
 		CompletionsResponse().apply {
 			targets = (args.frameId
+				.toLong()
 				.let(converter::toInternalStackFrame)
 					?: throw KotlinDAException("Could not find stack frame with ID ${args.frameId}"))
 				.completions(args.text)
@@ -423,7 +426,7 @@ class KotlinDebugAdapter(
 	}
 	
 	override fun exceptionInfo(args: ExceptionInfoArguments): CompletableFuture<ExceptionInfoResponse> = async.compute {
-		val id = exceptionsPool.getIDsOwnedBy(args.threadId).firstOrNull()
+		val id = exceptionsPool.getIDsOwnedBy(args.threadId.toLong()).firstOrNull()
 		val exception = id?.let { exceptionsPool.getByID(it) }
 		ExceptionInfoResponse().apply {
 			exceptionId = id?.toString() ?: ""

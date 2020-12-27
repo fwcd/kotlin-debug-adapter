@@ -10,9 +10,9 @@ package org.javacs.ktda.adapter
  * In this case, externalLineOffset would be -1.
  */
 class LineNumberConverter(
-	private val externalLineOffset: Long = 0 // Internal line + externalLineOffset = External line
+	private val externalLineOffset: Int = 0 // Internal line + externalLineOffset = External line
 ) {
-	fun toInternalLine(lineNumber: Long) = lineNumber - externalLineOffset
+	fun toInternalLine(lineNumber: Int) = lineNumber - externalLineOffset
 	
-	fun toExternalLine(lineNumber: Long) = lineNumber + externalLineOffset
+	fun toExternalLine(lineNumber: Int) = lineNumber + externalLineOffset
 }
