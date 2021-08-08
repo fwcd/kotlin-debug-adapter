@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the debug adapter will be documented in this file.
 
+## [0.4.3]
+- Kotlin 1.5.20
+- Small fixes
+
 ## [0.4.2]
 - Improve handling of cyclic references
 - Ignore breakpoints from other languages
