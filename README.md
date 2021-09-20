@@ -1,7 +1,7 @@
 # Kotlin Debug Adapter
 
 [![Release](https://img.shields.io/github/release/fwcd/kotlin-debug-adapter)](https://github.com/fwcd/kotlin-debug-adapter/releases)
-[![Build](https://github.com/fwcd/kotlin-debug-adapter/workflows/Build/badge.svg)](https://github.com/fwcd/kotlin-debug-adapter/actions)
+[![Build](https://github.com/fwcd/kotlin-debug-adapter/actions/workflows/build.yml/badge.svg)](https://github.com/fwcd/kotlin-debug-adapter/actions/workflows/build.yml)
 [![Downloads](https://img.shields.io/github/downloads/fwcd/kotlin-debug-adapter/total)](https://github.com/fwcd/kotlin-debug-adapter/releases)
 [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da)](https://discord.gg/cNtppzN)
 
