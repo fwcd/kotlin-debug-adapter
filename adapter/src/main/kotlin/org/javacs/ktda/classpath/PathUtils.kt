@@ -46,4 +46,4 @@ private fun Path.ifExists() = if (Files.exists(this)) this else null
 private fun Path.withExtension(extension: String) = resolveSibling(fileName.toString() + extension)
 
 private fun String.capitalizeCharAt(index: Int) =
-	take(index) + this[index].toUpperCase() + substring(index + 1)
+	take(index) + this[index].uppercaseChar() + substring(index + 1)
