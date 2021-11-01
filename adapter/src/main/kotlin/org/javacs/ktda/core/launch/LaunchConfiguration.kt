@@ -6,5 +6,7 @@ class LaunchConfiguration(
 	val classpath: Set<Path>,
 	val mainClass: String,
 	val projectRoot: Path,
-	val vmArguments: String = ""
+	val vmArguments: String = "",
+	val cwd: Path = projectRoot,
+	val envs: Map<String, String> = mapOf()
 )

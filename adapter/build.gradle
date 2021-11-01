@@ -28,6 +28,8 @@ dependencies {
 	implementation 'com.github.fwcd.kotlin-language-server:shared:fb2c4f58aec6738ee2b66afb583ab51e2c424ebb'
 	// The Java Debug Interface classes (com.sun.jdi.*)
 	implementation files("${System.properties['java.home']}/../lib/tools.jar")
+	// For CommandLineUtils.translateCommandLine
+	implementation 'org.codehaus.plexus:plexus-utils:3.3.0'
 	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.hamcrest:hamcrest-all:1.3'
 }

@@ -8,12 +8,9 @@ import org.eclipse.lsp4j.debug.StackFrame
 import org.eclipse.lsp4j.debug.StackTraceArguments
 import org.eclipse.lsp4j.debug.StoppedEventArguments
 import org.eclipse.lsp4j.debug.VariablesArguments
+import org.hamcrest.Matchers.*
 import org.junit.Assert.assertThat
 import org.junit.Test
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.hasItem
-import org.hamcrest.Matchers.nullValue
-import org.hamcrest.Matchers.not
 import org.javacs.kt.LOG
 import java.util.concurrent.CountDownLatch
 
@@ -21,7 +18,9 @@ import java.util.concurrent.CountDownLatch
  * Tests a very basic debugging scenario
  * using a sample application.
  */
-class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt") {
+class SampleWorkspaceWithCustomConfigTest : DebugAdapterTestFixture(
+        "sample-workspace", "sample.workspace.AppKt",
+        vmArguments = "-Dfoo=bar", cwd = "/tmp", envs = mapOf("MSG" to "hello")) {
     private val latch = CountDownLatch(1)
     private var asyncException: Throwable? = null
 
@@ -81,8 +80,9 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
             }
 
             assertThat(memberMap["member"], equalTo(""""test""""))
-            assertThat(memberMap["foo"], equalTo("null"))
-            assertThat(memberMap["cwd"]?.trim('"'), equalTo(absoluteWorkspaceRoot.toString()))
+            assertThat(memberMap["foo"], equalTo(""""bar""""))
+            assertThat(memberMap["cwd"]?.trim('"'), containsString("/tmp"))
+            assertThat(memberMap["msg"], equalTo(""""hello""""))
 
         } catch (e: Throwable) {
             asyncException = e

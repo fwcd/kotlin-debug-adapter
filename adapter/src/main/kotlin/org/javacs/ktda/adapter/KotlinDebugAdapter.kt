@@ -92,6 +92,8 @@ class KotlinDebugAdapter(
 	override fun launch(args: Map<String, Any>) = launcherAsync.execute {
 		performInitialization()
 
+		LOG.debug("launch args: $args")
+
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
 			?: throw missingRequestArgument("launch", "projectRoot")
 
@@ -100,13 +102,21 @@ class KotlinDebugAdapter(
 
 		val vmArguments = (args["vmArguments"] as? String) ?: ""
 
+		var cwd = (args["cwd"] as? String).let { if(it.isNullOrBlank()) projectRoot else Paths.get(it) }
+
+		// Cast from com.google.gson.internal.LinkedTreeMap
+		@Suppress("UNCHECKED_CAST")
+		var envs = args["envs"] as? Map<String, String> ?: mapOf()
+
 		setupCommonInitializationParams(args)
 
 		val config = LaunchConfiguration(
 			debugClassPathResolver(listOf(projectRoot)).classpathOrEmpty,
 			mainClass,
 			projectRoot,
-			vmArguments
+			vmArguments,
+			cwd,
+			envs
 		)
 		debuggee = launcher.launch(
 			config,

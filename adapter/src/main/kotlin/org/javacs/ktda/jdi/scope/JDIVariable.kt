@@ -32,7 +32,7 @@ class JDIVariable(
 	}
 	
 	private fun arrayElementsOf(jdiValue: ArrayReference): List<VariableTreeNode> = jdiValue.values
-		.mapIndexed { i, it -> JDIVariable(i.toString(), it) }
+	    .mapIndexed { i, it -> JDIVariable(i.toString(), it) }
 		
 	private fun fieldsOf(jdiValue: ObjectReference, jdiType: ReferenceType) = jdiType.allFields()
 		.map { JDIVariable(it.name(), jdiValue.getValue(it), jdiType) }
