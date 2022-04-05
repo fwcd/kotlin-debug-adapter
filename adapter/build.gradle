@@ -23,8 +23,6 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'com.github.fwcd.kotlin-language-server:shared:c7e08424e9f5237c594c38ab51af475e40d256f2'
-	// The Java Debug Interface classes (com.sun.jdi.*)
-	implementation files("${System.properties['java.home']}/../lib/tools.jar")
 	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.hamcrest:hamcrest-all:1.3'
 }

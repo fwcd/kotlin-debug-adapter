@@ -11,3 +11,6 @@ node_modules
 *.vsix
 *.log
 out
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
