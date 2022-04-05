@@ -16,5 +16,5 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClassName = 'sample.workspace.AppKt'
+    mainClass = 'sample.workspace.AppKt'
 }
