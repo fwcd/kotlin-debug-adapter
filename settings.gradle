@@ -1,7 +1,6 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url 'https://cache-redirector.jetbrains.com/kotlin.bintray.com/kotlin-plugin' }
     }
 }
 
