@@ -13,16 +13,16 @@ startScripts {
 	applicationName = "kotlin-debug-adapter"
 }
 
-repositories {
-	maven { url 'https://jitpack.io' }
-}
-
 dependencies {
 	// The JSON-RPC and Debug Adapter Protocol implementations
 	implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.10.0'
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
-	implementation 'com.github.fwcd.kotlin-language-server:shared:c7e08424e9f5237c594c38ab51af475e40d256f2'
+	implementation('kotlin-language-server:shared') {
+		version {
+			branch = 'main'
+		}
+	}
 	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.hamcrest:hamcrest-all:1.3'
 }

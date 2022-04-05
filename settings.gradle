@@ -8,3 +8,9 @@ pluginManagement {
 rootProject.name = 'kotlin-debug-adapter'
 
 include 'adapter'
+
+sourceControl {
+    gitRepository('https://github.com/fwcd/kotlin-language-server.git') {
+        producesModule('kotlin-language-server:shared')
+    }
+}
