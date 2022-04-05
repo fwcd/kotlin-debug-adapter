@@ -103,7 +103,7 @@ class KotlinDebugAdapter(
 		setupCommonInitializationParams(args)
 
 		val config = LaunchConfiguration(
-			debugClassPathResolver(listOf(projectRoot)).classpathOrEmpty,
+			debugClassPathResolver(listOf(projectRoot)).classpathOrEmpty.map { it.compiledJar }.toSet(),
 			mainClass,
 			projectRoot,
 			vmArguments
