@@ -13,10 +13,6 @@ startScripts {
 	applicationName = "kotlin-debug-adapter"
 }
 
-repositories {
-	mavenCentral()
-}
-
 dependencies {
 	// The JSON-RPC and Debug Adapter Protocol implementations
 	implementation 'org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.12.0'
