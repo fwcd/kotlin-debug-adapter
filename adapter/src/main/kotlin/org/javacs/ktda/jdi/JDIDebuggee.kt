@@ -167,19 +167,22 @@ class JDIDebuggee(
 	override fun positionOf(location: Location): Position? = sourceOf(location)
 		?.let { Position(it, location.lineNumber()) }
 	
-	private fun sourceOf(location: Location): Source? {
-		val sourcePath = location.sourcePath()
-		val sourceName = location.sourceName()
-		
-		return sourcesRoots
-			.asSequence()
-			.map { it.resolve(sourcePath) }
-			.orEmpty()
-			.mapNotNull { findValidKtFilePath(it, sourceName) }
-			.firstOrNull()
-			?.let { Source(
-				name = sourceName ?: it.fileName.toString(),
-				filePath = it
-			) }
-	}
+    private fun sourceOf(location: Location): Source? =
+        try {
+            val sourcePath = location.sourcePath()
+            val sourceName = location.sourceName()
+
+            sourcesRoots
+                .asSequence()
+                .map { it.resolve(sourcePath) }
+                .orEmpty()
+                .mapNotNull { findValidKtFilePath(it, sourceName) }
+                .firstOrNull()
+                ?.let { Source(
+                    name = sourceName ?: it.fileName.toString(),
+                    filePath = it
+                ) }
+        } catch(exception: AbsentInformationException) {
+            null
+        }
 }
