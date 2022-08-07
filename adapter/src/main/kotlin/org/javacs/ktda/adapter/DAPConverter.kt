@@ -74,6 +74,12 @@ class DAPConverter(
 		line = lineConverter.toExternalLine(internalBreakpoint.position.lineNumber)
 		isVerified = true
 	}
+
+	fun toDAPBreakpoint(internalBreakpoint: InternalExceptionBreakpoint) = DAPBreakpoint().apply {
+		id = internalBreakpoint.id.toInt()
+		message = internalBreakpoint.label
+		isVerified = true
+	}
 	
 	fun toInternalStackFrame(frameId: Long) = stackFramePool.getByID(frameId)
 	

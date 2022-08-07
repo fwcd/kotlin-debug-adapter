@@ -80,8 +80,6 @@ class KotlinDebugAdapter(
 		LOG.info("Connected to client")
 	}
 	
-	override fun runInTerminal(args: RunInTerminalRequestArguments): CompletableFuture<RunInTerminalResponse> = notImplementedDAPMethod()
-	
 	override fun configurationDone(args: ConfigurationDoneArguments?): CompletableFuture<Void> {
 		LOG.trace("Got configurationDone request")
 		val response = CompletableFuture<Void>()
@@ -276,11 +274,15 @@ class KotlinDebugAdapter(
 	
 	override fun setFunctionBreakpoints(args: SetFunctionBreakpointsArguments): CompletableFuture<SetFunctionBreakpointsResponse> = notImplementedDAPMethod()
 	
-	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments) = async.execute {
-		args.filters
+	override fun setExceptionBreakpoints(args: SetExceptionBreakpointsArguments) = async.compute {
+		val internalBreakpoints = args.filters
 			.map(converter::toInternalExceptionBreakpoint)
 			.toSet()
-			.let(context.breakpointManager.exceptionBreakpoints::setAll)
+		internalBreakpoints.let(context.breakpointManager.exceptionBreakpoints::setAll)
+
+		SetExceptionBreakpointsResponse().apply {
+			breakpoints = internalBreakpoints.map(converter::toDAPBreakpoint).toTypedArray()
+		}
 	}
 	
 	override fun continue_(args: ContinueArguments) = async.compute {
