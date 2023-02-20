@@ -12,6 +12,8 @@ dependencies {
     implementation platform('org.jetbrains.kotlin:kotlin-bom')
     // Use the Kotlin JDK 8 standard library.
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    // Add Junit for test compilation
+    testImplementation group: 'org.jetbrains.kotlin', name: 'kotlin-test-junit', version: '1.4.13'
 }
 
 application {

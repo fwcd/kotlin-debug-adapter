@@ -21,7 +21,7 @@ import java.util.concurrent.CountDownLatch
  * Tests a very basic debugging scenario
  * using a sample application.
  */
-class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt", "-Dtest=testVmArgs",Pair("./gradlew", "build")) {
+class SampleMavenWorkspaceTest : DebugAdapterTestFixture("sample-workspace-maven", "sample.workspace.AppKt", "-Dtest=testVmArgs", Pair("./mvnw","compile")) {
     private val latch = CountDownLatch(1)
     private var asyncException: Throwable? = null
 

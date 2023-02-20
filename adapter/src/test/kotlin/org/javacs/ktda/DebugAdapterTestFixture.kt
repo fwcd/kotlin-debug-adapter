@@ -17,14 +17,15 @@ import org.hamcrest.Matchers.equalTo
 abstract class DebugAdapterTestFixture(
     relativeWorkspaceRoot: String,
     private val mainClass: String,
-    private val vmArguments: String = ""
+    private val vmArguments: String = "",
+    private val processCommand: Pair<String,String>
 ) : IDebugProtocolClient {
     val absoluteWorkspaceRoot: Path = Paths.get(DebugAdapterTestFixture::class.java.getResource("/Anchor.txt").toURI()).parent.resolve(relativeWorkspaceRoot)
     lateinit var debugAdapter: KotlinDebugAdapter
     
     @Before fun startDebugAdapter() {
         // Build the project first
-        val process = ProcessBuilder("./gradlew", "assemble")
+        val process = ProcessBuilder(processCommand.first, processCommand.second)
             .directory(absoluteWorkspaceRoot.toFile())
             .inheritIO()
             .start()

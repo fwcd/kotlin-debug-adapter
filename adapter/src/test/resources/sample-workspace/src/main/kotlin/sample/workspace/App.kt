@@ -12,5 +12,6 @@ class App {
 }
 
 fun main(args: Array<String>) {
+    Class.forName("sample.workspace.ExampleTest");
     println(App().greeting)
 }
