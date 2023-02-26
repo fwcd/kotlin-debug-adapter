@@ -4,7 +4,6 @@ import org.eclipse.lsp4j.debug.ScopesArguments
 import org.eclipse.lsp4j.debug.SetBreakpointsArguments
 import org.eclipse.lsp4j.debug.Source
 import org.eclipse.lsp4j.debug.SourceBreakpoint
-import org.eclipse.lsp4j.debug.StackFrame
 import org.eclipse.lsp4j.debug.StackTraceArguments
 import org.eclipse.lsp4j.debug.StoppedEventArguments
 import org.eclipse.lsp4j.debug.VariablesArguments
@@ -21,7 +20,7 @@ import java.util.concurrent.CountDownLatch
  * Tests a very basic debugging scenario
  * using a sample application.
  */
-class SampleMavenWorkspaceTest : DebugAdapterTestFixture("sample-workspace-maven", "sample.workspace.AppKt", "-Dtest=testVmArgs", Pair("./mvnw","compile")) {
+class SampleMavenWorkspaceTest : DebugAdapterTestFixture("sample-workspace-maven", "sample.workspace.AppKt", "-Dtest=testVmArgs", Pair("./mvnw","test-compile")) {
     private val latch = CountDownLatch(1)
     private var asyncException: Throwable? = null
 
@@ -45,6 +44,13 @@ class SampleMavenWorkspaceTest : DebugAdapterTestFixture("sample-workspace-maven
 
         launch()
         latch.await() // Wait for the breakpoint event to finish
+        asyncException?.let { throw it }
+    }
+
+    @Test fun testTestClassesOnClassPath() {
+        // Setting the TestClassPath will cause our test app to check if its
+        // test-classes are present on the JVM class-path
+        launch("-DTestClassPath=true")
         asyncException?.let { throw it }
     }
 

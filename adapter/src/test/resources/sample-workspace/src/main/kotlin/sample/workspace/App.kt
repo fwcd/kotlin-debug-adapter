@@ -1,7 +1,7 @@
 package sample.workspace
 
 class App {
-    private val member: String = System.getProperty("test")
+    private val member: String? = System.getProperty("test")
     val greeting: String
         get() {
             val local: Int = 123
@@ -12,6 +12,12 @@ class App {
 }
 
 fun main(args: Array<String>) {
-    Class.forName("sample.workspace.ExampleTest");
     println(App().greeting)
+    testClassPath(System.getProperty("TestClassPath").toBoolean())
+}
+
+fun testClassPath(enabled: Boolean){
+    if(enabled){
+        Class.forName("sample.workspace.ExampleTest");
+    }
 }

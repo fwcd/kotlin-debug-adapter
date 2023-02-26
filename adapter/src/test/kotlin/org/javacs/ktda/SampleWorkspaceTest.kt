@@ -4,7 +4,6 @@ import org.eclipse.lsp4j.debug.ScopesArguments
 import org.eclipse.lsp4j.debug.SetBreakpointsArguments
 import org.eclipse.lsp4j.debug.Source
 import org.eclipse.lsp4j.debug.SourceBreakpoint
-import org.eclipse.lsp4j.debug.StackFrame
 import org.eclipse.lsp4j.debug.StackTraceArguments
 import org.eclipse.lsp4j.debug.StoppedEventArguments
 import org.eclipse.lsp4j.debug.VariablesArguments
@@ -47,7 +46,12 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
         latch.await() // Wait for the breakpoint event to finish
         asyncException?.let { throw it }
     }
-
+    @Test fun testTestClassesOnClassPath() {
+        // Setting the TestClassPath will cause our test app to check if its
+        // test-classes are present on the JVM class-path
+        launch("-Dtest=testVmArgs -DTestClassPath=true")
+        asyncException?.let { throw it }
+    }
     override fun stopped(args: StoppedEventArguments) {
         try {
             assertThat(args.reason, equalTo("breakpoint"))
