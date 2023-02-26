@@ -18,6 +18,7 @@ fun main(args: Array<String>) {
 
 fun testClassPath(enabled: Boolean){
     if(enabled){
+        // Check if the test-class is present on the jvm class-path
         Class.forName("sample.workspace.ExampleTest");
     }
 }
