@@ -3,8 +3,8 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.kesizo.kotlin.samples</groupId>
-    <artifactId>my-maven-sample-app</artifactId>
+    <groupId>com.fwcd.testapp</groupId>
+    <artifactId>application</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
