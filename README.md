@@ -14,6 +14,7 @@ Any editor conforming to DAP is supported, including [VSCode](https://github.com
 ## Getting Started
 * See [BUILDING.md](BUILDING.md) for build instructions
 * See [Editor Integration](EDITORS.md) for editor-specific instructions
+* See [CONFIGURATION.md](CONFIGURATION.md) for examples on debug configurations (mostly editor agnostic).
 * See [Kotlin Quick Start](https://github.com/fwcd/kotlin-quick-start) for a sample project
 * See [Kotlin Language Server](https://github.com/fwcd/kotlin-language-server) for smart code completion, diagnostics and more
 
