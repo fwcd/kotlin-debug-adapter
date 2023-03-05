@@ -14,11 +14,27 @@ class App {
 fun main(args: Array<String>) {
     println(App().greeting)
     testClassPath(System.getProperty("TestClassPath").toBoolean())
+    testExceptionBreakpoint(System.getProperty("TestExceptionBreakpoint",""))
 }
 
 fun testClassPath(enabled: Boolean){
     if(enabled){
         // Check if the test-class is present on the jvm class-path
         Class.forName("sample.workspace.ExampleTest");
+    }
+}
+
+fun testExceptionBreakpoint(type: String) {
+    when (type) {
+        "Uncaught" -> {
+            throw Exception()
+        }
+        "Caught" -> {
+            try {
+                throw Exception()
+            } catch (e: Exception) {
+                print(e.message)
+            }
+        }
     }
 }

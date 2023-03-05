@@ -24,6 +24,7 @@ dependencies {
 		}
 	}
 	testImplementation 'junit:junit:4.12'
+	testImplementation 'io.mockk:mockk:1.13.4'
 	testImplementation 'org.hamcrest:hamcrest-all:1.3'
 }
 
