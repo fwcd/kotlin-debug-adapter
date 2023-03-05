@@ -76,7 +76,7 @@ class DAPConverter(
 	}
 
 	fun toDAPBreakpoint(internalBreakpoint: InternalExceptionBreakpoint) = DAPBreakpoint().apply {
-		id = internalBreakpoint.id.toInt()
+		id = internalBreakpoint.ordinal
 		message = internalBreakpoint.label
 		isVerified = true
 	}
