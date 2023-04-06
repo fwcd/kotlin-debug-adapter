@@ -75,12 +75,16 @@ class JDILauncher(
 		.let { it.find { it.javaClass.name == "com.sun.tools.jdi.SunCommandLineLauncher" } ?: it.firstOrNull() }
 		?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
 	
-	private fun sourcesRootsOf(projectRoot: Path): Set<Path> = projectRoot.resolve("src")
-		.let(Files::list) // main, test
-		.filter { Files.isDirectory(it) }
-		.flatMap(Files::list) // kotlin, java
-		.filter { Files.isDirectory(it) }
-		.collect(Collectors.toSet())
+	private fun sourcesRootsOf(projectRoot: Path): Set<Path> =
+			Files.walk(projectRoot, 2) // root project and submodule
+					.filter { Files.isDirectory(it) }
+					.map { it.resolve("src") }
+					.filter { Files.isDirectory(it) }
+					.flatMap(Files::list) // main, test
+					.filter { Files.isDirectory(it) }
+					.flatMap(Files::list) // kotlin, java
+					.filter { Files.isDirectory(it) }
+					.collect(Collectors.toSet())
 	
 	private fun formatOptions(config: LaunchConfiguration): String {
 		var options = config.vmArguments
