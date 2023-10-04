@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the debug adapter will be documented in this file.
 
+## [0.4.4]
+- Kotlin 1.9.10
+- Fix class path resolution by depending on the language server's shared module via a source dependency (see #78)
+
 ## [0.4.3]
 - Kotlin 1.5.20
 - Small fixes
