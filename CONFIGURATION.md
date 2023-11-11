@@ -15,7 +15,8 @@ On this page we will collect some configuration examples. This is meant to help 
 Replace the `mainClassName` with your fully qualified class name where your main method resides (e.g, `com.example.MyApplicationKt`), and `projectRootPath` with the root of your project. If your main method resides in a file, the class name will be the package and name of the file (+ Kt at the end). 
 
 
-**Note:** If you use [the VSCode Kotlin extension](https://github.com/fwcd/vscode-kotlin) or [Emacs lsp-mode](https://emacs-lsp.github.io/lsp-mode/), you will have the option to use code lenses in your editor to run or debug main methods. These will fill out the details below automatically for you.
+> [!NOTE]
+> If you use [the VSCode Kotlin extension](https://github.com/fwcd/vscode-kotlin) or [Emacs lsp-mode](https://emacs-lsp.github.io/lsp-mode/), you will have the option to use code lenses in your editor to run or debug main methods. These will fill out the details below automatically for you.
 
 
 ```json
