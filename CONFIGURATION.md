@@ -2,10 +2,12 @@
 On this page we will collect some configuration examples. This is meant to help you configure debug templates for your editor. The examples are provided in JSON format, but should be easily translatable to VSCode launch.json files, Emacs dap-mode templates, etc.
 
 
-**NOTE: Some editors like Emacs using lsp-mode will require you to set a `noDebug` argument to `false`/`nil` to start a debug process, if not you will simply run the code.**
+> [!NOTE]
+> Some editors like Emacs using lsp-mode will require you to set a `noDebug` argument to `false`/`nil` to start a debug process, if not you will simply run the code.**
 
 
-**NOTE 2: A general tip for working with the debug adapter is building your codebase before launching the debugger. A lot of people experiencing "class not found"-style issues, and they are in most cases caused by not building before debugging. A simple Maven or Gradle compile should suffice.**
+> [!NOTE]
+> A general tip for working with the debug adapter is building your codebase before launching the debugger. A lot of people experiencing "class not found"-style issues, and they are in most cases caused by not building before debugging. A simple Maven or Gradle compile should suffice.**
 
 
 ## launch
