@@ -24,7 +24,7 @@ abstract class DebugAdapterTestFixture(
     
     @Before fun startDebugAdapter() {
         // Build the project first
-        val process = ProcessBuilder("./gradlew", "assemble")
+        val process = ProcessBuilder("./gradlew", "--no-daemon", "assemble")
             .directory(absoluteWorkspaceRoot.toFile())
             .inheritIO()
             .start()

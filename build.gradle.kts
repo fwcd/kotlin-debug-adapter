@@ -1,5 +1,6 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
+    kotlin("jvm")
+    `maven-publish`
 }
 
 allprojects {
