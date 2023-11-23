@@ -13,7 +13,6 @@ val adapterMainClassName = "org.javacs.ktda.KDAMainKt"
 application {
     mainClass.set(adapterMainClassName)
     description = "Debug Adapter for Kotlin"
-    applicationDefaultJvmArgs = listOf("-DkotlinLanguageServer.version=$version")
     applicationDistribution.into("bin") {
         fileMode = 755
     }
