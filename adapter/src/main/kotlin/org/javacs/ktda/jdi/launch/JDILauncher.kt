@@ -4,7 +4,6 @@ import org.javacs.kt.LOG
 import org.javacs.ktda.core.launch.DebugLauncher
 import org.javacs.ktda.core.launch.LaunchConfiguration
 import org.javacs.ktda.core.launch.AttachConfiguration
-import org.javacs.ktda.core.Debuggee
 import org.javacs.ktda.core.DebugContext
 import org.javacs.ktda.util.KotlinDAException
 import org.javacs.ktda.jdi.JDIDebuggee
@@ -16,14 +15,11 @@ import com.sun.jdi.connect.AttachingConnector
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Files
-import java.net.URLEncoder
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
+import org.javacs.kt.LOG
 
 class JDILauncher(
 	private val attachTimeout: Int = 50,
-	private val vmArguments: String? = null,
 	private val modulePaths: String? = null
 ) : DebugLauncher {
 	private val vmManager: VirtualMachineManager
@@ -31,7 +27,7 @@ class JDILauncher(
 	
 	override fun launch(config: LaunchConfiguration, context: DebugContext): JDIDebuggee {
 		val connector = createLaunchConnector()
-		LOG.info("Starting JVM debug session with main class {}", config.mainClass)
+		LOG.info("Starting JVM debug session with main class {} and connector {}", config.mainClass, connector)
 		
 		LOG.debug("Launching VM")
 		val vm = connector.launch(createLaunchArgs(config, connector)) ?: throw KotlinDAException("Could not launch a new VM")
@@ -54,9 +50,11 @@ class JDILauncher(
 	
 	private fun createLaunchArgs(config: LaunchConfiguration, connector: Connector): Map<String, Connector.Argument> = connector.defaultArguments()
 		.also { args ->
-			args["suspend"]!!.setValue("true")
-			args["options"]!!.setValue(formatOptions(config))
-			args["main"]!!.setValue(formatMainClass(config))
+			args.get("suspend")?.setValue("true") 
+			args.get("options")?.setValue(formatOptions(config))
+			args.get("main")?.setValue(formatMainClass(config))
+			args.get("cwd")?.setValue(config.cwd.toAbsolutePath().toString())
+			args.get("env")?.setValue(KDACommandLineLauncher.urlEncode(config.env.map { "${it.key}=${it.value}" }) ?: "")
 		}
 	
 	private fun createAttachArgs(config: AttachConfiguration, connector: Connector): Map<String, Connector.Argument> = connector.defaultArguments()
@@ -67,12 +65,13 @@ class JDILauncher(
 		}
 	
 	private fun createAttachConnector(): AttachingConnector = vmManager.attachingConnectors()
-		.let { it.find { it.name() == "com.sun.jdi.SocketAttach" } ?: it.firstOrNull() }
+		.let { it.find { it.name() == "com.sun.jdi.SocketAttach" } }
 		?: throw KotlinDAException("Could not find an attaching connector (for a new debuggee VM)")
-	
+
 	private fun createLaunchConnector(): LaunchingConnector = vmManager.launchingConnectors()
-		// Workaround for JDK 11+ where the first launcher (RawCommandLineLauncher) does not properly support args
-		.let { it.find { it.javaClass.name == "com.sun.tools.jdi.SunCommandLineLauncher" } ?: it.firstOrNull() }
+		.also { LOG.debug("connectors: $it") }
+		// Using our own connector to support cwd and envs
+		.let { it.find { it.name() == KDACommandLineLauncher::class.java.name } }
 		?: throw KotlinDAException("Could not find a launching connector (for a new debuggee VM)")
 	
 	private fun sourcesRootsOf(projectRoot: Path): Set<Path> =
@@ -104,13 +103,5 @@ class JDILauncher(
 	private fun formatClasspath(config: LaunchConfiguration): String = config.classpath
 		.map { it.toAbsolutePath().toString() }
 		.reduce { prev, next -> "$prev${File.pathSeparatorChar}$next" }
-		
-	private fun urlEncode(arg: Collection<String>?) = arg
-		?.map { URLEncoder.encode(it, StandardCharsets.UTF_8.name()) }
-		?.reduce { a, b -> "$a\n$b" }
-		
-	private fun urlDecode(arg: String?) = arg
-		?.split("\n")
-		?.map { URLDecoder.decode(it, StandardCharsets.UTF_8.name()) }
-		?.toList()
+
 }

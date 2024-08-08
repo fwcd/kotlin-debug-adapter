@@ -10,18 +10,18 @@ import org.eclipse.lsp4j.debug.StoppedEventArguments
 import org.eclipse.lsp4j.debug.VariablesArguments
 import org.junit.Assert.assertThat
 import org.junit.Test
-import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.nullValue
 import org.hamcrest.Matchers.not
+import org.javacs.kt.LOG
 import java.util.concurrent.CountDownLatch
 
 /**
  * Tests a very basic debugging scenario
  * using a sample application.
  */
-class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt", "-Dtest=testVmArgs") {
+class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.workspace.AppKt") {
     private val latch = CountDownLatch(1)
     private var asyncException: Throwable? = null
 
@@ -39,7 +39,7 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
                     .toString()
             }
             breakpoints = arrayOf(SourceBreakpoint().apply {
-                line = 8
+                line = 11
             })
         }).join()
 
@@ -74,7 +74,16 @@ class SampleWorkspaceTest : DebugAdapterTestFixture("sample-workspace", "sample.
                 variablesReference = receiver!!.variablesReference
             }).join().variables
 
-            assertThat(members.map { Pair(it.name, it.value) }, containsInAnyOrder(Pair("member", "\"testVmArgs\"")))
+            val memberMap = members.fold(mutableMapOf<String, String?>()) {
+                map, v ->
+                    map[v.name] = v.value
+                    map
+            }
+
+            assertThat(memberMap["member"], equalTo(""""test""""))
+            assertThat(memberMap["foo"], equalTo("null"))
+            assertThat(memberMap["cwd"]?.trim('"'), equalTo(absoluteWorkspaceRoot.toString()))
+
         } catch (e: Throwable) {
             asyncException = e
         } finally {

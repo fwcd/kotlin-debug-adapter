@@ -90,6 +90,8 @@ class KotlinDebugAdapter(
 	override fun launch(args: Map<String, Any>) = launcherAsync.execute {
 		performInitialization()
 
+		LOG.debug("launch args: $args")
+
 		val projectRoot = (args["projectRoot"] as? String)?.let { Paths.get(it) }
 			?: throw missingRequestArgument("launch", "projectRoot")
 
@@ -98,13 +100,36 @@ class KotlinDebugAdapter(
 
 		val vmArguments = (args["vmArguments"] as? String) ?: ""
 
+		var cwd = (args["cwd"] as? String).let { if(it.isNullOrBlank()) projectRoot else Paths.get(it) }
+
+		val env = mutableMapOf<String, String>().apply {
+			(args["envFile"] as? String)?.let { Paths.get(it) }?.let { envFile ->
+				envFile.toFile().readLines()
+					.map { it.trim() }
+					.filter { it.isNotBlank() && !it.startsWith("#") }
+					.forEach {
+						val (key, value) = it.split("=", limit = 2)
+						set(key, value)
+					}
+			}
+			
+			// apply 'env' from launch request overriding contents of 'envFile'
+			args.get("env")?.let { env ->
+				// Cast from com.google.gson.internal.LinkedTreeMap
+				@Suppress("UNCHECKED_CAST")
+				putAll(env as Map<String, String>)
+			}
+		}.toMap()
+
 		setupCommonInitializationParams(args)
 
 		val config = LaunchConfiguration(
 			debugClassPathResolver(listOf(projectRoot)).classpathOrEmpty.map { it.compiledJar }.toSet(),
 			mainClass,
 			projectRoot,
-			vmArguments
+			vmArguments,
+			cwd,
+			env
 		)
 		debuggee = launcher.launch(
 			config,
